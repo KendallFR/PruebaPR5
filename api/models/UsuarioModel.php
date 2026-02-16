@@ -13,7 +13,7 @@ class UsuarioModel
 	public function all()
 	{
 		//Consulta sql
-		$vSql = "SELECT * FROM usuario order by idUsuario asc;";
+		$vSql = "SELECT * FROM usuario order by idUsuario desc;";
 
 		//Ejecutar la consulta
 		$vResultado = $this->enlace->ExecuteSQL($vSql);
