@@ -60,11 +60,15 @@ class UsuarioModel
 	}
 
 	public function cantidadPujasSubastas($idUsuario){
+        $vResultado = null;
+        $rolM = new RolModel();
+        $estadoUsuarioM = new EstadoUsuarioModel();
+
 		$vSql = "SELECT 
                         u.idUsuario,
                         u.nombre,
-                        r.nombre AS rol,
-                        eu.descripcion AS estado,
+                        u.idRol,
+                        u.idEstadoUsuario,
                         u.fechaRegistro,
 
     -- Cantidad de subastas creadas
@@ -80,16 +84,17 @@ class UsuarioModel
                         AS cantidadPujas
 
                         FROM usuario u
-                        INNER JOIN rol r ON r.idRol = u.idRol
-                        INNER JOIN estado_usuario eu ON eu.idEstadoUsuario = u.idEstadoUsuario
                         WHERE u.idusuario = $idUsuario;";
 
 		//Ejecutar la consulta
 		$vResultado = $this->enlace->ExecuteSQL($vSql);
 		if (!empty($vResultado)) {
-			// Retornar el objeto
-			return $vResultado[0];
-		}
+            $vResultado = $vResultado[0];
+            //Rol
+            $vResultado->rol = $rolM->get($vResultado->idRol);
+            //Estado
+            $vResultado->estado = $estadoUsuarioM->get($vResultado->idEstadoUsuario);
+        }
 		return $vResultado;
 	}
 	public function login($objeto)
