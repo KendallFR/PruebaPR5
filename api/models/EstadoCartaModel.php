@@ -1,5 +1,5 @@
 <?php
-class DirectorModel
+class EstadoCartaModel
 {
     public $enlace;
     public function __construct()

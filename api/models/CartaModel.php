@@ -1,56 +1,144 @@
 <?php
+
 class CartaModel
 {
     public $enlace;
+
     public function __construct()
     {
         $this->enlace = new MySqlConnect();
     }
-    /*Listar */
+
+    /* 
+       LISTAR TODAS LAS CARTAS
+       */
     public function all()
     {
-        $imagenM = new ImageModel();
-        $categoriaM = new CategoriaModel();
-        //Consulta SQL
-        $vSQL = "SELECT * FROM carta order by title desc;";
-        //Ejecutar la consulta
-        $vResultado = $this->enlace->ExecuteSQL($vSQL);
-        if(!empty($vResultado) && is_array($vResultado)){
-            for($i=0; $i < count($vResultado); $i++){
-                //Imagen
-                $vResultado[$i]->imagen=$imagenM->getImageCarta($vResultado[$i]->id);
-                //Categorias - categoria
-                $vResultado[$i]->genres=$categoriaM->getCategoriaCarta($vResultado[$i]->id);
+        try {
+
+            $sql = "SELECT 
+                        c.idCarta,
+                        c.nombre,
+                        c.descripcion,
+                        c.idUsuario,
+                        c.idEstadoCarta,
+                        c.idCondicion,
+                        c.fechaRegistro,
+
+                        (SELECT COUNT(*) 
+                         FROM subasta s 
+                         WHERE s.idCarta = c.idCarta)
+                         AS cantidadSubastas
+
+                    FROM carta c
+                    ORDER BY c.idCarta DESC";
+
+            $resultado = $this->enlace->ExecuteSQL($sql);
+
+            if (!empty($resultado) && is_array($resultado))
+            {
+                $imagenM = new ImageModel();
+                $categoriaM = new CategoriaModel();
+
+                $usuarioM = new UsuarioModel();
+                $estadoCartaM = new EstadoCartaModel();
+                $condicionM = new CondicionModel(); 
+
+                foreach ($resultado as $item)
+                {
+                    $idCarta = $item->idCarta;
+
+                    // Imagen
+                    $item->imagen = $imagenM->getImageCarta($idCarta);
+
+                    // Categorias
+                    $item->categorias = $categoriaM->getCategoriaCarta($idCarta);
+
+                    // Usuario dueño
+                    $item->usuario = $usuarioM->get($item->idUsuario);
+
+                    // Estado carta renombrado
+                    $item->estadoCarta = $estadoCartaM->get($item->idEstadoCarta);
+
+                    // Condición
+                    $item->condicion = $condicionM->get($item->idCondicion);
+
+                    // quita el antiguo idEstadoCarta para que no se vea duplicado
+                    unset($item->idEstadoCarta);
+                }
             }
+
+            return $resultado;
+
+        } catch (Exception $e) {
+
+            handleException($e);
         }
-        //Retornar la respuesta
-        return $vResultado;
     }
-    public function get($id)
+
+
+    /* 
+       OBTENER UNA CARTA
+       */
+    public function get($idCarta)
     {
-        $usuarioM = new UsuarioModel();
-        $estadoCartaM = new EstadoCartaModel();
-        $categoriaM = new CategoriaModel();
-        $actorM = new ActorModel();
-        $imagenM = new ImageModel();
-        $vSql = "SELECT * FROM carta
-                    where id=$id;";
+        try {
 
-        //Ejecutar la consulta sql
-        $vResultado = $this->enlace->executeSQL($vSql);
-        if(!empty($vResultado)){
-            $vResultado=$vResultado[0];
-            //Imagen
-            $vResultado->imagen=$imagenM->getImageMovie($vResultado->id);
-            //Director
-            $vResultado->director=$directorM->get($vResultado->director_id);
-            //Generos - genres
-            $vResultado->genres=$genreM->getGenreMovie($id);
-            //Actores - actors
-            $vResultado->actors=$actorM->getActorMovie($vResultado->id);
+            $sql = "SELECT 
+                        c.idCarta,
+                        c.nombre,
+                        c.descripcion,
+                        c.idUsuario,
+                        c.idEstadoCarta,
+                        c.idCondicion,
+                        c.fechaRegistro,
+
+                        (SELECT COUNT(*) 
+                         FROM subasta s 
+                         WHERE s.idCarta = c.idCarta)
+                         AS cantidadSubastas
+
+                    FROM carta c
+                    WHERE c.idCarta = $idCarta";
+
+            $resultado = $this->enlace->ExecuteSQL($sql);
+
+            if (!empty($resultado))
+            {
+                $resultado = $resultado[0];
+
+                $imagenM = new ImageModel();
+                $categoriaM = new CategoriaModel();
+
+              
+                $usuarioM = new UsuarioModel();
+                $estadoCartaM = new EstadoCartaModel();
+                $condicionM = new CondicionModel(); 
+
+                // Imagen
+                $resultado->imagen = $imagenM->getImageCarta($idCarta);
+
+                // Categorias
+                $resultado->categorias = $categoriaM->getCategoriaCarta($idCarta);
+
+                // Usuario dueño
+                $resultado->usuario = $usuarioM->get($resultado->idUsuario);
+
+                // Estado carta renombrado
+                $resultado->estadoCarta = $estadoCartaM->get($resultado->idEstadoCarta);
+
+                // Condición
+                $resultado->condicion = $condicionM->get($resultado->idCondicion);
+
+                // quita el antiguo idEstadoCarta
+                unset($resultado->idEstadoCarta);
+            }
+
+            return $resultado;
+
+        } catch (Exception $e) {
+
+            handleException($e);
         }
-
-        //Retornar la respuesta
-        return $vResultado;
     }
 }
