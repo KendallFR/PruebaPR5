@@ -48,18 +48,6 @@ class UsuarioModel
 	}
 
 	public function getUsuario($idUsuario){
-		$vSql = "SELECT * FROM usuario where idUsuario=$idUsuario";
-
-        //Ejecutar la consulta
-        $vResultado = $this->enlace->ExecuteSQL($vSql);
-        if (!empty($vResultado)) {
-            // Retornar el objeto
-            return $vResultado[0];
-        }
-        return $vResultado;
-	}
-
-	public function cantidadPujasSubastas($idUsuario){
         $vResultado = null;
         $rolM = new RolModel();
         $estadoUsuarioM = new EstadoUsuarioModel();

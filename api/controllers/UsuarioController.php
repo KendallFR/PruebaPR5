@@ -42,18 +42,6 @@ class usuario
             handleException($e);
         }
     }
-    public function cantidadPujasSubastas($idUsuario)
-    {
-        try{
-            $response = new Response();
-            $usuario = new UsuarioModel();
-            $result = $usuario->cantidadPujasSubastas($idUsuario);
-            $response->toJSON($result);
-        }catch(Exception $e){
-            $response->toJSON($result);
-            handleException($e);
-        }
-    }
     public function login()
     {
         $response = new Response();
