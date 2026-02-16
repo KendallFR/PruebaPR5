@@ -23,20 +23,20 @@ require_once "models/RolModel.php";
 require_once "models/EstadoUsuarioModel.php";
 require_once "models/UsuarioModel.php";
 require_once "models/ImageModel.php";
-
 require_once "models/CartaModel.php";
 require_once "models/CategoriaModel.php";
 require_once "models/EstadoCartaModel.php";
+require_once "models/CondicionModel.php";
 
 /***--- Agregar todos los controladores*/
 require_once "controllers/RolController.php";
 require_once "controllers/EstadoUsuarioController.php";
 require_once "controllers/UsuarioController.php";
 require_once "controllers/ImageController.php";
-
-
 require_once "controllers/CartaController.php";
 require_once "controllers/CategoriaController.php";
+require_once "controllers/EstadoCartaController.php";
+require_once "controllers/CondicionController.php";
 
 //Enrutador
 require_once "routes/RoutesController.php";

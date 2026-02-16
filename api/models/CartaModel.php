@@ -10,7 +10,7 @@ class CartaModel
     }
 
     /* 
-       LISTAR TODAS LAS CARTAS
+    LISTAR TODAS LAS CARTAS
        */
     public function all()
     {
@@ -26,9 +26,9 @@ class CartaModel
                         c.fechaRegistro,
 
                         (SELECT COUNT(*) 
-                         FROM subasta s 
-                         WHERE s.idCarta = c.idCarta)
-                         AS cantidadSubastas
+                        FROM subasta s 
+                        WHERE s.idCarta = c.idCarta)
+                        AS cantidadSubastas
 
                     FROM carta c
                     ORDER BY c.idCarta DESC";
@@ -94,9 +94,9 @@ class CartaModel
                         c.fechaRegistro,
 
                         (SELECT COUNT(*) 
-                         FROM subasta s 
-                         WHERE s.idCarta = c.idCarta)
-                         AS cantidadSubastas
+                        FROM subasta s 
+                        WHERE s.idCarta = c.idCarta)
+                        AS cantidadSubastas
 
                     FROM carta c
                     WHERE c.idCarta = $idCarta";
@@ -109,8 +109,6 @@ class CartaModel
 
                 $imagenM = new ImageModel();
                 $categoriaM = new CategoriaModel();
-
-              
                 $usuarioM = new UsuarioModel();
                 $estadoCartaM = new EstadoCartaModel();
                 $condicionM = new CondicionModel(); 
