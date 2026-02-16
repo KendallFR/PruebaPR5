@@ -22,12 +22,12 @@ class image{
         }
     }
 
-    public function getImageMovie($idMovie)
+    public function getImageCarta($idCarta)
     {
         try{
             $response = new Response();
             $imagen = new ImageModel();
-            $result = $imagen->getImageMovie($idMovie);
+            $result = $imagen->getImageCarta($idCarta);
             $response->toJSON($result);
         }catch(Exception $e){
             $response->toJSON($result);

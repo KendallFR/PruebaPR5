@@ -1,5 +1,5 @@
 <?php
-class GenreModel
+class CategoriaModel
 {
     public $enlace;
     public function __construct()
@@ -10,7 +10,7 @@ class GenreModel
     public function all()
     {
         //Consulta sql
-        $vSql = "SELECT * FROM genre;";
+        $vSql = "SELECT * FROM categoria;";
         //Ejecutar la consulta
         $vResultado = $this->enlace->ExecuteSQL($vSql);
         // Retornar el objeto
@@ -20,32 +20,32 @@ class GenreModel
     public function get($id)
     {
         //Consulta sql
-        $vSql = "SELECT * FROM genre where id=$id";
+        $vSql = "SELECT * FROM categoria where idCategoria=$id";
 
         //Ejecutar la consulta
         $vResultado = $this->enlace->ExecuteSQL($vSql);
         // Retornar el objeto
         return $vResultado[0];
     }
-    public function getGenreMovie($idMovie)
+    public function getCategoriaCarta($id)
     {
         //Consulta sql
-        $vSql = "SELECT g.id,g.title 
-            FROM genre g,movie_genre mg 
-            where mg.genre_id=g.id and mg.movie_id=$idMovie";
+        $vSql = "SELECT g.idCategoria,g.descripcion 
+            FROM categoria g,carta_categoria mg 
+            where mg.idCategoria=g.idCategoria and mg.idCarta=$id";
 
         //Ejecutar la consulta
         $vResultado = $this->enlace->ExecuteSQL($vSql);
         // Retornar el objeto
         return $vResultado;
     }
-    public function getMoviesbyGenre($param)
+    public function getCartasbyCategoria($param)
     {
         $vResultado = null;
         if (!empty($param)) {
-            $vSql = "SELECT m.id, m.lang, m.time, m.title, m.year
-				FROM movie_genre mg, movie m
-				where mg.movie_id=m.id and mg.genre_id=$param";
+            $vSql = "SELECT m.idCarta, m.nombre, m.descripcion, m.idUsuario, m.idEstadoCarta, m.idCondicion, m.fechaRegistro
+				FROM carta_categoria mg, carta m
+				where mg.idCarta=m.idCarta and mg.idCategoria=$param";
             $vResultado = $this->enlace->ExecuteSQL($vSql);
         }
         // Retornar el objeto

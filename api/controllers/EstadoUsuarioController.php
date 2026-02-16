@@ -1,21 +1,20 @@
 <?php
 //class Genre
-class shop{
+class estadoUsuario{
     //Listar en el API
     public function index(){
         $response = new Response();
         //Obtener el listado del Modelo
-        $shopRental=new ShopRentalModel();
-        $result=$shopRental->all();
+        $estadoUsuario=new EstadoUsuarioModel();
+        $result=$estadoUsuario->all();
          //Dar respuesta
-         $response->toJSON($result);
+        $response->toJSON($result);
     }
     public function get($param){
         $response = new Response();
-        $shopRental=new ShopRentalModel();
-        $result=$shopRental->get($param);
+        $estadoUsuario=new EstadoUsuarioModel();
+        $result=$estadoUsuario->get($param);
         //Dar respuesta
         $response->toJSON($result);
     }
-   
 }

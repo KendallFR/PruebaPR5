@@ -15,7 +15,7 @@ class RoutesController
     {
         // Registrar rutas protegidas
         //---------------------  Metodo,path (en minuscula),controlador, accion, array de nombres de roles
-        $this->addProtectedRoute('GET', '/apimovie/actor', 'actor', 'index', ['Administrador']);
+        $this->addProtectedRoute('GET', '/proyecto_subasta/usuario', 'usuario', 'index', ['Administrador']);
     }
 
     public function routes()

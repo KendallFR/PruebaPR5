@@ -15,10 +15,10 @@ class ImageModel
         return false;
     }
     //Obtener una imagen de una pelicula
-    public function getImageMovie($idMovie)
+    public function getImageCarta($idCarta)
     {
         //Consulta sql
-        $vSql = "SELECT * FROM movie_image where movie_id=$idMovie";
+        $vSql = "SELECT * FROM imagen_carta where idCarta=$idCarta";
 
         //Ejecutar la consulta
         $vResultado = $this->enlace->ExecuteSQL($vSql);

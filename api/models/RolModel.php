@@ -22,19 +22,7 @@ class RolModel
     public function get($id)
     {
         //Consulta sql
-        $vSql = "SELECT * FROM rol where id=$id";
-
-        //Ejecutar la consulta
-        $vResultado = $this->enlace->ExecuteSQL($vSql);
-        // Retornar el objeto
-        return $vResultado[0];
-    }
-    public function getRolUser($idUser)
-    {
-        //Consulta sql
-        $vSql = "SELECT r.id,r.name
-            FROM rol r,user u 
-            where r.id=u.rol_id and u.id=$idUser";
+        $vSql = "SELECT * FROM rol where idRol=$id";
 
         //Ejecutar la consulta
         $vResultado = $this->enlace->ExecuteSQL($vSql);

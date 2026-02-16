@@ -1,5 +1,5 @@
 <?php
-class ShopRentalModel
+class EstadoUsuarioModel
 {
     public $enlace;
     public function __construct()
@@ -10,7 +10,7 @@ class ShopRentalModel
     public function all()
     {
         //Consulta sql
-        $vSql = "SELECT * FROM shop_rental;";
+        $vSql = "SELECT * FROM estado_usuario;";
 
         //Ejecutar la consulta
         $vResultado = $this->enlace->ExecuteSQL($vSql);
@@ -22,7 +22,7 @@ class ShopRentalModel
     public function get($id)
     {
         //Consulta sql
-        $vSql = "SELECT * FROM shop_rental where id=$id";
+        $vSql = "SELECT * FROM estado_usuario where idEstadoUsuario=$id";
 
         //Ejecutar la consulta
         $vResultado = $this->enlace->ExecuteSQL($vSql);

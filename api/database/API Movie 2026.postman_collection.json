@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "6b03e9f5-ea6f-4f2c-8744-409a21bfbb87",
-		"name": "API Movie 2026",
+		"name": "Proyecto_Subasta",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "7418211"
 	},
@@ -221,7 +221,7 @@
 			]
 		},
 		{
-			"name": "User",
+			"name": "Usuario",
 			"item": [
 				{
 					"name": "Login",

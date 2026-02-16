@@ -1,13 +1,13 @@
 <?php
-class genre
+class categoria
 {
     public function index()
     {
         try {
             $response = new Response();
             //Obtener el listado del Modelo
-            $genero = new GenreModel();
-            $result = $genero->all();
+            $categoria = new CategoriaModel();
+            $result = $categoria->all();
             //Dar respuesta
             $response->toJSON($result);
         } catch (Exception $e) {
@@ -20,8 +20,8 @@ class genre
     {
         try {
             $response = new Response();
-            $genero = new GenreModel();
-            $result = $genero->get($param);
+            $categoria = new CategoriaModel();
+            $result = $categoria->get($param);
             //Dar respuesta
             $response->toJSON($result);
         } catch (Exception $e) {
@@ -30,12 +30,12 @@ class genre
             
         }
     }
-    public function getGenreMovie($id)
+    public function getCategoriaCarta($id)
     {
         try {
             $response = new Response();
-            $genero = new GenreModel();
-            $result = $genero->getGenreMovie($id);
+            $categoria = new CategoriaModel();
+            $result = $categoria->getCategoriaCarta($id);
             //Dar respuesta
             $response->toJSON($result);
         } catch (Exception $e) {
@@ -44,12 +44,12 @@ class genre
             
         }
     }
-    public function getMoviesbyGenre($param)
+    public function getCartasbyCategoria($param)
     {
         try {
             $response = new Response();
-            $genero = new GenreModel();
-            $result = $genero->getMoviesbyGenre($param);
+            $categoria = new CategoriaModel();
+            $result = $categoria->getCartasbyCategoria($param);
             //Dar respuesta
             $response->toJSON($result);
         } catch (Exception $e) {
