@@ -1,5 +1,4 @@
 <?php
-
 class CondicionController
 {
     private $condicionM;

@@ -1,43 +1,28 @@
 <?php
-//Cargar todos los paquetes
-require_once "vendor/autoload.php";
-
-use Firebase\JWT\JWT;
-
 class usuario
 {
     //Listar en el API
     public function index()
     {
         try {
-        $response = new Response();
-        //Obtener el listado del Modelo
-        $usuario = new UsuarioModel();
-        $result = $usuario->all();
-        //Dar respuesta
-        $response->toJSON($result);
-    } catch (Exception $e) {
+            $response = new Response();
+            $usuario = new UsuarioModel();
+            $result = $usuario->all();
+            $response->toJSON($result);
+        } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);
             
         }
     }
-    public function get($param)
-    {
-        $response = new Response();
-        $usuario = new UsuarioModel();
-        $result = $usuario->get($param);
-        //Dar respuesta
-        $response->toJSON($result);
-    }
-    public function getUsuario($idUsuario)
+    public function get($id)
     {
         try{
             $response = new Response();
             $usuario = new UsuarioModel();
-            $result = $usuario->getUsuario($idUsuario);
+            $result = $usuario->get($id);
             $response->toJSON($result);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);
         }

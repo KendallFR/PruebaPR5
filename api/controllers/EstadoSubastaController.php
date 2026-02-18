@@ -1,13 +1,13 @@
 <?php
-class carta
+class estadoSubasta
 {
     public function index()
     {
         try {
             $response = new Response();
             //Obtener el listado del Modelo
-            $cartaM = new CartaModel();
-            $result = $cartaM->all();
+            $estadoSubasta = new EstadoSubastaModel();
+            $result = $estadoSubasta->all();
             //Dar respuesta
             $response->toJSON($result);
         } catch (Exception $e) {
@@ -16,12 +16,12 @@ class carta
             
         }
     }
-    public function get($id)
+    public function get($param)
     {
         try {
             $response = new Response();
-            $carta = new CartaModel();
-            $result = $carta->get($id);
+            $estadoSubasta = new EstadoSubastaModel();
+            $result = $estadoSubasta->get($param);
             //Dar respuesta
             $response->toJSON($result);
         } catch (Exception $e) {

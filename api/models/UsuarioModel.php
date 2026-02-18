@@ -13,11 +13,16 @@ class UsuarioModel
 	public function all()
 	{
         try{
+            $rolM = new RolModel();
+            $estadoUsuarioM = new EstadoUsuarioModel();
 		    $vSql = "SELECT * FROM usuario order by idUsuario desc;";
 		    $vResultado = $this->enlace->ExecuteSQL($vSql);
 		    if (!empty($vResultado) && is_array($vResultado)) {
-                for ($i = 0; $i <= count($vResultado) - 1; $i++) {
-                    $vResultado[$i] = $this->get($vResultado[$i]->idUsuario);
+                for ($i = 0; $i < count($vResultado); $i++) {
+                    //Rol
+                    $vResultado[$i]->rol = $rolM->get($vResultado[$i]->idRol);
+                    //Estado
+                    $vResultado[$i]->estado = $estadoUsuarioM->get($vResultado[$i]->idEstadoUsuario);
                 }
 		    }
 		    return $vResultado;
@@ -29,28 +34,6 @@ class UsuarioModel
 	public function get($id)
 	{
         try{
-		    $vResultado = null;
-            $rolM = new RolModel();
-            $estadoUsuarioM = new EstadoUsuarioModel();
-            $vSql = "SELECT * FROM usuario where idUsuario=$id";
-            $vResultado = $this->enlace->ExecuteSQL($vSql);
-            if (!empty($vResultado)) {
-                $vResultado = $vResultado[0];
-            //Rol
-                $vResultado->rol = $rolM->get($vResultado->idRol);
-            //Estado
-                $vResultado->estado = $estadoUsuarioM->get($vResultado->idEstadoUsuario);
-            }
-            return $vResultado;
-        } catch (Exception $e) {
-            handleException($e);
-        }
-	}
-
-	public function getUsuario($idUsuario)
-    {
-        try{
-            $vResultado = null;
             $rolM = new RolModel();
             $estadoUsuarioM = new EstadoUsuarioModel();
 
@@ -72,7 +55,7 @@ class UsuarioModel
                         AS cantidadPujas
 
                         FROM usuario u
-                        WHERE u.idusuario = $idUsuario;";
+                        WHERE u.idusuario = $id;";
 
 		    $vResultado = $this->enlace->ExecuteSQL($vSql);
 		    if (!empty($vResultado)) {

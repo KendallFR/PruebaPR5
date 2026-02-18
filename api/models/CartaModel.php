@@ -1,9 +1,7 @@
 <?php
-
 class CartaModel
 {
     public $enlace;
-
     public function __construct()
     {
         $this->enlace = new MySqlConnect();
@@ -15,47 +13,28 @@ class CartaModel
     public function all()
     {
         try {
-            $sql = "SELECT 
-                        c.idCarta,
-                        c.nombre,
-                        c.descripcion,
-                        c.idUsuario,
-                        c.idEstadoCarta,
-                        c.idCondicion,
-                        c.fechaRegistro,
-                        (SELECT COUNT(*) 
-                        FROM subasta s 
-                        WHERE s.idCarta = c.idCarta)
-                        AS cantidadSubastas
-                    FROM carta c
-                    ORDER BY c.idCarta DESC";
-
-            $resultado = $this->enlace->ExecuteSQL($sql);
-            if (!empty($resultado) && is_array($resultado))
-            {
-                $imagenM = new ImageModel();
-                $categoriaM = new CategoriaModel();
-                $usuarioM = new UsuarioModel();
-                $estadoCartaM = new EstadoCartaModel();
-                $condicionM = new CondicionModel(); 
-                foreach ($resultado as $item)
-                {
-                    $idCarta = $item->idCarta;
-                    // Imagen
-                    $item->imagen = $imagenM->getImageCarta($idCarta);
-                    // Categorias
-                    $item->categorias = $categoriaM->getCategoriaCarta($idCarta);
-                    // Usuario dueño
-                    $item->usuario = $usuarioM->get($item->idUsuario);
-                    // Estado carta renombrado
-                    $item->estadoCarta = $estadoCartaM->get($item->idEstadoCarta);
-                    // Condición
-                    $item->condicion = $condicionM->get($item->idCondicion);
-                    // quita el antiguo idEstadoCarta para que no se vea duplicado
-                    unset($item->idEstadoCarta);
-                }
+            $imagenM = new ImageModel();
+            $categoriaM = new CategoriaModel();
+            $condicionM = new CondicionModel();
+            $estadoCartaM = new EstadoCartaModel();
+            $usuarioM = new UsuarioModel();
+            $vSQL = "SELECT idCarta,nombre,idCondicion,idEstadoCarta,idUsuario FROM carta order by nombre desc;";
+            $vResultado = $this->enlace->ExecuteSQL($vSQL);
+            if(!empty($vResultado) && is_array($vResultado)){
+            for($i=0; $i < count($vResultado); $i++){
+                //Imagenes
+                $vResultado[$i]->imagenes=$imagenM->getImageCarta($vResultado[$i]->idCarta);
+                //Categorias
+                $vResultado[$i]->categorias=$categoriaM->getCategoriaCarta($vResultado[$i]->idCarta);
+                //Condicion
+                $vResultado[$i]->condicion = $condicionM->get($vResultado[$i]->idCondicion);
+                // Usuario dueño
+                $vResultado[$i]->propietario = $usuarioM->get($vResultado[$i]->idUsuario);
+                // Estado carta
+                $vResultado[$i]->estadoCarta = $estadoCartaM->get($vResultado[$i]->idEstadoCarta);
             }
-            return $resultado;
+        }
+            return $vResultado;
         } catch (Exception $e) {
             handleException($e);
         }
@@ -68,43 +47,28 @@ class CartaModel
     public function get($id)
     {
         try {
-            $sql = "SELECT 
-                        c.idCarta,
-                        c.nombre,
-                        c.descripcion,
-                        c.idUsuario,
-                        c.idEstadoCarta,
-                        c.idCondicion,
-                        c.fechaRegistro,
-                        (SELECT COUNT(*) 
-                        FROM subasta s 
-                        WHERE s.idCarta = c.idCarta)
-                        AS cantidadSubastas
-                    FROM carta c
-                    WHERE c.idCarta = $id";
-            $resultado = $this->enlace->ExecuteSQL($sql);
-            if (!empty($resultado))
+            $usuarioM = new UsuarioModel();
+            $imagenM = new ImageModel();
+            $estadoCartaM = new EstadoCartaModel();
+            $categoriaM = new CategoriaModel();
+            $condicionM = new CondicionModel();
+            $vSql = "SELECT * FROM carta WHERE idCarta = $id;";
+            $vResultado = $this->enlace->executeSQL($vSql);
+            if (!empty($vResultado))
             {
-                $resultado = $resultado[0];
-                $imagenM = new ImageModel();
-                $categoriaM = new CategoriaModel();
-                $usuarioM = new UsuarioModel();
-                $estadoCartaM = new EstadoCartaModel();
-                $condicionM = new CondicionModel(); 
+                $vResultado = $vResultado[0];
                 // Imagen
-                $resultado->imagen = $imagenM->getImageCarta($id);
+                $vResultado->imagenes = $imagenM->getImageCarta($vResultado->idCarta);
                 // Categorias
-                $resultado->categorias = $categoriaM->getCategoriaCarta($id);
+                $vResultado->categorias = $categoriaM->getCategoriaCarta($id);
                 // Usuario dueño
-                $resultado->usuario = $usuarioM->get($resultado->idUsuario);
-                // Estado carta renombrado
-                $resultado->estadoCarta = $estadoCartaM->get($resultado->idEstadoCarta);
+                $vResultado->propietario = $usuarioM->get($vResultado->idUsuario);
+                // Estado carta
+                $vResultado->estadoCarta = $estadoCartaM->get($vResultado->idEstadoCarta);
                 // Condición
-                $resultado->condicion = $condicionM->get($resultado->idCondicion);
-                // quita el antiguo idEstadoCarta
-                unset($resultado->idEstadoCarta);
+                $vResultado->condicion = $condicionM->get($vResultado->idCondicion);
             }
-            return $resultado;
+            return $vResultado;
         } catch (Exception $e) {
             handleException($e);
         }

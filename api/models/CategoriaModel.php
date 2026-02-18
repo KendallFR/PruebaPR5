@@ -29,12 +29,12 @@ class CategoriaModel
         }
     }
 
-    public function getCategoriaCarta($id)
+    public function getCategoriaCarta($idCarta)
     {
         try{
             $vSql = "SELECT g.idCategoria,g.descripcion 
             FROM categoria g,carta_categoria mg 
-            where mg.idCategoria=g.idCategoria and mg.idCarta=$id";
+            where mg.idCategoria=g.idCategoria and mg.idCarta=$idCarta";
 
             $vResultado = $this->enlace->ExecuteSQL($vSql);
             return $vResultado;

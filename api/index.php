@@ -27,6 +27,9 @@ require_once "models/CartaModel.php";
 require_once "models/CategoriaModel.php";
 require_once "models/EstadoCartaModel.php";
 require_once "models/CondicionModel.php";
+require_once "models/SubastaModel.php";
+require_once "models/EstadoSubastaModel.php";
+
 
 /***--- Agregar todos los controladores*/
 require_once "controllers/RolController.php";
@@ -37,6 +40,8 @@ require_once "controllers/CartaController.php";
 require_once "controllers/CategoriaController.php";
 require_once "controllers/EstadoCartaController.php";
 require_once "controllers/CondicionController.php";
+require_once "controllers/SubastaController.php";
+require_once "controllers/EstadoSubastaController.php";
 
 //Enrutador
 require_once "routes/RoutesController.php";
