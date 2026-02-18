@@ -4,7 +4,6 @@ class EstadoUsuarioModel
     public $enlace;
     public function __construct()
     {
-
         $this->enlace = new MySqlConnect();
     }
     public function all()

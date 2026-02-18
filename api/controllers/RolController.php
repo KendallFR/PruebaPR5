@@ -6,26 +6,23 @@ class rol
     public function index()
     {
         try{
-        $response = new Response();
-        //Obtener el listado del Modelo
-        $rol=new RolModel();
-        $result=$rol->all();
-         //Dar respuesta
-        $response->toJSON($result);
+            $response = new Response();
+            $rol=new RolModel();
+            $result=$rol->all();
+            $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);
             
         }
     }
-    public function get($param)
+    public function get($id)
     {
         try{
-        $response = new Response();
-        $rol=new RolModel();
-        $result=$rol->get($param);
-        //Dar respuesta
-        $response->toJSON($result);
+            $response = new Response();
+            $rol=new RolModel();
+            $result=$rol->get($id);
+            $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);
