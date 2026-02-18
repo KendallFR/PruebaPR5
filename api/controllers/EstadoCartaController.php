@@ -6,7 +6,6 @@ class estadoCarta
         try {
             $response = new Response();
             //Obtener el listado del Modelo
-
             $estadoCarta = new EstadoCartaModel();
             $result = $estadoCarta->all();
             //Dar respuesta
@@ -21,8 +20,8 @@ class estadoCarta
     {
         try {
             $response = new Response();
-            $genero = new DirectorModel();
-            $result = $genero->get($param);
+            $estadoCarta = new EstadoCartaModel();
+            $result = $estadoCarta->get($param);
             //Dar respuesta
             $response->toJSON($result);
         } catch (Exception $e) {
