@@ -1,7 +1,6 @@
 <?php
 class usuario
 {
-    //Listar en el API
     public function index()
     {
         try {
@@ -12,7 +11,6 @@ class usuario
         } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);
-            
         }
     }
     public function get($id)

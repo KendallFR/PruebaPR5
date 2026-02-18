@@ -7,22 +7,41 @@ class SubastaModel
 		$this->enlace = new MySqlConnect();
 	}
 
-	public function getSubastasActivas()
+    public function all()
 	{
         try{
-		    $vSql = "SELECT idSubasta,idCarta,fechaInicio,fechaCierre,precio,incrementoMin FROM subasta where idEstadoSubasta = 1 order by idSubasta desc;";
+            $cartaM = new CartaModel();
+            $estadoSubastaM = new EstadoSubastaModel();
+		    $vSql = "SELECT idSubasta,idCarta,fechaInicio,fechaCierre,precio,incrementoMin FROM subasta order by idSubasta desc;";
 		    $vResultado = $this->enlace->ExecuteSQL($vSql);
+		    if (!empty($vResultado) && is_array($vResultado)) {
+                for ($i = 0; $i < count($vResultado); $i++) {
+                    //Carta
+                    $vResultado[$i]->carta = $cartaM->get($vResultado[$i]->idCarta);
+                    //Estado
+                    $vResultado[$i]->estadoSubasta = $estadoSubastaM->get($vResultado[$i]->idEstadoSubasta);
+                }
+		    }
 		    return $vResultado;
 	    } catch (Exception $e) {
             handleException($e);
         }
     }
-
-    public function getSubastasFinalizadas()
+	public function getSubastasbyEstado($id)
 	{
         try{
-		    $vSql = "SELECT idSubasta,idCarta,fechaInicio,fechaCierre,precio,incrementoMin FROM subasta where idEstadoSubasta = 2 order by idSubasta desc;";
+            $cartaM = new CartaModel();
+            $estadoSubastaM = new EstadoSubastaModel();
+		    $vSql = "SELECT idSubasta,idEstadoSubasta,idCarta,fechaInicio,fechaCierre,precio,incrementoMin FROM subasta where idEstadoSubasta = $id order by idSubasta desc;";
 		    $vResultado = $this->enlace->ExecuteSQL($vSql);
+            if (!empty($vResultado) && is_array($vResultado)) {
+                for ($i = 0; $i < count($vResultado); $i++) {
+                    //Carta
+                    $vResultado[$i]->carta = $cartaM->get($vResultado[$i]->idCarta);
+                    //Estado
+                    $vResultado[$i]->estadoSubasta = $estadoSubastaM->get($vResultado[$i]->idEstadoSubasta);
+                }
+		    }
 		    return $vResultado;
 	    } catch (Exception $e) {
             handleException($e);
@@ -32,10 +51,9 @@ class SubastaModel
 	public function get($id)
 	{
         try{
-		    $vResultado = null;
             $cartaM = new CartaModel();
             $estadoSubastaM = new EstadoSubastaModel();
-            $vSql = "SELECT * FROM subasta where idSubasta=$id";
+            $vSql = "SELECT * FROM subasta where idSubasta=$id;";
             $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado)) {
                 $vResultado = $vResultado[0];

@@ -11,7 +11,6 @@ class estadoCarta
         } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);
-            
         }
     }
     public function get($id)
