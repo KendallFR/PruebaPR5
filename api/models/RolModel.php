@@ -4,29 +4,28 @@ class RolModel
     public $enlace;
     public function __construct()
     {
-
         $this->enlace = new MySqlConnect();
     }
+
     public function all()
     {
-        //Consulta sql
-        $vSql = "SELECT * FROM rol;";
-
-        //Ejecutar la consulta
-        $vResultado = $this->enlace->ExecuteSQL($vSql);
-
-        // Retornar el objeto
-        return $vResultado;
+        try {
+            $vSql = "SELECT * FROM rol;";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return $vResultado;
+        } catch (Exception $e) {
+            handleException($e);
+        }
     }
 
     public function get($id)
     {
-        //Consulta sql
-        $vSql = "SELECT * FROM rol where idRol=$id";
-
-        //Ejecutar la consulta
-        $vResultado = $this->enlace->ExecuteSQL($vSql);
-        // Retornar el objeto
-        return $vResultado[0];
+        try{
+            $vSql = "SELECT * FROM rol where idRol=$id";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return $vResultado[0];
+        } catch (Exception $e) {
+            handleException($e);
+        }
     }
 }

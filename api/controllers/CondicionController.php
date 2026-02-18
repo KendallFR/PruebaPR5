@@ -27,9 +27,9 @@ class CondicionController
     /* 
        OBTENER UNA CONDICION
         */
-    public function get($idCondicion)
+    public function get($param)
     {
-        $condicion = $this->condicionM->get($idCondicion);
+        $condicion = $this->condicionM->get($param);
 
         if ($condicion) {
             return [

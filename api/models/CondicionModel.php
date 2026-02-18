@@ -3,19 +3,18 @@
 class CondicionModel
 {
     public $enlace;
-
     public function __construct()
     {
         $this->enlace = new MySqlConnect();
     }
 
     /* 
-       OBTENER TODAS LAS CONDICIONES
+    OBTENER TODAS LAS CONDICIONES
       */
     public function all()
     {
         try {
-            $sql = "SELECT idCondicion, descripcion FROM condicion ORDER BY idCondicion ASC";
+            $sql = "SELECT * FROM condicion;";
             $resultado = $this->enlace->ExecuteSQL($sql);
             return $resultado;
         } catch (Exception $e) {
@@ -24,20 +23,17 @@ class CondicionModel
     }
 
     /* 
-       OBTENER UNA CONDICION POR ID
+    OBTENER UNA CONDICION POR ID
       */
-    public function get($idCondicion)
+    public function get($id)
     {
         try {
-            $sql = "SELECT idCondicion, descripcion FROM condicion WHERE idCondicion = $idCondicion";
+            $sql = "SELECT * FROM condicion WHERE idCondicion = $id";
             $resultado = $this->enlace->ExecuteSQL($sql);
-
             if (!empty($resultado)) {
-                return $resultado[0]; // Devuelve solo el objeto
+                return $resultado[0]; 
             }
-
             return null;
-
         } catch (Exception $e) {
             handleException($e);
         }

@@ -17,15 +17,15 @@ class ImageModel
     //Obtener una imagen de una pelicula
     public function getImageCarta($idCarta)
     {
-        //Consulta sql
-        $vSql = "SELECT * FROM imagen_carta where idCarta=$idCarta";
-
-        //Ejecutar la consulta
-        $vResultado = $this->enlace->ExecuteSQL($vSql);
-        if (!empty($vResultado)) {
-            // Retornar el objeto
-            return $vResultado[0];
+        try{
+            $vSql = "SELECT * FROM imagen_carta where idCarta=$idCarta";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            if (!empty($vResultado)) {
+                return $vResultado[0];
+            }
+            return $vResultado;
+        } catch (Exception $e) {
+            handleException($e);
         }
-        return $vResultado;
     }
 }

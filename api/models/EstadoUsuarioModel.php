@@ -9,24 +9,23 @@ class EstadoUsuarioModel
     }
     public function all()
     {
-        //Consulta sql
-        $vSql = "SELECT * FROM estado_usuario;";
-
-        //Ejecutar la consulta
-        $vResultado = $this->enlace->ExecuteSQL($vSql);
-
-        // Retornar el objeto
-        return $vResultado;
+        try{
+            $vSql = "SELECT * FROM estado_usuario;";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return $vResultado;
+        } catch (Exception $e) {
+            handleException($e);
+        }
     }
 
     public function get($id)
     {
-        //Consulta sql
-        $vSql = "SELECT * FROM estado_usuario where idEstadoUsuario=$id";
-
-        //Ejecutar la consulta
-        $vResultado = $this->enlace->ExecuteSQL($vSql);
-        // Retornar el objeto
-        return $vResultado[0];
+        try{
+            $vSql = "SELECT * FROM estado_usuario where idEstadoUsuario=$id";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return $vResultado[0];
+        } catch (Exception $e) {
+            handleException($e);
+        }
     }
 }

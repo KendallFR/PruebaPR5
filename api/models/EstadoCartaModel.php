@@ -9,22 +9,23 @@ class EstadoCartaModel
     /*Listar */
     public function all()
     {
-        //Consulta sql
-        $vSql = "SELECT * FROM estado_carta;";
-        //Ejecutar la consulta
-        $vResultado = $this->enlace->ExecuteSQL($vSql);
-        // Retornar el objeto
-        return $vResultado;
+        try{
+            $vSql = "SELECT * FROM estado_carta;";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return $vResultado;
+        } catch (Exception $e) {
+            handleException($e);
+        }
     }
     /*Obtener */
     public function get($id)
     {
-        //Consulta sql
+        try{
         $vSql = "SELECT * FROM estado_carta where idEstadoCarta=$id";
-
-        //Ejecutar la consulta
         $vResultado = $this->enlace->ExecuteSQL($vSql);
-        // Retornar el objeto
-        return $vResultado[0];
+            return $vResultado[0];
+        } catch (Exception $e) {
+            handleException($e);
+        }
     }
 }
