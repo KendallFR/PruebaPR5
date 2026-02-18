@@ -23,7 +23,7 @@ class CategoriaModel
         try{
             $vSql = "SELECT * FROM categoria where idCategoria=$id";
             $vResultado = $this->enlace->ExecuteSQL($vSql);
-            return $vResultado[0];
+            return $vResultado;
         } catch (Exception $e) {
             handleException($e);
         }

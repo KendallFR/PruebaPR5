@@ -5,10 +5,8 @@ class estadoCarta
     {
         try {
             $response = new Response();
-            //Obtener el listado del Modelo
             $estadoCarta = new EstadoCartaModel();
             $result = $estadoCarta->all();
-            //Dar respuesta
             $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);
@@ -16,13 +14,12 @@ class estadoCarta
             
         }
     }
-    public function get($param)
+    public function get($id)
     {
         try {
             $response = new Response();
             $estadoCarta = new EstadoCartaModel();
-            $result = $estadoCarta->get($param);
-            //Dar respuesta
+            $result = $estadoCarta->get($id);
             $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);

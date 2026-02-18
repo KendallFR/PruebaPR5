@@ -1,5 +1,4 @@
 <?php
-
 class CondicionModel
 {
     public $enlace;
@@ -7,33 +6,23 @@ class CondicionModel
     {
         $this->enlace = new MySqlConnect();
     }
-
-    /* 
-    OBTENER TODAS LAS CONDICIONES
-      */
     public function all()
     {
         try {
-            $sql = "SELECT * FROM condicion;";
-            $resultado = $this->enlace->ExecuteSQL($sql);
-            return $resultado;
+            $vSql = "SELECT * FROM condicion;";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return $vResultado;
         } catch (Exception $e) {
             handleException($e);
         }
     }
 
-    /* 
-    OBTENER UNA CONDICION POR ID
-      */
     public function get($id)
     {
         try {
-            $sql = "SELECT * FROM condicion WHERE idCondicion = $id";
-            $resultado = $this->enlace->ExecuteSQL($sql);
-            if (!empty($resultado)) {
-                return $resultado[0]; 
-            }
-            return null;
+            $vSql = "SELECT * FROM condicion WHERE idCondicion = $id";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return $vResultado[0]; 
         } catch (Exception $e) {
             handleException($e);
         }

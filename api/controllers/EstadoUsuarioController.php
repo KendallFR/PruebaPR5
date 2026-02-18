@@ -1,28 +1,26 @@
 <?php
-//class Genre
-class estadoUsuario{
-    //Listar en el API
-    public function index(){
+class estadoUsuario
+{
+    public function index()
+    {
         try{
-        $response = new Response();
-        //Obtener el listado del Modelo
-        $estadoUsuario=new EstadoUsuarioModel();
-        $result=$estadoUsuario->all();
-         //Dar respuesta
-        $response->toJSON($result);
+            $response = new Response();
+            $estadoUsuario=new EstadoUsuarioModel();
+            $result=$estadoUsuario->all();
+            $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);
             
         }
     }
-    public function get($param){
+    public function get($id)
+    {
         try{
-        $response = new Response();
-        $estadoUsuario=new EstadoUsuarioModel();
-        $result=$estadoUsuario->get($param);
-        //Dar respuesta
-        $response->toJSON($result);
+            $response = new Response();
+            $estadoUsuario=new EstadoUsuarioModel();
+            $result=$estadoUsuario->get($id);
+            $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);

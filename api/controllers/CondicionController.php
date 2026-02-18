@@ -1,49 +1,30 @@
 <?php
 class CondicionController
 {
-    private $condicionM;
-
-    public function __construct()
+    public function index()
     {
-        $this->condicionM = new CondicionModel();
-    }
-
-    /* 
-       LISTAR TODAS LAS CONDICIONES
-        */
-    public function all()
-    {
-        $condiciones = $this->condicionM->all();
-
-        return [
-            "success" => true,
-            "status" => 200,
-            "message" => "Condiciones obtenidas correctamente",
-            "data" => $condiciones
-        ];
-    }
-
-    /* 
-       OBTENER UNA CONDICION
-        */
-    public function get($param)
-    {
-        $condicion = $this->condicionM->get($param);
-
-        if ($condicion) {
-            return [
-                "success" => true,
-                "status" => 200,
-                "message" => "Condición obtenida correctamente",
-                "data" => $condicion
-            ];
+        try{
+            $response = new Response();
+            $condicion=new CondicionModel();
+            $result=$condicion->all();
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            $response->toJSON($result);
+            handleException($e);
+            
         }
-
-        return [
-            "success" => false,
-            "status" => 404,
-            "message" => "Condición no encontrada",
-            "data" => null
-        ];
+    }
+    public function get($id)
+    {
+        try{
+            $response = new Response();
+            $condicion=new CondicionModel();
+            $result=$condicion->get($id);
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            $response->toJSON($result);
+            handleException($e);
+            
+        }
     }
 }

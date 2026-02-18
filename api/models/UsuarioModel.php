@@ -1,7 +1,4 @@
 <?php
-
-use Firebase\JWT\JWT;
-
 class UsuarioModel
 {
 	public $enlace;
