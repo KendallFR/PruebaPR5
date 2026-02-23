@@ -36,9 +36,9 @@ export default function Header() {
   const userEmail = "Invitado";
 
 const navItems = [
-  { title: "Películas", href: "/movie", icon: <Film className="h-4 w-4" /> },
+  { title: "Subastas", href: "/movie", icon: <Film className="h-4 w-4" /> },
   {
-    title: "Filtrar Películas",
+    title: "Filtrar por carta",
     href: "/movie/filter",
     icon: <Filter className="h-4 w-4" />,
   },
@@ -46,20 +46,25 @@ const navItems = [
 
 const mantItems = [
  {
-      title: "Películas",
+      title: "Subastas",
       href: "movie/table",
       icon: <Wrench className="h-4 w-4" />,
     },
     {
-      title: "Alquileres",
+      title: "Cartas",
       href: "rental",
       icon: <ShoppingBasket className="h-4 w-4" />,
     },
     {
-      title: "Gráfico de Alquileres",
+      title: "Usuarios",
       href: "/rental/graph",
       icon: <ChartArea className="h-4 w-4" />,
     },
+    {
+      title: "Pujas",
+      href: "/rental/graph",
+      icon: <ChartArea className="h-4 w-4" />,
+    }
 ];
 
 const userItems = [
@@ -85,7 +90,7 @@ const userItems = [
           className="flex items-center gap-2 text-xl font-semibold tracking-wide hover:opacity-90 transition"
         >
           <Clapperboard className="h-6 w-6" />
-          <span className="hidden sm:inline">MoviesApp</span>
+          <span className="hidden sm:inline">RedCard Market Trading</span>
         </Link>
 
         {/* -------- Menú escritorio -------- */}
@@ -94,7 +99,7 @@ const userItems = [
             {/* Películas */}
             <MenubarMenu>
               <MenubarTrigger className="text-white font-medium flex items-center gap-1 hover:text-secondary transition">
-                <Film className="h-4 w-4" /> Películas
+                <Film className="h-4 w-4" /> Subastas
                 <ChevronDown className="h-3 w-3" />
               </MenubarTrigger>
               <MenubarContent className="bg-primary/0 backdrop-blur-md border-white/10">
@@ -177,13 +182,13 @@ const userItems = [
               <nav className="mt-8 px-4 space-y-6">
                 <div>
                   <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-                    <Clapperboard /> MoviesApp
+                    <Clapperboard /> RedCard Market Trading
                   </Link>
                 </div>
 
                 <div>
                   <h4 className="mb-2 text-lg font-semibold flex items-center gap-2">
-                    <Film /> Películas
+                    <Film /> Subastas
                   </h4>
                   {navItems.map((item) => (
                     <Link
