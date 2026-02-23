@@ -29,7 +29,7 @@ require_once "models/EstadoCartaModel.php";
 require_once "models/CondicionModel.php";
 require_once "models/SubastaModel.php";
 require_once "models/EstadoSubastaModel.php";
-
+require_once "models/PujaModel.php";
 
 /***--- Agregar todos los controladores*/
 require_once "controllers/RolController.php";
@@ -42,6 +42,7 @@ require_once "controllers/EstadoCartaController.php";
 require_once "controllers/CondicionController.php";
 require_once "controllers/SubastaController.php";
 require_once "controllers/EstadoSubastaController.php";
+require_once "controllers/PujaController.php";
 
 //Enrutador
 require_once "routes/RoutesController.php";

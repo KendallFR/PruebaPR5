@@ -29,6 +29,7 @@ export function PageNotFound() {
           </p>
 
           {/* Botón volver */}
+          
           <Button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2"

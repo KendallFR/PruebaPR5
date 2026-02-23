@@ -1,5 +1,6 @@
 import ticketImg from "../../assets/ticket.jpg";
 
+
 export function Home() {
   return (
     <div className="relative w-full h-screen flex items-center justify-center text-center overflow-hidden">

@@ -15,10 +15,11 @@ class CartaModel
         try {
             $imagenM = new ImageModel();
             $categoriaM = new CategoriaModel();
+            $subastaM = new SubastaModel();
             $condicionM = new CondicionModel();
             $estadoCartaM = new EstadoCartaModel();
             $usuarioM = new UsuarioModel();
-            $vSQL = "SELECT idCarta,nombre,idCondicion,idEstadoCarta,idUsuario FROM carta order by nombre desc;";
+            $vSQL = "SELECT * FROM carta order by nombre desc;";
             $vResultado = $this->enlace->ExecuteSQL($vSQL);
             if(!empty($vResultado) && is_array($vResultado)){
                 for($i=0; $i < count($vResultado); $i++){
@@ -32,6 +33,8 @@ class CartaModel
                     $vResultado[$i]->propietario = $usuarioM->get($vResultado[$i]->idUsuario);
                     // Estado carta
                     $vResultado[$i]->estadoCarta = $estadoCartaM->get($vResultado[$i]->idEstadoCarta);
+                    // Subasta
+                    $vResultado[$i]->subasta = $subastaM->getSubastaCarta($vResultado[$i]->idCarta);
                 }
             }
             return $vResultado;
@@ -49,6 +52,7 @@ class CartaModel
         try {
             $usuarioM = new UsuarioModel();
             $imagenM = new ImageModel();
+            $subastaM = new SubastaModel();
             $estadoCartaM = new EstadoCartaModel();
             $categoriaM = new CategoriaModel();
             $condicionM = new CondicionModel();
@@ -67,6 +71,8 @@ class CartaModel
                 $vResultado->estadoCarta = $estadoCartaM->get($vResultado->idEstadoCarta);
                 // Condición
                 $vResultado->condicion = $condicionM->get($vResultado->idCondicion);
+                // Subasta
+                $vResultado->subasta = $subastaM->getSubastaCarta($vResultado->idCarta);
             }
             return $vResultado;
         } catch (Exception $e) {

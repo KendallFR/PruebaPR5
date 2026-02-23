@@ -7,32 +7,25 @@ class SubastaModel
 		$this->enlace = new MySqlConnect();
 	}
 
-    public function all()
+	public function allSubastasActivas()
 	{
         try{
             $cartaM = new CartaModel();
             $estadoSubastaM = new EstadoSubastaModel();
-		    $vSql = "SELECT idSubasta,idCarta,fechaInicio,fechaCierre,precio,incrementoMin FROM subasta order by idSubasta desc;";
-		    $vResultado = $this->enlace->ExecuteSQL($vSql);
-		    if (!empty($vResultado) && is_array($vResultado)) {
-                for ($i = 0; $i < count($vResultado); $i++) {
-                    //Carta
-                    $vResultado[$i]->carta = $cartaM->get($vResultado[$i]->idCarta);
-                    //Estado
-                    $vResultado[$i]->estadoSubasta = $estadoSubastaM->get($vResultado[$i]->idEstadoSubasta);
-                }
-		    }
-		    return $vResultado;
-	    } catch (Exception $e) {
-            handleException($e);
-        }
-    }
-	public function getSubastasbyEstado($id)
-	{
-        try{
-            $cartaM = new CartaModel();
-            $estadoSubastaM = new EstadoSubastaModel();
-		    $vSql = "SELECT idSubasta,idEstadoSubasta,idCarta,fechaInicio,fechaCierre,precio,incrementoMin FROM subasta where idEstadoSubasta = $id order by idSubasta desc;";
+		    $vSql = "SELECT
+                    u.idSubasta,
+                    u.fechaInicio,
+                    u.fechaCierre,
+                    u.precio,
+                    u.incrementoMin,
+                    u.idEstadoSubasta,
+                    u.idUsuario,
+                    u.idCarta,
+
+                    (SELECT COUNT(*) FROM puja s WHERE s.idSubasta = u.idSubasta) 
+                    AS cantidadPujas
+
+                    FROM subasta u where u.idEstadoSubasta = 1 order by idSubasta desc;";
 		    $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado) && is_array($vResultado)) {
                 for ($i = 0; $i < count($vResultado); $i++) {
@@ -47,13 +40,45 @@ class SubastaModel
             handleException($e);
         }
     }
-
+public function allSubastasFinalizadas()
+	{
+        try{
+            $cartaM = new CartaModel();
+            $estadoSubastaM = new EstadoSubastaModel();
+		    $vSql = "SELECT * FROM subasta  where idEstadoSubasta = 2 or idEstadoSubasta = 3 order by idSubasta desc;";
+		    $vResultado = $this->enlace->ExecuteSQL($vSql);
+            if (!empty($vResultado) && is_array($vResultado)) {
+                for ($i = 0; $i < count($vResultado); $i++) {
+                    //Carta
+                    $vResultado[$i]->carta = $cartaM->get($vResultado[$i]->idCarta);
+                    //Estado
+                    $vResultado[$i]->estadoSubasta = $estadoSubastaM->get($vResultado[$i]->idEstadoSubasta);
+                }
+		    }
+		    return $vResultado;
+	    } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 	public function get($id)
 	{
         try{
             $cartaM = new CartaModel();
             $estadoSubastaM = new EstadoSubastaModel();
-            $vSql = "SELECT * FROM subasta where idSubasta=$id;";
+            $vSql = "SELECT
+                    u.idSubasta,
+                    u.fechaInicio,
+                    u.fechaCierre,
+                    u.precio,
+                    u.incrementoMin,
+                    u.idEstadoSubasta,
+                    u.idUsuario,
+                    u.idCarta,
+
+                    (SELECT COUNT(*) FROM puja s WHERE s.idSubasta = u.idSubasta) 
+                    AS cantidadPujas
+
+                    FROM subasta u where u.idEstadoSubasta = $id order by idSubasta desc;";
             $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado)) {
                 $vResultado = $vResultado[0];
@@ -62,11 +87,23 @@ class SubastaModel
             //Estado
                 $vResultado->estadoSubasta = $estadoSubastaM->get($vResultado->idEstadoSubasta);
             //enlace
-                $vResultado->enlace = "<a href='subasta.php?id=" . $vResultado->idSubasta . "'>Ver detalles</a>";
+                $vResultado->enlace = "<a href='localhost:81/proyectoSubasta/api/puja/getPujasbySubasta/" 
+                . $vResultado->idSubasta . 
+                "'>Historial de Pujas</a>";
             }
             return $vResultado;
         } catch (Exception $e) {
             handleException($e);
         }
 	}
+    public function getSubastaCarta($idCarta)
+    {
+        try{
+            $vSql = "SELECT * FROM subasta where idCarta=$idCarta";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return $vResultado;
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 }

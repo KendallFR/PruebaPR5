@@ -1,24 +1,25 @@
 <?php
 class subasta
 {
-    public function index()
+    public function allSubastasActivas()
     {
         try {
             $response = new Response();
             $subasta = new SubastaModel();
-            $result = $subasta->all();
+            $result = $subasta->allSubastasActivas();
             $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);
+            
         }
     }
-    public function getSubastasbyEstado($id)
+    public function allSubastasFinalizadas()
     {
         try {
             $response = new Response();
             $subasta = new SubastaModel();
-            $result = $subasta->getSubastasbyEstado($id);
+            $result = $subasta->allSubastasFinalizadas();
             $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);

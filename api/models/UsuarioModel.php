@@ -36,7 +36,9 @@ class UsuarioModel
 
 		    $vSql = "SELECT 
                         u.idUsuario,
+                        u.cedula,
                         u.nombre,
+                        u.email,
                         u.idRol,
                         u.idEstadoUsuario,
                         u.fechaRegistro,
