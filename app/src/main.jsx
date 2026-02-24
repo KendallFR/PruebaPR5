@@ -9,6 +9,7 @@ import TableMovies from './components/Movie/TableMovies'
 import { ListMovies } from './components/Movie/ListMovies'
 import { DetailMovie } from './components/Movie/DetailMovie'
 import UserList from "./components/User/UserList";
+import UserDetail from "./components/User/UserDetail";
 
 
 const rutas = createBrowserRouter([
@@ -25,7 +26,8 @@ const rutas = createBrowserRouter([
       {path:"movie", element: <ListMovies/>},
       {path:"movie/detail/:id", element: <DetailMovie />},
 
-      { path:"user", element: <UserList /> }
+      { path:"usuario", element: <UserList /> },
+      { path: "usuario/detail/:id", element: <UserDetail /> }
 
     ]
   }
