@@ -1,3 +1,0 @@
-[04-02-2026 15:36:32] [Estudiante] error: File: C:\xampp\htdocs\appmovie\api\index.php - line: 36 - Message: require_once(controllers/ActorController.php): Failed to open stream: No such file or directory
- [04-02-2026 15:44:44] [Estudiante] error: File: C:\xampp\htdocs\appmovie\api\controllers\core\MySqlConnect.php - line: 29 - Message: Unknown database 'movie_rental'
- 
