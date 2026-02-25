@@ -62,7 +62,7 @@ class UsuarioModel
             //Rol
                 $vResultado->rol = $rolM->get($vResultado->idRol);
             //Estado
-                $vResultado->estado = $estadoUsuarioM->get($vResultado->idEstadoUsuario);
+                $vResultado->estadoUsuario = $estadoUsuarioM->get($vResultado->idEstadoUsuario);
             }
 		    return $vResultado;
         } catch (Exception $e) {

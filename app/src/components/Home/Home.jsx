@@ -18,10 +18,10 @@ export function Home() {
       {/* Contenido principal */}
       <div className="px-4 max-w-2xl text-white">
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-4 drop-shadow-lg">
-          Alquiler de Películas
+          Subastas de Cartas Pokemon
         </h1>
         <p className="text-lg md:text-xl text-white/80 mb-6 drop-shadow">
-          Descubre y alquila tus películas favoritas por días.
+          Busca y encuentra las mejores cartas de Pokemon en nuestras subastas en línea. ¡Únete a la comunidad de coleccionistas y haz tus ofertas hoy mismo!
         </p>
         <div className="flex justify-center gap-4">
           <a

@@ -57,7 +57,7 @@ const mantItems = [
     },
     {
       title: "Usuarios",
-      href: "/rental/graph",
+      href: "/usuario/table",
       icon: <ChartArea className="h-4 w-4" />,
     },
     {
