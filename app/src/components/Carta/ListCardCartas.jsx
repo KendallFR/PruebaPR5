@@ -24,20 +24,24 @@ export function ListCardCartas({ data }) {
           </CardHeader>
 
           {/* Imagen */}
-          <div className="relative w-full aspect-video">
-            {item.imagenes?.[0]?.imagen ? (
-              <img
-                src={`${BASE_URL}/${item.imagenes[0].imagen}`}
-                alt={item.nombre}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="h-full w-full bg-muted flex items-center justify-center text-muted-foreground">
-                <FilmIcon className="h-1/2 w-1/2" />
-              </div>
-            )}
-          </div>
-
+<div className="relative w-full aspect-video">
+  {item.imagenes && item.imagenes.length > 0 ? (
+    <div className="grid h-full w-full grid-cols-2 gap-1 auto-rows-fr">
+      {item.imagenes.map((img, index) => (
+        <img
+          key={index}
+          src={`${BASE_URL}/${img.imagen}`}
+          alt={`${item.nombre}-${index}`}
+          className="w-full h-full object-cover"
+        />
+      ))}
+    </div>
+  ) : (
+    <div className="h-full w-full bg-muted flex items-center justify-center text-muted-foreground">
+      <FilmIcon className="h-1/2 w-1/2" />
+    </div>
+  )}
+</div>
           {/* Contenido */}
           <CardContent className="flex-1 space-y-2 pt-4">
             <h1 className="text-lg font-semibold">Propietario</h1>

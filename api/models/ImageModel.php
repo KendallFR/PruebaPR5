@@ -17,7 +17,7 @@ class ImageModel
     public function getImageCarta($idCarta)
     {
         try{
-            $vSql = "SELECT * FROM imagen_carta where idCarta=$idCarta";
+            $vSql = "SELECT * FROM imagen_carta where idCarta=$idCarta order by id desc";
             $vResultado = $this->enlace->ExecuteSQL($vSql);
             return $vResultado;
         } catch (Exception $e) {
