@@ -4,14 +4,11 @@ import CartaService from '../../services/CartaService';
 import { ErrorAlert } from "../ui/custom/ErrorAlert";
 // Shadcn UI Components
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Clock,
     Globe,
     User,
     Film,
-    Star,
     ChevronRight,
     ArrowLeft
 } from "lucide-react";
@@ -56,22 +53,22 @@ export function DetailCarta() {
             <div className="flex flex-col md:flex-row gap-8 items-start">
                 {/* Sección de la Imagen */}
                 <div className="w-full md:w-1/2">
-  {carta?.data?.imagenes?.length > 0 ? (
-    <div className="grid grid-cols-2 gap-2">
-      {carta.data.imagenes.map((img) => (
-        <img
-          key={img.idImagen}
-          src={`${BASE_URL}/${img.imagen}`}
-          alt={carta.data.nombre}
-          className="w-full h-full object-contain rounded-lg bg-white"
-        />
-      ))}
+                    {carta?.data?.imagenes?.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-2">
+                            {carta.data.imagenes.map((img) => (
+                            <img
+                                key={img.idImagen}
+                                src={`${BASE_URL}/${img.imagen}`}
+                                alt={carta.data.nombre}
+                                className="w-full h-full object-contain rounded-lg bg-white"
+                            />
+                        ))}
     </div>
-  ) : (
+                        ) : (
     <div className="w-full aspect-square bg-muted flex items-center justify-center rounded-lg">
       <Film className="w-12 h-12 text-muted-foreground" />
     </div>
-  )}
+                        )}
 </div>
                 {/* Sección de los Detalles */}
                 <div className="flex-1 space-y-6">
