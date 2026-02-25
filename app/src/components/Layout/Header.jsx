@@ -36,7 +36,7 @@ export default function Header() {
   const userEmail = "Invitado";
 
 const navItems = [
-  { title: "Subastas", href: "/movie", icon: <Film className="h-4 w-4" /> },
+  { title: "Subastas", href: "/carta", icon: <Film className="h-4 w-4" /> },
   {
     title: "Filtrar por carta",
     href: "/movie/filter",
@@ -47,12 +47,12 @@ const navItems = [
 const mantItems = [
  {
       title: "Subastas",
-      href: "movie/table",
+      href: "/movie/table",
       icon: <Wrench className="h-4 w-4" />,
     },
     {
       title: "Cartas",
-      href: "rental",
+      href: "/carta",
       icon: <ShoppingBasket className="h-4 w-4" />,
     },
     {

@@ -10,6 +10,7 @@ import { ListMovies } from './components/Movie/ListMovies'
 import { DetailMovie } from './components/Movie/DetailMovie'
 import TableUsuarios from './components/Usuario/TableUsuarios'
 import { DetailUsuario } from './components/Usuario/DetailUsuario'
+import { ListCartas } from './components/Carta/ListCartas'
 
 
 
@@ -29,6 +30,7 @@ const rutas = createBrowserRouter([
       {path:"movie/detail/:id", element: <DetailMovie />},
       {path:"usuario/table", element: <TableUsuarios/>},
       {path:"usuario/detail/:id", element: <DetailUsuario/>},
+      {path:"carta", element: <ListCartas/>},
       
     ]
   }
