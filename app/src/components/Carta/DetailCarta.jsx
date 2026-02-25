@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import CartaService from '../../services/CartaService';
 import { ErrorAlert } from "../ui/custom/ErrorAlert";
-// Shadcn UI Components
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+
 import {
     Globe,
     User,
@@ -12,153 +13,379 @@ import {
     ChevronRight,
     ArrowLeft
 } from "lucide-react";
+
 import { LoadingGrid } from '../ui/custom/LoadingGrid';
 import { EmptyState } from '../ui/custom/EmptyState';
 
 export function DetailCarta() {
+
     const navigate = useNavigate();
     const { id } = useParams();
+
     const BASE_URL = import.meta.env.VITE_BASE_URL + 'uploads';
+
     const [carta, setData] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+
     useEffect(() => {
+
         const fetchData = async () => {
+
             try {
+
                 const response = await CartaService.getCartaById(id);
-                // Si la petición es exitosa, se guardan los datos
-                console.log(response.data)
+
                 setData(response.data);
-                if(!response.data.success){
-                    setError(response.data.message)
+
+                if (!response.data.success) {
+                    setError(response.data.message);
                 }
+
             } catch (err) {
-                // Si el error no es por cancelación, se registra
-                if (err.name !== "AbortError") setError(err.message);
+
+                if (err.name !== "AbortError")
+                    setError(err.message);
+
             } finally {
-                // Independientemente del resultado, se actualiza el loading
+
                 setLoading(false);
+
             }
+
         };
-        fetchData(id)
+
+        fetchData();
+
     }, [id]);
 
 
-    if (loading) return <LoadingGrid count={1} type="grid" />;
-    if (error) return <ErrorAlert title="Error al cargar cartas" message={error} />;
+    /*
+    ========================================
+    COLOR DINAMICO SEGUN CATEGORIA
+    ========================================
+    */
+
+    const glowColor = useMemo(() => {
+
+        if (!carta?.data?.categorias?.length)
+            return "rgba(59,130,246,0.6)";
+
+        const categoria = carta.data.categorias[0].descripcion.toLowerCase();
+
+        if (categoria.includes("electrico"))
+            return "rgba(255, 221, 0, 0.9)";
+
+        if (categoria.includes("fuego"))
+            return "rgba(255, 60, 60, 0.9)";
+
+        if (categoria.includes("agua"))
+            return "rgba(0, 140, 255, 0.9)";
+
+        if (categoria.includes("planta"))
+            return "rgba(0, 255, 140, 0.9)";
+
+        if (categoria.includes("psiquico"))
+            return "rgba(255, 0, 255, 0.9)";
+
+        return "rgba(59,130,246,0.6)";
+
+    }, [carta]);
+
+
+    /*
+    ========================================
+    ESTADOS
+    ========================================
+    */
+
+    if (loading)
+        return <LoadingGrid count={1} type="grid" />;
+
+    if (error)
+        return <ErrorAlert title="Error al cargar cartas" message={error} />;
+
     if (!carta || carta.data.length === 0)
         return <EmptyState message="No se encontraron cartas en esta tienda." />;
+
+
+
     return (
-        <div className="max-w-4xl mx-auto py-12 px-4">
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-                {/* Sección de la Imagen */}
-                <div className="w-full md:w-1/2">
-                    {carta?.data?.imagenes?.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-2">
-                            {carta.data.imagenes.map((img) => (
-                            <img
-                                key={img.idImagen}
-                                src={`${BASE_URL}/${img.imagen}`}
-                                alt={carta.data.nombre}
-                                className="w-full h-full object-contain rounded-lg bg-white"
-                            />
-                        ))}
-    </div>
+
+        <div className="max-w-5xl mx-auto py-12 px-4">
+
+
+            {/* CONTENEDOR PRINCIPAL CON GLOW */}
+            <div
+
+                className="relative rounded-2xl overflow-hidden transition-all duration-500 hover:scale-[1.01]"
+
+                style={{
+
+                    background:
+                        `
+                        radial-gradient(circle at 20% 30%, ${glowColor}22, transparent 60%),
+                        radial-gradient(circle at 80% 70%, ${glowColor}22, transparent 60%),
+                        linear-gradient(145deg, #020617, #020617)
+                        `,
+
+                    boxShadow:
+                        `
+                        0 0 25px ${glowColor}44,
+                        inset 0 0 40px ${glowColor}22
+                        `
+
+                }}
+
+            >
+
+
+                <div className="flex flex-col md:flex-row gap-8 items-start p-6">
+
+
+                    {/* IMAGENES */}
+                    <div className="w-full md:w-1/2">
+
+                        {carta?.data?.imagenes?.length > 0 ? (
+
+                            <div className="grid grid-cols-2 gap-3">
+
+                                {carta.data.imagenes.map((img) => (
+
+                                    <img
+                                        key={img.idImagen}
+                                        src={`${BASE_URL}/${img.imagen}`}
+                                        alt={carta.data.nombre}
+
+                                        className="
+                                        w-full
+                                        h-full
+                                        object-contain
+                                        rounded-lg
+
+                                        bg-slate-900
+
+                                        transition-all duration-300
+
+                                        hover:scale-105
+
+                                        hover:shadow-[0_0_25px_rgba(255,255,255,0.25)]
+                                        "
+                                    />
+
+                                ))}
+
+                            </div>
+
                         ) : (
-    <div className="w-full aspect-square bg-muted flex items-center justify-center rounded-lg">
-      <Film className="w-12 h-12 text-muted-foreground" />
-    </div>
+
+                            <div className="w-full aspect-square bg-slate-900 flex items-center justify-center rounded-lg">
+
+                                <Film className="w-12 h-12 text-gray-400" />
+
+                            </div>
+
                         )}
-</div>
-                {/* Sección de los Detalles */}
-                <div className="flex-1 space-y-6">
-                    {/* Título de la carta */}
-                    <div>
-                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                            {carta.data.carta}
-                        </h1>
+
                     </div>
 
-                    <Card>
-                        <CardContent className="p-6 space-y-6">
-                            {/* Información */}
-                            <div className="flex flex-wrap items-center gap-x-10 gap-y-4">
-                                {/* descripcion */}
-                                <div className="flex items-center gap-4">
-                                    <User className="h-5 w-5 text-primary" />
-                                    <span className="font-semibold">Descripcion:</span>
-                                    <p className="text-muted-foreground">
-                                        {carta.data.descripcion}
-                                    </p>
-                                </div>
-                                {/* Condicion */}
-                                <div className="flex items-center gap-4">
-                                    <Globe className="h-5 w-5 text-primary" />
-                                    <span className="font-semibold">Condición:</span>
-                                    <p className="text-muted-foreground">
-                                    {carta.data.condicion.descripcion}
-                                    </p>
-                                </div>
-                                {/* Disponibilidad */}
-                                <div className="flex items-center gap-4">
-                                    <Globe className="h-5 w-5 text-primary" />
-                                    <span className="font-semibold">Disponibilidad:</span>
-                                    <p className="text-muted-foreground">
-                                    {carta.data.estadoCarta.descripcion}
-                                    </p>
-                                </div>
-                                {/* Registro */}
-                                <div className="flex items-center gap-4">
-                                    <Globe className="h-5 w-5 text-primary" />
-                                    <span className="font-semibold">Registrado el:</span>
-                                    <p className="text-muted-foreground">
-                                    {carta.data.fechaRegistro}
-                                    </p>
-                                </div>
-                                {/* Propietario */}
-                                <div className="flex items-center gap-4">
-                                    <Globe className="h-5 w-5 text-primary" />
-                                    <span className="font-semibold">Propietario:</span>
-                                    <p className="text-muted-foreground">
-                                    {carta.data.propietario.nombre}
-                                    </p>
-                                </div>
-                            </div>
 
-                            {/* Contenedor de dos columnas para géneros y actores */}
-                            <div className="grid gap-4 md:grid-cols-2">
-                            {carta.data.categorias && carta.data.categorias.length > 0 && ( 
-                                    <div>
-                                        <div className="flex items-center gap-4 mb-2">
-                                            <Film className="h-5 w-5 text-primary" />
-                                            <span className="font-semibold">Categorias:</span>
-                                        </div>
-                                        <div className="flex flex-col space-y-1">
-                                            
-                                                {carta.data.categorias.map((categoria)=>(
-                                                <div key={categoria.idCategoria}  className="flex items-center gap-2 py-1 px-2 text-sm">
-                                                    <ChevronRight className="h-4 w-4 text-secondary" />
-                                                    <span className="text-muted-foreground">
-                                                        {categoria.descripcion}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
+
+                    {/* DETALLES */}
+                    <div className="flex-1 space-y-6 text-white">
+
+
+                        {/* TITULO */}
+                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+
+                            {carta.data.carta}
+
+                        </h1>
+
+
+
+                        {/* CARD INFO */}
+                        <Card
+
+                            className="
+
+                            bg-slate-950/60
+                            backdrop-blur-xl
+
+                            border border-slate-800
+
+                            shadow-inner
+
+                            "
+
+                        >
+
+                            <CardContent className="p-6 space-y-4">
+
+
+                                {/* DESCRIPCION */}
+                                <InfoRow
+                                    icon={<User />}
+                                    label="Descripcion"
+                                    value={carta.data.descripcion}
+                                />
+
+
+                                {/* CONDICION */}
+                                <InfoRow
+                                    icon={<Globe />}
+                                    label="Condición"
+                                    value={carta.data.condicion.descripcion}
+                                />
+
+
+                                {/* DISPONIBILIDAD */}
+                                <InfoRow
+                                    icon={<Globe />}
+                                    label="Disponibilidad"
+                                    value={carta.data.estadoCarta.descripcion}
+                                />
+
+
+                                {/* REGISTRO */}
+                                <InfoRow
+                                    icon={<Globe />}
+                                    label="Registrado el"
+                                    value={carta.data.fechaRegistro}
+                                />
+
+
+                                {/* PROPIETARIO */}
+                                <InfoRow
+                                    icon={<Globe />}
+                                    label="Propietario"
+                                    value={carta.data.propietario.nombre}
+                                />
+
+
+                                {/* CATEGORIAS */}
+                                <div>
+
+                                    <div className="flex items-center gap-3 mb-2">
+
+                                        <Film className="w-5 h-5 text-red-400" />
+
+                                        <span className="font-semibold">
+
+                                            Categorias:
+
+                                        </span>
+
                                     </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
+
+
+                                    {carta.data.categorias.map((categoria) => (
+
+                                        <div
+                                            key={categoria.idCategoria}
+                                            className="flex items-center gap-2 ml-4"
+                                        >
+
+                                            <ChevronRight
+                                                className="w-4 h-4"
+                                                style={{ color: glowColor }}
+                                            />
+
+                                            <span className="text-gray-300">
+
+                                                {categoria.descripcion}
+
+                                            </span>
+
+                                        </div>
+
+                                    ))}
+
+                                </div>
+
+
+                            </CardContent>
+
+                        </Card>
+
+
+                    </div>
+
                 </div>
+
             </div>
+
+
+
+            {/* BOTON REGRESAR */}
             <Button
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className="flex items-center gap-2 bg-accent text-white hover:bg-accent/90 mt-6" 
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Regresar
-                    </Button>
+
+                onClick={() => navigate(-1)}
+
+                className="
+
+                mt-6
+
+                bg-blue-700
+
+                hover:bg-blue-800
+
+                shadow-lg
+
+                hover:shadow-[0_0_20px_rgba(0,140,255,0.7)]
+
+                transition-all duration-300
+
+                "
+
+            >
+
+                <ArrowLeft className="w-4 h-4 mr-2" />
+
+                Regresar
+
+            </Button>
+
+
         </div>
+
     );
+
+}
+
+
+/*
+========================================
+COMPONENTE FILA INFO
+========================================
+*/
+
+function InfoRow({ icon, label, value }) {
+
+    return (
+
+        <div className="flex items-center gap-4">
+
+            <div className="text-red-400">
+
+                {icon}
+
+            </div>
+
+            <span className="font-semibold">
+
+                {label}:
+
+            </span>
+
+            <span className="text-gray-300">
+
+                {value}
+
+            </span>
+
+        </div>
+
+    );
+
 }
