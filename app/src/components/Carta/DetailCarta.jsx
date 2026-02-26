@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import CartaService from '../../services/CartaService';
 import { ErrorAlert } from "../ui/custom/ErrorAlert";
@@ -62,35 +62,27 @@ export function DetailCarta() {
 
     /*
     ========================================
-    COLOR DINAMICO SEGUN CATEGORIA
+    COLOR DINAMICO SIN useMemo
     ========================================
     */
 
-    const glowColor = useMemo(() => {
+    let glowColor = "rgba(59,130,246,0.6)";
 
-        if (!carta?.data?.categorias?.length)
-            return "rgba(59,130,246,0.6)";
+    if (carta?.data?.categorias?.length) {
 
         const categoria = carta.data.categorias[0].descripcion.toLowerCase();
 
         if (categoria.includes("electrico"))
-            return "rgba(255, 221, 0, 0.9)";
-
-        if (categoria.includes("fuego"))
-            return "rgba(255, 60, 60, 0.9)";
-
-        if (categoria.includes("agua"))
-            return "rgba(0, 140, 255, 0.9)";
-
-        if (categoria.includes("planta"))
-            return "rgba(0, 255, 140, 0.9)";
-
-        if (categoria.includes("psiquico"))
-            return "rgba(255, 0, 255, 0.9)";
-
-        return "rgba(59,130,246,0.6)";
-
-    }, [carta]);
+            glowColor = "rgba(255, 221, 0, 0.9)";
+        else if (categoria.includes("fuego"))
+            glowColor = "rgba(255, 60, 60, 0.9)";
+        else if (categoria.includes("agua"))
+            glowColor = "rgba(0, 140, 255, 0.9)";
+        else if (categoria.includes("planta"))
+            glowColor = "rgba(0, 255, 140, 0.9)";
+        else if (categoria.includes("psiquico"))
+            glowColor = "rgba(255, 0, 255, 0.9)";
+    }
 
 
     /*
@@ -109,39 +101,26 @@ export function DetailCarta() {
         return <EmptyState message="No se encontraron cartas en esta tienda." />;
 
 
-
     return (
 
         <div className="max-w-5xl mx-auto py-12 px-4">
 
-
-            {/* CONTENEDOR PRINCIPAL CON GLOW */}
             <div
-
                 className="relative rounded-2xl overflow-hidden transition-all duration-500 hover:scale-[1.01]"
-
                 style={{
-
-                    background:
-                        `
+                    background: `
                         radial-gradient(circle at 20% 30%, ${glowColor}22, transparent 60%),
                         radial-gradient(circle at 80% 70%, ${glowColor}22, transparent 60%),
                         linear-gradient(145deg, #020617, #020617)
-                        `,
-
-                    boxShadow:
-                        `
+                    `,
+                    boxShadow: `
                         0 0 25px ${glowColor}44,
                         inset 0 0 40px ${glowColor}22
-                        `
-
+                    `
                 }}
-
             >
 
-
                 <div className="flex flex-col md:flex-row gap-8 items-start p-6">
-
 
                     {/* IMAGENES */}
                     <div className="w-full md:w-1/2">
@@ -156,21 +135,7 @@ export function DetailCarta() {
                                         key={img.idImagen}
                                         src={`${BASE_URL}/${img.imagen}`}
                                         alt={carta.data.nombre}
-
-                                        className="
-                                        w-full
-                                        h-full
-                                        object-contain
-                                        rounded-lg
-
-                                        bg-slate-900
-
-                                        transition-all duration-300
-
-                                        hover:scale-105
-
-                                        hover:shadow-[0_0_25px_rgba(255,255,255,0.25)]
-                                        "
+                                        className="w-full h-full object-contain rounded-lg bg-slate-900 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_25px_rgba(255,255,255,0.25)]"
                                     />
 
                                 ))}
@@ -180,9 +145,7 @@ export function DetailCarta() {
                         ) : (
 
                             <div className="w-full aspect-square bg-slate-900 flex items-center justify-center rounded-lg">
-
                                 <Film className="w-12 h-12 text-gray-400" />
-
                             </div>
 
                         )}
@@ -190,202 +153,87 @@ export function DetailCarta() {
                     </div>
 
 
-
                     {/* DETALLES */}
                     <div className="flex-1 space-y-6 text-white">
 
-
-                        {/* TITULO */}
                         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-
                             {carta.data.carta}
-
                         </h1>
 
-
-
-                        {/* CARD INFO */}
-                        <Card
-
-                            className="
-
-                            bg-slate-950/60
-                            backdrop-blur-xl
-
-                            border border-slate-800
-
-                            shadow-inner
-
-                            "
-
-                        >
-
+                        <Card className="bg-slate-950/60 backdrop-blur-xl border border-slate-800 shadow-inner">
                             <CardContent className="p-6 space-y-4">
 
-
                                 {/* DESCRIPCION */}
-                                <InfoRow
-                                    icon={<User />}
-                                    label="Descripcion"
-                                    value={carta.data.descripcion}
-                                />
-
+                                <div className="flex items-center gap-4">
+                                    <User className="text-red-400 w-5 h-5" />
+                                    <span className="font-semibold">Descripcion:</span>
+                                    <span className="text-gray-300">{carta.data.descripcion}</span>
+                                </div>
 
                                 {/* CONDICION */}
-                                <InfoRow
-                                    icon={<Globe />}
-                                    label="Condición"
-                                    value={carta.data.condicion.descripcion}
-                                />
-
+                                <div className="flex items-center gap-4">
+                                    <Globe className="text-red-400 w-5 h-5" />
+                                    <span className="font-semibold">Condición:</span>
+                                    <span className="text-gray-300">{carta.data.condicion.descripcion}</span>
+                                </div>
 
                                 {/* DISPONIBILIDAD */}
-                                <InfoRow
-                                    icon={<Globe />}
-                                    label="Disponibilidad"
-                                    value={carta.data.estadoCarta.descripcion}
-                                />
-
+                                <div className="flex items-center gap-4">
+                                    <Globe className="text-red-400 w-5 h-5" />
+                                    <span className="font-semibold">Disponibilidad:</span>
+                                    <span className="text-gray-300">{carta.data.estadoCarta.descripcion}</span>
+                                </div>
 
                                 {/* REGISTRO */}
-                                <InfoRow
-                                    icon={<Globe />}
-                                    label="Registrado el"
-                                    value={carta.data.fechaRegistro}
-                                />
-
+                                <div className="flex items-center gap-4">
+                                    <Globe className="text-red-400 w-5 h-5" />
+                                    <span className="font-semibold">Registrado el:</span>
+                                    <span className="text-gray-300">{carta.data.fechaRegistro}</span>
+                                </div>
 
                                 {/* PROPIETARIO */}
-                                <InfoRow
-                                    icon={<Globe />}
-                                    label="Propietario"
-                                    value={carta.data.propietario.nombre}
-                                />
-
+                                <div className="flex items-center gap-4">
+                                    <Globe className="text-red-400 w-5 h-5" />
+                                    <span className="font-semibold">Propietario:</span>
+                                    <span className="text-gray-300">{carta.data.propietario.nombre}</span>
+                                </div>
 
                                 {/* CATEGORIAS */}
                                 <div>
-
                                     <div className="flex items-center gap-3 mb-2">
-
                                         <Film className="w-5 h-5 text-red-400" />
-
-                                        <span className="font-semibold">
-
-                                            Categorias:
-
-                                        </span>
-
+                                        <span className="font-semibold">Categorias:</span>
                                     </div>
 
-
                                     {carta.data.categorias.map((categoria) => (
-
-                                        <div
-                                            key={categoria.idCategoria}
-                                            className="flex items-center gap-2 ml-4"
-                                        >
-
+                                        <div key={categoria.idCategoria} className="flex items-center gap-2 ml-4">
                                             <ChevronRight
                                                 className="w-4 h-4"
                                                 style={{ color: glowColor }}
                                             />
-
                                             <span className="text-gray-300">
-
                                                 {categoria.descripcion}
-
                                             </span>
-
                                         </div>
-
                                     ))}
-
                                 </div>
 
-
                             </CardContent>
-
                         </Card>
-
 
                     </div>
 
                 </div>
-
             </div>
 
-
-
-            {/* BOTON REGRESAR */}
             <Button
-
                 onClick={() => navigate(-1)}
-
-                className="
-
-                mt-6
-
-                bg-blue-700
-
-                hover:bg-blue-800
-
-                shadow-lg
-
-                hover:shadow-[0_0_20px_rgba(0,140,255,0.7)]
-
-                transition-all duration-300
-
-                "
-
+                className="mt-6 bg-blue-700 hover:bg-blue-800 shadow-lg hover:shadow-[0_0_20px_rgba(0,140,255,0.7)] transition-all duration-300"
             >
-
                 <ArrowLeft className="w-4 h-4 mr-2" />
-
                 Regresar
-
             </Button>
 
-
         </div>
-
     );
-
-}
-
-
-/*
-========================================
-COMPONENTE FILA INFO
-========================================
-*/
-
-function InfoRow({ icon, label, value }) {
-
-    return (
-
-        <div className="flex items-center gap-4">
-
-            <div className="text-red-400">
-
-                {icon}
-
-            </div>
-
-            <span className="font-semibold">
-
-                {label}:
-
-            </span>
-
-            <span className="text-gray-300">
-
-                {value}
-
-            </span>
-
-        </div>
-
-    );
-
 }
