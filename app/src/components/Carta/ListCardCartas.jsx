@@ -59,7 +59,6 @@ export function ListCardCartas({ data }) {
               <Globe className="h-4 w-4 text-secondary" />
               {item.estadoCarta.descripcion}
             </p>
-
           </CardContent>
 
           {/* Acciones */}
