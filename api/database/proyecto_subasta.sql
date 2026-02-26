@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-02-2026 a las 15:47:15
+-- Tiempo de generación: 25-02-2026 a las 16:52:15
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -30,7 +30,7 @@ USE `proyecto_subasta`;
 --
 
 CREATE TABLE `carta` (
-  `idcarta` int(11) NOT NULL,
+  `idCarta` int(11) NOT NULL,
   `nombre` varchar(45) NOT NULL,
   `descripcion` varchar(45) NOT NULL,
   `idUsuario` int(11) NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE `carta` (
 -- Volcado de datos para la tabla `carta`
 --
 
-INSERT INTO `carta` (`idcarta`, `nombre`, `descripcion`, `idUsuario`, `idEstadoCarta`, `idCondicion`, `fechaRegistro`) VALUES
+INSERT INTO `carta` (`idCarta`, `nombre`, `descripcion`, `idUsuario`, `idEstadoCarta`, `idCondicion`, `fechaRegistro`) VALUES
 (1, 'Pikachu', 'carta pokemon tcg', 1, 1, 1, '2026-02-11 08:55:00');
 
 -- --------------------------------------------------------
@@ -72,7 +72,7 @@ INSERT INTO `carta_categoria` (`idCarta`, `idCategoria`) VALUES
 --
 
 CREATE TABLE `categoria` (
-  `idcategoria` int(11) NOT NULL,
+  `idCategoria` int(11) NOT NULL,
   `descripcion` varchar(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -80,7 +80,7 @@ CREATE TABLE `categoria` (
 -- Volcado de datos para la tabla `categoria`
 --
 
-INSERT INTO `categoria` (`idcategoria`, `descripcion`) VALUES
+INSERT INTO `categoria` (`idCategoria`, `descripcion`) VALUES
 (1, 'Pokemon'),
 (2, 'Objeto'),
 (3, 'Entrenador'),
@@ -153,7 +153,8 @@ CREATE TABLE `estado_subasta` (
 --
 
 INSERT INTO `estado_subasta` (`idEstadoSubasta`, `descripcion`) VALUES
-(1, 'Activa');
+(1, 'Activa'),
+(2, 'Finalizada');
 
 -- --------------------------------------------------------
 
@@ -207,7 +208,8 @@ CREATE TABLE `imagen_carta` (
 --
 
 INSERT INTO `imagen_carta` (`id`, `idCarta`, `imagen`) VALUES
-(1, 1, 'pikachu-g025.png');
+(1, 1, 'pikachu-g025.png'),
+(2, 1, 'tcg-card-back.jpg');
 
 -- --------------------------------------------------------
 
@@ -228,7 +230,8 @@ CREATE TABLE `puja` (
 --
 
 INSERT INTO `puja` (`idPuja`, `montoOfertado`, `fechaPuja`, `idUsuario`, `idSubasta`) VALUES
-(1, 1, '2026-02-11 08:55:00', 2, 1);
+(1, 1, '2026-02-11 08:55:00', 2, 1),
+(2, 1000, '2026-02-11 08:55:00', 2, 1);
 
 -- --------------------------------------------------------
 
@@ -272,7 +275,8 @@ CREATE TABLE `subasta` (
 --
 
 INSERT INTO `subasta` (`idSubasta`, `fechaInicio`, `fechaCierre`, `precio`, `incrementoMin`, `idEstadoSubasta`, `idUsuario`, `idCarta`) VALUES
-(1, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 2, 2, 1, 1, 1);
+(1, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 2, 2, 1, 1, 1),
+(2, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 5, 10, 2, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -297,7 +301,7 @@ CREATE TABLE `usuario` (
 
 INSERT INTO `usuario` (`idUsuario`, `cedula`, `nombre`, `email`, `password`, `idRol`, `idEstadoUsuario`, `fechaRegistro`) VALUES
 (1, '119330734', 'Dilan Sanchez Acuña', 'endrascorplay@gmail.com', '123456', 1, 1, '2026-02-11 08:55:00'),
-(2, '1111111', 'jose ', 'ee', '11', 1, 1, '2026-02-11 08:55:00');
+(2, '1111111', 'jose ', 'ee', '11', 2, 1, '2026-02-11 08:55:00');
 
 --
 -- Índices para tablas volcadas
@@ -307,7 +311,7 @@ INSERT INTO `usuario` (`idUsuario`, `cedula`, `nombre`, `email`, `password`, `id
 -- Indices de la tabla `carta`
 --
 ALTER TABLE `carta`
-  ADD PRIMARY KEY (`idcarta`),
+  ADD PRIMARY KEY (`idCarta`),
   ADD KEY `fk_carta_usuario_idx` (`idUsuario`),
   ADD KEY `fk_carta_estado_idx` (`idEstadoCarta`),
   ADD KEY `fk_carta_condicion_idx` (`idCondicion`);
@@ -323,7 +327,7 @@ ALTER TABLE `carta_categoria`
 -- Indices de la tabla `categoria`
 --
 ALTER TABLE `categoria`
-  ADD PRIMARY KEY (`idcategoria`);
+  ADD PRIMARY KEY (`idCategoria`);
 
 --
 -- Indices de la tabla `condicion`
@@ -412,13 +416,13 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `carta`
 --
 ALTER TABLE `carta`
-  MODIFY `idcarta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `idCarta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `categoria`
 --
 ALTER TABLE `categoria`
-  MODIFY `idcategoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `idCategoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `condicion`
@@ -442,7 +446,7 @@ ALTER TABLE `estado_facturacion`
 -- AUTO_INCREMENT de la tabla `estado_subasta`
 --
 ALTER TABLE `estado_subasta`
-  MODIFY `idEstadoSubasta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `idEstadoSubasta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `estado_usuario`
@@ -460,13 +464,13 @@ ALTER TABLE `facturacion`
 -- AUTO_INCREMENT de la tabla `imagen_carta`
 --
 ALTER TABLE `imagen_carta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `puja`
 --
 ALTER TABLE `puja`
-  MODIFY `idPuja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `idPuja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
@@ -478,7 +482,7 @@ ALTER TABLE `rol`
 -- AUTO_INCREMENT de la tabla `subasta`
 --
 ALTER TABLE `subasta`
-  MODIFY `idSubasta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `idSubasta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
