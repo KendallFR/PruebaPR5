@@ -163,39 +163,24 @@ export function ListCardCartas({ data }) {
 
 
             {/* IMAGEN */}
-            <div className="
-              relative z-10
-              w-full
-              h-64
-              flex
-              items-center
-              justify-center
-              overflow-hidden
-              bg-black/30
-            ">
-
-              {item.imagenes && item.imagenes.length > 0 ? (
-
-                <img
-                  src={`${BASE_URL}/${item.imagenes[0].imagen}`}
-                  alt={item.nombre}
-                  className="
-                    max-h-full
-                    max-w-full
-                    object-contain
-                    transition-transform
-                    duration-500
-                    group-hover:scale-105
-                  "
-                />
-
-              ) : (
-
-                <FilmIcon className="h-16 w-16 text-white/40" />
-
-              )}
-
-            </div>
+<div className="relative w-full aspect-video">
+  {item.imagenes && item.imagenes.length > 0 ? (
+    <div className="grid h-full w-full grid-cols-2 gap-1 auto-rows-fr">
+      {item.imagenes.map((img, index) => (
+        <img
+          key={index}
+          src={`${BASE_URL}/${img.imagen}`}
+          alt={`${item.nombre}-${index}`}
+          className="w-full h-full object-cover"
+        />
+      ))}
+    </div>
+  ) : (
+    <div className="h-full w-full bg-muted flex items-center justify-center text-muted-foreground">
+      <FilmIcon className="h-1/2 w-1/2" />
+    </div>
+  )}
+</div>
 
 
             {/* CONTENT */}
