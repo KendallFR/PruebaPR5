@@ -15,6 +15,7 @@ import { DetailCarta } from './components/Carta/DetailCarta'
 import { ListSubastasActivas } from './components/Subasta/ListSubastaActivas'
 import { ListSubastasFinalizadas } from './components/Subasta/ListSubastasFinalizadas'
 import { DetailSubasta } from './components/Subasta/DetailSubasta'
+import TablePujas from './components/Puja/TablePujas'
 
 
 
@@ -39,6 +40,7 @@ const rutas = createBrowserRouter([
       {path:"subasta/SubastasActivas", element: <ListSubastasActivas/>},
       {path:"subasta/SubastasFinalizadas", element: <ListSubastasFinalizadas/>},
       {path:"subasta/detail/:id", element: <DetailSubasta/>},
+      {path:"puja/table/:id", element: <TablePujas/>},
     ]
   }
 ])

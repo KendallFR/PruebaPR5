@@ -123,7 +123,7 @@ export function DetailSubasta() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link to={`/puja/${data.idSubasta}`}>
+                  <Link to={`/puja/table/${data.idSubasta}`}>
                     <Button
                       size="icon"
                       className="h-10 w-10 rounded-full bg-yellow-400 hover:bg-yellow-300 text-black shadow-lg hover:scale-110 transition"

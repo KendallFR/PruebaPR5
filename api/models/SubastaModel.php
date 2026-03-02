@@ -95,10 +95,6 @@ public function allSubastasFinalizadas()
                 $vResultado->estadoSubasta = $estadoSubastaM->get($vResultado->idEstadoSubasta);
             //Usuario
                 $vResultado->creador = $usuarioM->get($vResultado->idUsuario);    
-            //enlace
-                $vResultado->enlace = "<a href='localhost:81/proyectoSubasta/api/puja/getPujasbySubasta/" 
-                . $vResultado->idSubasta . 
-                "'>Historial de Pujas</a>";
             }
             return $vResultado;
         } catch (Exception $e) {

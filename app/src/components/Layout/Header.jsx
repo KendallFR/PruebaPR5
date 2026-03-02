@@ -67,7 +67,7 @@ const mantItems = [
     },
     {
       title: "Pujas",
-      href: "/rental/graph",
+      href: "/puja/table/1",
       icon: <ChartArea className="h-4 w-4" />,
     }
 ];
