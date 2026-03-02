@@ -72,6 +72,13 @@ const getTypeStyles = (categorias) => {
         gradient: "from-green-500/30 via-green-400/10 to-transparent",
       };
 
+      case "objeto":
+      return {
+        glow: "hover:shadow-white-500/80 hover:border-white-500/80",
+        ring: "group-hover:ring-white-500/70",
+        badge: "bg-white text-black",
+        gradient: "from-white-500/30 via-white-400/10 to-transparent",
+      };
     default:
       return {
         glow: "hover:shadow-yellow-400/80",
