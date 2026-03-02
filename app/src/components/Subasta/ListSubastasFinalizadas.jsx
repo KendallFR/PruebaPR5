@@ -2,17 +2,17 @@ import { useEffect, useState } from "react";
 import { LoadingGrid } from "../ui/custom/LoadingGrid";
 import { EmptyState } from "../ui/custom/EmptyState";
 import { ErrorAlert } from "../ui/custom/ErrorAlert";
-import { ListCardSubastasActivas } from "./ListCardSubastasActivas";
+import { ListCardSubastasFinalizadas } from "./ListCardSubastasFinalizadas";
 import SubastaService from "@/services/SubastaService";
 
-export function ListSubastasActivas() {
+export function ListSubastasFinalizadas() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         const fetchData = async() => {
             try {
-                const response = await SubastaService.allSubastasActivas();
+                const response = await SubastaService.allSubastasFinalizadas();
                 // Si la petición es exitosa, se guardan los datos
                 console.log(response.data)
                 setData(response.data);
@@ -32,14 +32,14 @@ export function ListSubastasActivas() {
 
 
     if (loading) return <LoadingGrid type="grid" />;
-    if (error) return <ErrorAlert title="Error al cargar subastas activas" message={error} />;
+    if (error) return <ErrorAlert title="Error al cargar subastas finalizadas" message={error} />;
     if (!data || data.data.length === 0)
-        return <EmptyState message="No se encontraron subastas activas." />;
+        return <EmptyState message="No se encontraron subastas finalizadas." />;
 
     return (
         <div className="mx-auto max-w-7xl p-6">
         {data && (
-            <ListCardSubastasActivas data={data.data}/>
+            <ListCardSubastasFinalizadas data={data.data}/>
         )}
         </div>
     );

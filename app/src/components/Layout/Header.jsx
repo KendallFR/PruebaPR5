@@ -46,8 +46,13 @@ const navItems = [
 
 const mantItems = [
  {
-      title: "Subastas",
-      href: "/movie/table",
+      title: "Subastas Activas",
+      href: "/subasta/SubastasActivas",
+      icon: <Wrench className="h-4 w-4" />,
+    },
+    {
+      title: "Subastas Finalizadas",
+      href: "/subasta/SubastasFinalizadas",
       icon: <Wrench className="h-4 w-4" />,
     },
     {
