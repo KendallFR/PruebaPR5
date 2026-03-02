@@ -36,7 +36,7 @@ export default function Header() {
   const userEmail = "Invitado";
 
 const navItems = [
-  { title: "Subastas", href: "/carta", icon: <Film className="h-4 w-4" /> },
+  { title: "Subastas", href: "/subasta/SubastasActivas", icon: <Film className="h-4 w-4" /> },
   {
     title: "Filtrar por carta",
     href: "/movie/filter",

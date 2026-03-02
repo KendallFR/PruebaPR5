@@ -12,6 +12,7 @@ import TableUsuarios from './components/Usuario/TableUsuarios'
 import { DetailUsuario } from './components/Usuario/DetailUsuario'
 import { ListCartas } from './components/Carta/ListCartas'
 import { DetailCarta } from './components/Carta/DetailCarta'
+import { ListSubastasActivas } from './components/Subasta/ListSubastaActivas'
 
 
 
@@ -33,6 +34,7 @@ const rutas = createBrowserRouter([
       {path:"usuario/detail/:id", element: <DetailUsuario/>},
       {path:"carta", element: <ListCartas/>},
       {path:"carta/detail/:id", element: <DetailCarta/>},
+      {path:"subasta/SubastasActivas", element: <ListSubastasActivas/>},
     ]
   }
 ])

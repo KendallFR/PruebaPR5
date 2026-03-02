@@ -12,6 +12,7 @@ class SubastaModel
         try{
             $cartaM = new CartaModel();
             $estadoSubastaM = new EstadoSubastaModel();
+            $usuarioM = new UsuarioModel();
 		    $vSql = "SELECT
                     u.idSubasta,
                     u.fechaInicio,
@@ -33,6 +34,8 @@ class SubastaModel
                     $vResultado[$i]->carta = $cartaM->get($vResultado[$i]->idCarta);
                     //Estado
                     $vResultado[$i]->estadoSubasta = $estadoSubastaM->get($vResultado[$i]->idEstadoSubasta);
+                    //Usuario
+                    $vResultado[$i]->creador = $usuarioM->get($vResultado[$i]->idUsuario);
                 }
 		    }
 		    return $vResultado;
@@ -45,6 +48,7 @@ public function allSubastasFinalizadas()
         try{
             $cartaM = new CartaModel();
             $estadoSubastaM = new EstadoSubastaModel();
+            $usuarioM = new UsuarioModel();
 		    $vSql = "SELECT * FROM subasta  where idEstadoSubasta = 2 or idEstadoSubasta = 3 order by idSubasta desc;";
 		    $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado) && is_array($vResultado)) {
@@ -53,6 +57,8 @@ public function allSubastasFinalizadas()
                     $vResultado[$i]->carta = $cartaM->get($vResultado[$i]->idCarta);
                     //Estado
                     $vResultado[$i]->estadoSubasta = $estadoSubastaM->get($vResultado[$i]->idEstadoSubasta);
+                    //Usuario
+                    $vResultado[$i]->creador = $usuarioM->get($vResultado[$i]->idUsuario);
                 }
 		    }
 		    return $vResultado;
@@ -65,6 +71,7 @@ public function allSubastasFinalizadas()
         try{
             $cartaM = new CartaModel();
             $estadoSubastaM = new EstadoSubastaModel();
+            $usuarioM = new UsuarioModel();
             $vSql = "SELECT
                     u.idSubasta,
                     u.fechaInicio,
@@ -86,6 +93,8 @@ public function allSubastasFinalizadas()
                 $vResultado->carta = $cartaM->get($vResultado->idCarta);
             //Estado
                 $vResultado->estadoSubasta = $estadoSubastaM->get($vResultado->idEstadoSubasta);
+            //Usuario
+                $vResultado->creador = $usuarioM->get($vResultado->idUsuario);    
             //enlace
                 $vResultado->enlace = "<a href='localhost:81/proyectoSubasta/api/puja/getPujasbySubasta/" 
                 . $vResultado->idSubasta . 
