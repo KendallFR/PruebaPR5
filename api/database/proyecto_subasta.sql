@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-02-2026 a las 16:52:15
+-- Tiempo de generación: 02-03-2026 a las 10:21:57
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -44,7 +44,9 @@ CREATE TABLE `carta` (
 --
 
 INSERT INTO `carta` (`idCarta`, `nombre`, `descripcion`, `idUsuario`, `idEstadoCarta`, `idCondicion`, `fechaRegistro`) VALUES
-(1, 'Pikachu', 'carta pokemon tcg', 1, 1, 1, '2026-02-11 08:55:00');
+(1, 'Pikachu', 'carta pokemon tcg', 1, 1, 1, '2026-02-11 08:55:00'),
+(2, 'Pocion', 'carta pokemon tcg', 1, 2, 2, '2026-02-11 08:55:00'),
+(3, 'Poliwhirl', 'Carta pokemon tcg', 1, 3, 3, '2026-02-11 08:55:00');
 
 -- --------------------------------------------------------
 
@@ -63,7 +65,10 @@ CREATE TABLE `carta_categoria` (
 
 INSERT INTO `carta_categoria` (`idCarta`, `idCategoria`) VALUES
 (1, 1),
-(1, 4);
+(1, 4),
+(2, 2),
+(3, 1),
+(3, 6);
 
 -- --------------------------------------------------------
 
@@ -105,7 +110,8 @@ CREATE TABLE `condicion` (
 
 INSERT INTO `condicion` (`idCondicion`, `descripcion`) VALUES
 (1, 'Nuevo'),
-(2, 'Usado');
+(2, 'Usado'),
+(3, 'Gradeada');
 
 -- --------------------------------------------------------
 
@@ -123,8 +129,9 @@ CREATE TABLE `estado_carta` (
 --
 
 INSERT INTO `estado_carta` (`idEstadoCarta`, `descripcion`) VALUES
-(1, 'Activo'),
-(2, 'Inactivo');
+(1, 'Disponible'),
+(2, 'No Disponible'),
+(3, 'Agotada');
 
 -- --------------------------------------------------------
 
@@ -154,7 +161,8 @@ CREATE TABLE `estado_subasta` (
 
 INSERT INTO `estado_subasta` (`idEstadoSubasta`, `descripcion`) VALUES
 (1, 'Activa'),
-(2, 'Finalizada');
+(2, 'Finalizada'),
+(3, 'Cancelada');
 
 -- --------------------------------------------------------
 
@@ -173,7 +181,8 @@ CREATE TABLE `estado_usuario` (
 
 INSERT INTO `estado_usuario` (`idEstadoUsuario`, `descripcion`) VALUES
 (1, 'Activo'),
-(2, 'Bloqueado');
+(2, 'Bloqueado'),
+(3, 'Inactivo');
 
 -- --------------------------------------------------------
 
@@ -209,7 +218,11 @@ CREATE TABLE `imagen_carta` (
 
 INSERT INTO `imagen_carta` (`id`, `idCarta`, `imagen`) VALUES
 (1, 1, 'pikachu-g025.png'),
-(2, 1, 'tcg-card-back.jpg');
+(2, 1, 'tcg-card-back.jpg'),
+(3, 2, 'pocion-g188.png'),
+(4, 2, 'tcg-card-back.jpg'),
+(5, 3, 'poliwhirl-g176.jpg'),
+(6, 3, 'tcg-card-back.jpg');
 
 -- --------------------------------------------------------
 
@@ -231,7 +244,11 @@ CREATE TABLE `puja` (
 
 INSERT INTO `puja` (`idPuja`, `montoOfertado`, `fechaPuja`, `idUsuario`, `idSubasta`) VALUES
 (1, 1, '2026-02-11 08:55:00', 2, 1),
-(2, 1000, '2026-02-11 08:55:00', 2, 1);
+(2, 1000, '2026-02-11 08:55:00', 2, 1),
+(3, 50000, '2026-08-11 08:55:00', 2, 2),
+(4, 200, '2026-03-04 18:00:00', 2, 3),
+(5, 1500, '2026-03-04 18:00:00', 2, 4),
+(6, 4000, '2026-03-04 18:00:00', 2, 4);
 
 -- --------------------------------------------------------
 
@@ -275,8 +292,10 @@ CREATE TABLE `subasta` (
 --
 
 INSERT INTO `subasta` (`idSubasta`, `fechaInicio`, `fechaCierre`, `precio`, `incrementoMin`, `idEstadoSubasta`, `idUsuario`, `idCarta`) VALUES
-(1, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 2, 2, 1, 1, 1),
-(2, '0000-00-00 00:00:00', '0000-00-00 00:00:00', 5, 10, 2, 1, 1);
+(1, '2026-03-01 18:00:00', '2026-03-05 18:00:00', 2, 2, 1, 1, 1),
+(2, '2026-02-10 18:00:00', '2026-02-28 18:00:00', 5, 10, 2, 1, 1),
+(3, '2026-03-02 18:00:00', '2026-03-10 18:00:00', 1000, 100, 2, 1, 2),
+(4, '2026-03-02 18:00:00', '2026-03-10 18:00:00', 20000, 1000, 2, 1, 3);
 
 -- --------------------------------------------------------
 
@@ -301,7 +320,8 @@ CREATE TABLE `usuario` (
 
 INSERT INTO `usuario` (`idUsuario`, `cedula`, `nombre`, `email`, `password`, `idRol`, `idEstadoUsuario`, `fechaRegistro`) VALUES
 (1, '119330734', 'Dilan Sanchez Acuña', 'endrascorplay@gmail.com', '123456', 1, 1, '2026-02-11 08:55:00'),
-(2, '1111111', 'jose ', 'ee', '11', 2, 1, '2026-02-11 08:55:00');
+(2, '1111111', 'jose ', 'ee', '11', 2, 1, '2026-02-11 08:55:00'),
+(3, '5343545', 'Kendall', 'admin554@gmail.com', '123456', 3, 1, '2026-03-02 08:55:00');
 
 --
 -- Índices para tablas volcadas
@@ -416,7 +436,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `carta`
 --
 ALTER TABLE `carta`
-  MODIFY `idCarta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `idCarta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `categoria`
@@ -428,13 +448,13 @@ ALTER TABLE `categoria`
 -- AUTO_INCREMENT de la tabla `condicion`
 --
 ALTER TABLE `condicion`
-  MODIFY `idCondicion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `idCondicion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `estado_carta`
 --
 ALTER TABLE `estado_carta`
-  MODIFY `idEstadoCarta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `idEstadoCarta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `estado_facturacion`
@@ -446,13 +466,13 @@ ALTER TABLE `estado_facturacion`
 -- AUTO_INCREMENT de la tabla `estado_subasta`
 --
 ALTER TABLE `estado_subasta`
-  MODIFY `idEstadoSubasta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `idEstadoSubasta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `estado_usuario`
 --
 ALTER TABLE `estado_usuario`
-  MODIFY `idEstadoUsuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `idEstadoUsuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `facturacion`
@@ -464,13 +484,13 @@ ALTER TABLE `facturacion`
 -- AUTO_INCREMENT de la tabla `imagen_carta`
 --
 ALTER TABLE `imagen_carta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `puja`
 --
 ALTER TABLE `puja`
-  MODIFY `idPuja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `idPuja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
@@ -482,13 +502,13 @@ ALTER TABLE `rol`
 -- AUTO_INCREMENT de la tabla `subasta`
 --
 ALTER TABLE `subasta`
-  MODIFY `idSubasta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `idSubasta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `idUsuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `idUsuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas
