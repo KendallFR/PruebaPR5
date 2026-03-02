@@ -85,7 +85,7 @@ public function allSubastasFinalizadas()
                     (SELECT COUNT(*) FROM puja s WHERE s.idSubasta = u.idSubasta) 
                     AS cantidadPujas
 
-                    FROM subasta u where u.idEstadoSubasta = $id order by idSubasta desc;";
+                    FROM subasta u where u.idSubasta = $id order by idSubasta desc;";
             $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado)) {
                 $vResultado = $vResultado[0];

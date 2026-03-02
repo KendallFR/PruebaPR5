@@ -87,26 +87,29 @@ export function DetailUsuario() {
                                     </p>
                                 </div>
                                 {/* Campo calculado */}
-                                {                          
-  
-  Number(usuario?.data?.cantidadSubastas) > 0 ? (
+                                {
+  Number(usuario.data.cantidadSubastas) > 0 && (
     <div className="flex items-center gap-4">
       <Globe className="h-5 w-5 text-primary" />
       <span className="font-semibold">
         Cantidad de Subastas Creadas:
       </span>
       <p className="text-muted-foreground">
-        {usuario?.data?.cantidadSubastas}
+        {usuario.data.cantidadSubastas}
       </p>
     </div>
-  ) : (
+  )
+}
+
+{
+  Number(usuario.data.cantidadPujas) > 0 && (
     <div className="flex items-center gap-4">
       <Globe className="h-5 w-5 text-primary" />
       <span className="font-semibold">
         Cantidad de Pujas Realizadas:
       </span>
       <p className="text-muted-foreground">
-        {usuario?.data?.cantidadPujas}
+        {usuario.data.cantidadPujas}
       </p>
     </div>
   )
