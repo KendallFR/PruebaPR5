@@ -1,35 +1,18 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
+import PujaService from "@/services/PujaService";
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-import PujaService from "@/services/PujaService";
-import { LoadingGrid } from "../ui/custom/LoadingGrid";
-import { ErrorAlert } from "../ui/custom/ErrorAlert";
-import { EmptyState } from "../ui/custom/EmptyState";
-
-const pujaColumns = [
-  { key: "usuario", label: "Usuario" },
-  { key: "montoOfertado", label: "Monto Ofertado" },
-  { key: "fechaPuja", label: "Fecha Puja" },
-];
+import { ArrowLeft, Crown, Sparkles } from "lucide-react";
 
 export default function TablePujas() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [pujas, setPujas] = useState([]);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,22 +21,14 @@ export default function TablePujas() {
         const response = await PujaService.getPujasbySubasta(id);
         const result = response.data;
 
-        // Si el backend responde correctamente
         if (result.success) {
-          setPujas(result.data);
-        } else {
-          setError(result.message || "Error al obtener las pujas");
+          const sorted = [...result.data].sort(
+            (a, b) => b.montoOfertado - a.montoOfertado
+          );
+          setPujas(sorted);
         }
-
-      } catch (err) {
-
-        // 🔥 Si el backend devuelve 404 (no hay pujas o no existe)
-        if (err.response && err.response.status === 404) {
-          setPujas([]); // Lo tratamos como subasta sin pujas
-        } else {
-          setError("Error al conectar con el servidor");
-        }
-
+      } catch {
+        setPujas([]);
       } finally {
         setLoading(false);
       }
@@ -62,73 +37,129 @@ export default function TablePujas() {
     fetchData();
   }, [id]);
 
-  if (loading) return <LoadingGrid type="grid" />;
-
-  if (error)
+  if (loading)
     return (
-      <ErrorAlert
-        title="Error al cargar pujas"
-        message={error}
-      />
+      <div className="min-h-screen flex items-center justify-center bg-[#020617] text-white">
+        Cargando Arena Pokémon...
+      </div>
     );
 
   return (
-    <div className="container mx-auto py-8">
-      
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Historial de Pujas
-        </h1>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#020617] via-[#020617] to-[#0f172a] p-8">
+
+      {/* PARTICULAS FLOTANTES */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute w-72 h-72 bg-yellow-400/10 rounded-full blur-3xl top-10 left-10 animate-float" />
+        <div className="absolute w-96 h-96 bg-purple-500/10 rounded-full blur-3xl bottom-20 right-10 animate-float" />
       </div>
 
-      {pujas.length === 0 ? (
-        <EmptyState message="Esta subasta aún no tiene pujas registradas." />
-      ) : (
-        <div className="rounded-md border border-white/10">
-          <Table>
-            <TableHeader className="bg-primary/50">
-              <TableRow>
-                {pujaColumns.map((col) => (
-                  <TableHead
-                    key={col.key}
-                    className="text-left font-semibold"
-                  >
-                    {col.label}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
+      <div className="relative max-w-4xl mx-auto space-y-10">
 
-            <TableBody>
-              {pujas.map((puja) => (
-                <TableRow key={puja.idPuja}>
-                  <TableCell className="font-medium">
-                    {puja.usuario.nombre}
-                  </TableCell>
+        {/* HEADER */}
+        <div className="text-center space-y-4 animate-fadeUp">
+          <h1 className="text-4xl font-extrabold text-yellow-400 flex items-center justify-center gap-3">
+            <Sparkles className="w-7 h-7 animate-float" />
+            Arena de Pujas
+          </h1>
 
-                  <TableCell>
-                    ${Number(puja.montoOfertado).toLocaleString()}
-                  </TableCell>
-
-                  <TableCell>
-                    {puja.fechaPuja}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {/* CONTADOR ANIMADO */}
+          <div className="flex justify-center">
+            <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-300 text-black text-lg px-6 py-2 shadow-xl animate-glow">
+              Total de Pujas: {pujas.length}
+            </Badge>
+          </div>
         </div>
-      )}
 
-      <Button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 bg-accent text-white hover:bg-accent/90 mt-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Regresar
-      </Button>
+        {/* LISTA */}
+        {pujas.length === 0 ? (
+          <Card className="bg-white/10 border border-white/10 backdrop-blur-xl rounded-3xl p-10 text-center text-white animate-fadeUp">
+            No hay entrenadores aún ⚡
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {pujas.map((puja, index) => {
+              const isChampion = index === 0;
 
+              return (
+                <Card
+                  key={puja.idPuja}
+                  className={`relative overflow-hidden rounded-3xl p-6 border backdrop-blur-xl transition-all duration-500 animate-fadeUp
+                  ${
+                    isChampion
+                      ? "bg-gradient-to-br from-yellow-400/20 via-yellow-300/10 to-transparent border-yellow-400 animate-glow"
+                      : "bg-white/10 border-white/10 hover:scale-[1.03]"
+                  }`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  {/* Shimmer campeón */}
+                  {isChampion && (
+                    <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+                  )}
+
+                  <div className="flex justify-between items-center relative z-10">
+
+                    {/* IZQUIERDA */}
+                    <div className="flex items-center gap-4">
+
+                      <div
+                        className={`w-14 h-14 flex items-center justify-center rounded-full font-bold text-xl shadow-lg
+                        ${
+                          isChampion
+                            ? "bg-yellow-400 text-black"
+                            : "bg-purple-600 text-white"
+                        }`}
+                      >
+                        {index + 1}
+                      </div>
+
+                      <div>
+                        <h2 className="text-xl font-bold text-white">
+                          {puja.usuario.nombre}
+                        </h2>
+                        <p className="text-sm text-gray-400">
+                          {puja.fechaPuja}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* DERECHA */}
+                    <div className="text-right space-y-2">
+                      <Badge
+                        className={`text-lg px-5 py-2
+                        ${
+                          isChampion
+                            ? "bg-yellow-400 text-black"
+                            : "bg-green-500 text-white"
+                        }`}
+                      >
+                        ${Number(puja.montoOfertado).toLocaleString()}
+                      </Badge>
+
+                      {isChampion && (
+                        <div className="flex items-center justify-end gap-2 text-yellow-400 font-semibold">
+                          <Crown className="w-5 h-5 animate-float" />
+                          Campeón Pokémon
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* BOTON */}
+        <Button
+          onClick={() => navigate(-1)}
+          className="bg-blue-700 hover:bg-blue-800 shadow-lg transition-all duration-300"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Volver a la Subasta
+        </Button>
+
+      </div>
     </div>
   );
 }

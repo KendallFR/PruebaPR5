@@ -23,6 +23,19 @@ export function ListCardSubastasActivas({ data }) {
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
           <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none ring-2 ring-white/20 blur-[2px]" />
 
+          {/* BADGE DE ESTADO */}
+          <div className="absolute top-3 right-3 z-20">
+            <span className={`
+              px-3 py-1 rounded-full text-xs font-semibold border shadow-lg
+              ${item.carta?.estado === 'Disponible' ? 'bg-green-500 text-white border-green-400' : ''}
+              ${item.carta?.estado === 'No Disponible' ? 'bg-red-500 text-white border-red-400' : ''}
+              ${item.carta?.estado === 'Agotada' ? 'bg-orange-500 text-white border-orange-400' : ''}
+              ${!item.carta?.estado || !['Disponible', 'No Disponible', 'Agotada'].includes(item.carta?.estado) ? 'bg-gray-500 text-white border-gray-400' : ''}
+            `}>
+              {item.carta?.estado || 'Disponible'}
+            </span>
+          </div>
+
           {/* HEADER SUBASTA */}
           <CardHeader className="text-center pb-2 relative z-10">
             <CardTitle className="text-xl font-bold text-yellow-400 flex items-center justify-center gap-2">
@@ -34,10 +47,10 @@ export function ListCardSubastasActivas({ data }) {
             </p>
           </CardHeader>
 
-          {/* IMAGEN CARTA */}
-          <div className="relative w-full aspect-video">
+          {/* IMAGEN CARTA  */}
+          <div className="relative w-full aspect-video px-4">
             {item.carta?.imagenes && item.carta.imagenes.length > 0 ? (
-              <div className="grid h-full w-full grid-cols-2 gap-1 auto-rows-fr">
+              <div className="grid h-full w-full grid-cols-2 gap-1 auto-rows-fr rounded-lg overflow-hidden">
                 {item.carta.imagenes.map((img, index) => (
                   <img
                     key={index}
@@ -48,7 +61,8 @@ export function ListCardSubastasActivas({ data }) {
                 ))}
               </div>
             ) : (
-              <div className="h-full w-full bg-muted flex items-center justify-center text-muted-foreground">
+             
+              <div className="h-full w-full bg-white/5 flex items-center justify-center text-white/30 rounded-lg border border-white/10">
                 <FilmIcon className="h-1/2 w-1/2" />
               </div>
             )}
@@ -93,5 +107,3 @@ export function ListCardSubastasActivas({ data }) {
     </div>
   );
 }
-
-
