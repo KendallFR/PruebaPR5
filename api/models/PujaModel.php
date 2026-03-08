@@ -17,6 +17,7 @@ class PujaModel
                 for ($i = 0; $i < count($vResultado); $i++) {
                     //usuario
                     $vResultado[$i]->usuario = $usuarioM->get($vResultado[$i]->idUsuario);
+                    //Subasta
                 }
 		    }
             return $vResultado;

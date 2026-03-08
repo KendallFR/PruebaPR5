@@ -190,7 +190,6 @@ export function DetailSubasta() {
         <TooltipTrigger asChild>
           <Link
             to={`/puja/table/${data.idSubasta}`}
-            state={{ cantidadPujas: data.cantidadPujas }}
           >
             <Button
               size="icon"
