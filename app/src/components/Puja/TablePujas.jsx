@@ -22,10 +22,7 @@ export default function TablePujas() {
         const result = response.data;
 
         if (result.success) {
-          const sorted = [...result.data].sort(
-            (a, b) => b.montoOfertado - a.montoOfertado
-          );
-          setPujas(sorted);
+          setPujas(result.data);
         }
       } catch {
         setPujas([]);

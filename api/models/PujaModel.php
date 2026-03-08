@@ -11,7 +11,7 @@ class PujaModel
     {
         try{
             $usuarioM = new UsuarioModel();
-            $vSql = "SELECT * FROM puja where idSubasta=$idSubasta";
+            $vSql = "SELECT * FROM puja where idSubasta=$idSubasta order by idPuja ASC;";
             $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado) && is_array($vResultado)) {
                 for ($i = 0; $i < count($vResultado); $i++) {
