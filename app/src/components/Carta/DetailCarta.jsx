@@ -62,7 +62,7 @@ export function DetailCarta() {
 
     /*
     ========================================
-    COLOR DINAMICO SIN useMemo
+    COLOR DINAMICO
     ========================================
     */
 
@@ -163,9 +163,16 @@ export function DetailCarta() {
                         <Card className="bg-slate-950/60 backdrop-blur-xl border border-slate-800 shadow-inner">
                             <CardContent className="p-6 space-y-4">
 
+                                {/* Nombre */}
+                                <div className="flex items-center gap-4">
+                                    <Globe className="text-red-400 w-5 h-5" />
+                                    <span className="font-semibold">Carta:</span>
+                                    <span className="text-gray-300">{carta.data.nombre}</span>
+                                </div>
+
                                 {/* DESCRIPCION */}
                                 <div className="flex items-center gap-4">
-                                    <User className="text-red-400 w-5 h-5" />
+                                    <Globe className="text-red-400 w-5 h-5" />
                                     <span className="font-semibold">Descripcion:</span>
                                     <span className="text-gray-300">{carta.data.descripcion}</span>
                                 </div>
@@ -193,7 +200,7 @@ export function DetailCarta() {
 
                                 {/* PROPIETARIO */}
                                 <div className="flex items-center gap-4">
-                                    <Globe className="text-red-400 w-5 h-5" />
+                                    <User className="text-red-400 w-5 h-5" />
                                     <span className="font-semibold">Propietario:</span>
                                     <span className="text-gray-300">{carta.data.propietario.nombre}</span>
                                 </div>

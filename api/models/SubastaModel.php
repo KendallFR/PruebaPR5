@@ -49,7 +49,20 @@ public function allSubastasFinalizadas()
             $cartaM = new CartaModel();
             $estadoSubastaM = new EstadoSubastaModel();
             $usuarioM = new UsuarioModel();
-		    $vSql = "SELECT * FROM subasta  where idEstadoSubasta = 2 or idEstadoSubasta = 3 order by idSubasta desc;";
+		    $vSql = "SELECT
+                    u.idSubasta,
+                    u.fechaInicio,
+                    u.fechaCierre,
+                    u.precio,
+                    u.incrementoMin,
+                    u.idEstadoSubasta,
+                    u.idUsuario,
+                    u.idCarta,
+
+                    (SELECT COUNT(*) FROM puja s WHERE s.idSubasta = u.idSubasta) 
+                    AS cantidadPujas
+
+                    FROM subasta u where u.idEstadoSubasta = 2 or u.idEstadoSubasta = 3 order by idSubasta desc;";
 		    $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado) && is_array($vResultado)) {
                 for ($i = 0; $i < count($vResultado); $i++) {

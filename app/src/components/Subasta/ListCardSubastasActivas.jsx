@@ -27,12 +27,11 @@ export function ListCardSubastasActivas({ data }) {
           <div className="absolute top-3 right-3 z-20">
             <span className={`
               px-3 py-1 rounded-full text-xs font-semibold border shadow-lg
-              ${item.carta?.estado === 'Disponible' ? 'bg-green-500 text-white border-green-400' : ''}
-              ${item.carta?.estado === 'No Disponible' ? 'bg-red-500 text-white border-red-400' : ''}
-              ${item.carta?.estado === 'Agotada' ? 'bg-orange-500 text-white border-orange-400' : ''}
-              ${!item.carta?.estado || !['Disponible', 'No Disponible', 'Agotada'].includes(item.carta?.estado) ? 'bg-gray-500 text-white border-gray-400' : ''}
+              ${item.estadoSubasta.descripcion === 'Activa' ? 'bg-green-500 text-white border-green-400' : ''}
+              ${item.estadoSubasta.descripcion === 'Finalizada' ? 'bg-red-500 text-white border-red-400' : ''}
+              ${item.estadoSubasta.descripcion === 'Cancelada' ? 'bg-orange-500 text-white border-orange-400' : ''}
             `}>
-              {item.carta?.estado || 'Disponible'}
+              {item.estadoSubasta.descripcion}
             </span>
           </div>
 

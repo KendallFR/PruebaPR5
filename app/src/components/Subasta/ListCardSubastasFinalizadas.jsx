@@ -23,6 +23,18 @@ export function ListCardSubastasFinalizadas({ data }) {
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-white/10 via-white/5 to-transparent pointer-events-none" />
           <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none ring-2 ring-white/20 blur-[2px]" />
 
+          {/* BADGE DE ESTADO */}
+          <div className="absolute top-3 right-3 z-20">
+            <span className={`
+              px-3 py-1 rounded-full text-xs font-semibold border shadow-lg
+              ${item.estadoSubasta.descripcion === 'Activa' ? 'bg-green-500 text-white border-green-400' : ''}
+              ${item.estadoSubasta.descripcion === 'Finalizada' ? 'bg-red-500 text-white border-red-400' : ''}
+              ${item.estadoSubasta.descripcion === 'Cancelada' ? 'bg-orange-500 text-white border-orange-400' : ''}
+            `}>
+              {item.estadoSubasta.descripcion}
+            </span>
+          </div>
+
           {/* HEADER SUBASTA */}
           <CardHeader className="text-center pb-2 relative z-10">
             <CardTitle className="text-xl font-bold text-yellow-400 flex items-center justify-center gap-2">
@@ -30,7 +42,7 @@ export function ListCardSubastasFinalizadas({ data }) {
               Subasta #{item.idSubasta}
             </CardTitle>
             <p className="text-sm text-white/70">
-              Precio: ${item.precio} | Incremento mínimo: ${item.incrementoMin}
+              Precio: ${item.precio} | Incremento mínimo: ${item.incrementoMin} | Pujas: {item.cantidadPujas}
             </p>
           </CardHeader>
 

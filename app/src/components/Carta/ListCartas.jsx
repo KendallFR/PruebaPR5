@@ -13,17 +13,16 @@ export function ListCartas() {
         const fetchData = async() => {
             try {
                 const response = await CartaService.getCartas();
-                // Si la petición es exitosa, se guardan los datos
                 console.log(response.data)
                 setData(response.data);
                 if(!response.data.success){
                     setError(response.data.message)
                 }
             } catch (err) {
-                // Si el error no es por cancelación, se registra
+
                 if (err.name !== "AbortError") setError(err.message);
             } finally {
-                // Independientemente del resultado, se actualiza el loading
+
                 setLoading(false);
             }
         };
