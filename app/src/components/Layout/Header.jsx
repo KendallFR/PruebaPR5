@@ -46,7 +46,7 @@ export default function Header() {
 
   const userItems = [
     { title: "Login", href: "/user/login", icon: <LogIn className="h-4 w-4" /> },
-    { title: "Registrarse", href: "/user/create", icon: <UserPlus className="h-4 w-4" /> },
+    { title: "Registrarse", href: "/usuario/create", icon: <UserPlus className="h-4 w-4" /> },
     { title: "Logout", href: "#login", icon: <LogOut className="h-4 w-4" /> },
   ];
 

@@ -76,7 +76,48 @@ class UsuarioModel
 	}
 
 	public function create($objeto)
-	{
-		return false;
-	}
+    {
+        try {
+
+            // Validar que venga el objeto
+            if (!$objeto) {
+                throw new Exception("No se recibieron datos del usuario");
+            }
+
+            // Validar password
+            if (!isset($objeto->password)) {
+                throw new Exception("La contraseña es requerida");
+            }
+
+            // Encriptar contraseña
+            $passwordHash = password_hash($objeto->password, PASSWORD_DEFAULT);
+
+            // Convertir idRol a número por seguridad
+            $idRol = intval($objeto->idRol);
+
+            $sql = "INSERT INTO usuario
+                    (cedula, nombre, email, password, idRol, idEstadoUsuario, fechaRegistro)
+                    VALUES
+                    (   
+                        '$objeto->cedula',
+                        '$objeto->nombre',
+                        '$objeto->email',
+                        '$passwordHash',
+                        $idRol,
+                        1,
+                        NOW()
+                    )";
+
+            // Ejecutar insert
+            $idUsuario = $this->enlace->executeSQL_DML_last($sql);
+
+            // Retornar el usuario creado
+            return $this->get($idUsuario);
+
+        } catch (Exception $e) {
+
+            handleException($e);
+
+        }
+    }
 }

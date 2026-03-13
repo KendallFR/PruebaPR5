@@ -14,15 +14,11 @@ class UsuarioService {
   getUsuarioById(UsuarioId){
     return axios.get(BASE_URL+'/'+UsuarioId);
   }
-createUser(User) {
-  return axios.post(BASE_URL, User, {
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
-}
-  loginUser(User) {
-    return axios.post(BASE_URL + '/login/', JSON.stringify(User));
+createUsuario(Usuario) {
+    return axios.post(BASE_URL + "/create", JSON.stringify(Usuario));
+  }
+  loginUser(Usuario) {
+    return axios.post(BASE_URL + '/login', JSON.stringify(Usuario));
   }
 }
 export default new UsuarioService();

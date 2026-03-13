@@ -1,224 +1,347 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
-import UserService from "../../services/UsuarioService";
+import toast from "react-hot-toast";
 
-export default function UserCreate() {
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+
+import { Save, ArrowLeft } from "lucide-react";
+
+import UsuarioService from "../../services/UsuarioService";
+import RolService from "../../services/RolService";
+
+import { CustomSelect } from "../ui/custom/custom-select";
+
+export function CreateUsuario() {
 
   const navigate = useNavigate();
 
-const [user, setUser] = useState({
-  nombre: "",
-  email: "",
-  cedula: "",
-  password: "",   
-  idRol: "",
-  idEstadoUsuario: ""
-});
-
-  const [loading, setLoading] = useState(false);
+  const [dataRoles, setDataRoles] = useState([]);
+  const [dataUsuarios, setDataUsuarios] = useState([]);
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setUser({
-      ...user,
-      [e.target.name]: e.target.value
-    });
+  /** VALIDACIÓN */
+  const usuarioSchema = yup.object({
+
+    cedula: yup
+      .string()
+      .required("La cédula es requerida")
+      .min(2,"La cédula debe tener 2 o más caracteres")
+      .test(
+        "cedula-existe",
+        "Esta cédula ya está registrada",
+        function(value){
+
+          if(!value) return true;
+
+          const existe = dataUsuarios.some(
+            (u)=>u.cedula === value
+          );
+
+          return !existe;
+
+        }
+      ),
+
+    nombre: yup
+      .string()
+      .required("El nombre es requerido")
+      .min(2,"El nombre debe tener 2 o más caracteres"),
+
+    email: yup
+      .string()
+      .email("Ingrese un correo válido")
+      .required("El correo es requerido")
+      .test(
+        "email-existe",
+        "Este correo ya está registrado",
+        function(value){
+
+          if(!value) return true;
+
+          const existe = dataUsuarios.some(
+            (u)=>u.email === value
+          );
+
+          return !existe;
+
+        }
+      ),
+
+    password: yup
+      .string()
+      .required("La contraseña es requerida")
+      .min(6,"La contraseña debe tener al menos 6 caracteres"),
+
+    idRol: yup
+      .string()
+      .required("Seleccione un rol")
+
+  });
+
+
+  const { control, handleSubmit, formState:{errors} } = useForm({
+
+    defaultValues:{
+      cedula:"",
+      nombre:"",
+      email:"",
+      password:"",
+      idRol:""
+    },
+
+    resolver:yupResolver(usuarioSchema)
+
+  });
+
+
+  /** CARGAR ROLES Y USUARIOS */
+  useEffect(()=>{
+
+    const fetchData = async ()=>{
+
+      try{
+
+        const rolesRes = await RolService.getRoles();
+        setDataRoles(rolesRes.data.data || []);
+
+        const usuariosRes = await UsuarioService.getUsuarios();
+        setDataUsuarios(usuariosRes.data.data || []);
+
+      }catch(error){
+
+        console.error(error);
+        setError("Error cargando datos");
+
+      }
+
+    }
+
+    fetchData();
+
+  },[]);
+
+
+  /** SUBMIT */
+  const onSubmit = async (dataForm) => {
+
+    try {
+
+      const usuario = {
+        ...dataForm,
+        idRol: Number(dataForm.idRol)
+      };
+
+      console.log("FORM DATA", usuario);
+
+      const response = await UsuarioService.createUsuario(usuario);
+
+      console.log("RESPONSE", response);
+
+      if(response.data){
+
+        const usuarioCreado = response.data.data;
+
+        toast.success(`Usuario creado: ${usuarioCreado.nombre}`,{
+          duration:3000
+        });
+
+        navigate("/usuario/table");
+
+      }
+
+    } catch (err) {
+
+      console.error(err);
+      toast.error("Error al crear usuario");
+
+    }
+
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
 
-    setLoading(true);
-    setError("");
+  if(error) return <p className="text-red-600">{error}</p>;
 
-    UserService.createUser(user)
-      .then(() => {
-        alert("Usuario creado correctamente");
-        navigate("/usuario");
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("Error al crear usuario");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
 
   return (
-    <div style={containerStyle}>
 
-      <div style={cardStyle}>
+    <Card className="p-6 max-w-5xl mx-auto">
 
-        <h2 style={titleStyle}>
-          Crear Usuario
-        </h2>
+      <h2 className="text-2xl font-bold mb-6">
+        Crear Usuario
+      </h2>
 
-        {error && (
-          <p style={errorStyle}>
-            {error}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+        {/* CEDULA */}
+        <div>
+
+          <Label>Cédula</Label>
+
+          <Controller
+            name="cedula"
+            control={control}
+            render={({field})=>(
+
+              <Input
+                {...field}
+                placeholder="Ingrese la cédula"
+                className={errors.cedula ? "border-red-500" : ""}
+              />
+
+            )}
+          />
+
+          {errors.cedula && (
+            <p className="text-red-500 text-sm">
+              {errors.cedula.message}
+            </p>
+          )}
+
+        </div>
+
+
+        {/* NOMBRE */}
+        <div>
+
+          <Label>Nombre</Label>
+
+          <Controller
+            name="nombre"
+            control={control}
+            render={({field})=>(
+
+              <Input
+                {...field}
+                placeholder="Ingrese el nombre"
+                className={errors.nombre ? "border-red-500" : ""}
+              />
+
+            )}
+          />
+
+          {errors.nombre && (
+            <p className="text-red-500 text-sm">
+              {errors.nombre.message}
+            </p>
+          )}
+
+        </div>
+
+
+        {/* EMAIL */}
+        <div>
+
+          <Label>Email</Label>
+
+          <Controller
+            name="email"
+            control={control}
+            render={({field})=>(
+
+              <Input
+                {...field}
+                placeholder="Ingrese el email"
+                className={errors.email ? "border-red-500" : ""}
+              />
+
+            )}
+          />
+
+          {errors.email && (
+            <p className="text-red-500 text-sm">
+              {errors.email.message}
+            </p>
+          )}
+
+        </div>
+
+
+        {/* PASSWORD */}
+        <div>
+
+          <Label>Password</Label>
+
+          <Controller
+            name="password"
+            control={control}
+            render={({field})=>(
+
+              <Input
+                type="password"
+                {...field}
+                className={errors.password ? "border-red-500" : ""}
+              />
+
+            )}
+          />
+
+          {errors.password && (
+            <p className="text-red-500 text-sm">
+              {errors.password.message}
+            </p>
+          )}
+
+        </div>
+
+
+        {/* ROL */}
+        <Controller
+          name="idRol"
+          control={control}
+          render={({field})=>(
+
+            <CustomSelect
+              field={field}
+              data={dataRoles}
+              label="Rol"
+              getOptionLabel={(item)=>item.nombre}
+              getOptionValue={(item)=>item.idRol}
+              error={errors.idRol?.message}
+
+            />
+
+          )}
+        />
+
+        {errors.idRol && (
+          <p className="text-red-500 text-sm">
+            {errors.idRol.message}
           </p>
         )}
 
-        <form onSubmit={handleSubmit}>
 
-          <div style={formGroup}>
-            <label style={labelStyle}>Nombre</label>
-            <input
-              type="text"
-              name="nombre"
-              value={user.nombre}
-              onChange={handleChange}
-              required
-              style={inputStyle}
-            />
-          </div>
+        {/* BOTONES */}
+        <div className="flex justify-between gap-4">
 
-          <div style={formGroup}>
-            <label style={labelStyle}>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={user.email}
-              onChange={handleChange}
-              required
-              style={inputStyle}
-            />
-          </div>
-
-          <div style={formGroup}>
-            <label style={labelStyle}>Cédula</label>
-            <input
-              type="text"
-              name="cedula"
-              value={user.cedula}
-              onChange={handleChange}
-              required
-              style={inputStyle}
-            />
-          </div>
-
-          <div style={formGroup}>
-             <label style={labelStyle}>Password</label>
-                <input
-                type="password"
-                name="password"
-                value={user.password}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-            />
-            </div>
-
-          <div style={formGroup}>
-            <label style={labelStyle}>Rol</label>
-            <select
-              name="idRol"
-              value={user.idRol}
-              onChange={handleChange}
-              required
-              style={inputStyle}
-            >
-              <option value="">Seleccione</option>
-              <option value="1">Administrador</option>
-              <option value="2">Vendedor</option>
-            </select>
-          </div>
-
-          <div style={formGroup}>
-            <label style={labelStyle}>Estado</label>
-            <select
-              name="idEstadoUsuario"
-              value={user.idEstadoUsuario}
-              onChange={handleChange}
-              required
-              style={inputStyle}
-            >
-              <option value="">Seleccione</option>
-              <option value="1">Activo</option>
-              <option value="2">Inactivo</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={buttonStyle}
+          <Button
+            type="button"
+            onClick={()=>navigate(-1)}
+            className="flex items-center gap-2"
           >
-            {loading ? "Guardando..." : "Crear Usuario"}
-          </button>
+            <ArrowLeft className="w-4 h-4"/>
+            Regresar
+          </Button>
 
-        </form>
+          <Button type="submit" className="flex items-center gap-2">
 
-      </div>
+            <Save className="w-4 h-4"/>
 
-    </div>
+            Guardar
+
+          </Button>
+
+        </div>
+
+      </form>
+
+    </Card>
+
   );
+
 }
-
-
-/* ESTILOS */
-
-const containerStyle = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  minHeight: "80vh",
-  backgroundColor: "#0f172a"
-};
-
-const cardStyle = {
-  backgroundColor: "#111827",
-  padding: "30px",
-  borderRadius: "12px",
-  width: "100%",
-  maxWidth: "450px",
-  boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
-};
-
-const titleStyle = {
-  textAlign: "center",
-  marginBottom: "20px",
-  color: "#00c853"
-};
-
-const errorStyle = {
-  color: "#ff5252",
-  marginBottom: "10px",
-  textAlign: "center"
-};
-
-const formGroup = {
-  marginBottom: "15px"
-};
-
-const labelStyle = {
-  display: "block",
-  marginBottom: "5px",
-  fontWeight: "500",
-  color: "#e5e7eb"
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  borderRadius: "6px",
-  border: "1px solid #374151",
-  backgroundColor: "#1f2937",
-  color: "white",
-  outline: "none"
-};
-
-const buttonStyle = {
-  marginTop: "15px",
-  padding: "12px",
-  width: "100%",
-  borderRadius: "6px",
-  border: "none",
-  backgroundColor: "#00c853",
-  color: "white",
-  fontWeight: "bold",
-  fontSize: "15px",
-  cursor: "pointer",
-  transition: "0.3s"
-};
