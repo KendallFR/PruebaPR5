@@ -24,6 +24,14 @@ class UsuarioService {
       data: JSON.stringify(Usuario)
     })
   }
+  deleteUsuario(Usuario) {
+    return axios({
+      method: 'put',
+      url: BASE_URL+ "/delete",
+      data: JSON.stringify(Usuario)
+
+    })
+  }
   loginUser(Usuario) {
     return axios.post(BASE_URL + '/login', JSON.stringify(Usuario));
   }

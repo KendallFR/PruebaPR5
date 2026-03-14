@@ -148,4 +148,23 @@ class UsuarioModel
         handleException($e);
     }
 }
+public function delete($objeto)
+{
+    try {
+
+        // Consulta SQL
+        $sql = "UPDATE usuario 
+                SET idEstadoUsuario = 3
+                WHERE idUsuario = $objeto->idUsuario";
+
+        // Ejecutar consulta
+        $this->enlace->executeSQL_DML($sql);
+
+        // Retornar usuario actualizado
+        return $this->get($objeto->idUsuario);
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
 }
