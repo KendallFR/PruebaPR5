@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
     Table,
     TableHeader,
@@ -33,6 +33,7 @@ const usuarioColumns = [
 ];
 
 export default function TableUsuarios() {
+    const navigate = useNavigate();
     const [usuarios, setUsuarios] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -94,7 +95,7 @@ export default function TableUsuarios() {
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon" >
+                                                <Button variant="ghost" size="icon" onClick={() => navigate(`/usuario/edit/${usuario.idUsuario}`)} >
                                                     <Edit className="h-4 w-4 text-primary" />
                                                 </Button>
                                             </TooltipTrigger>

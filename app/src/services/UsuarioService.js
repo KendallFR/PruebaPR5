@@ -14,8 +14,15 @@ class UsuarioService {
   getUsuarioById(UsuarioId){
     return axios.get(BASE_URL+'/'+UsuarioId);
   }
-createUsuario(Usuario) {
+  createUsuario(Usuario) {
     return axios.post(BASE_URL + "/create", JSON.stringify(Usuario));
+  }
+  updateUsuario(Usuario) {
+    return axios({
+      method: 'put',
+      url: BASE_URL,
+      data: JSON.stringify(Usuario)
+    })
   }
   loginUser(Usuario) {
     return axios.post(BASE_URL + '/login', JSON.stringify(Usuario));

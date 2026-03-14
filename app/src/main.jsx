@@ -17,6 +17,7 @@ import { ListSubastasFinalizadas } from './components/Subasta/ListSubastasFinali
 import { DetailSubasta } from './components/Subasta/DetailSubasta'
 import TablePujas from './components/Puja/TablePujas'
 import { CreateUsuario } from './components/Usuario/CreateUsuario'
+import { UpdateUsuario } from './components/Usuario/UpdateUsuario'
 
 
 
@@ -43,6 +44,7 @@ const rutas = createBrowserRouter([
       {path:"subasta/detail/:id", element: <DetailSubasta/>},
       {path:"puja/table/:id", element: <TablePujas/>},
       {path:"usuario/create", element: <CreateUsuario/>},
+      {path:"usuario/edit/:id", element: <UpdateUsuario/>}
     ]
   }
 ])
