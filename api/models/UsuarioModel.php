@@ -120,4 +120,32 @@ class UsuarioModel
 
         }
     }
+
+    public function update($objeto)
+{
+    try {
+
+        // Encriptar contraseña
+        $passwordHash = password_hash($objeto->password, PASSWORD_DEFAULT);
+
+        // Consulta SQL
+        $sql = "UPDATE usuario SET 
+                    cedula = '$objeto->cedula',
+                    nombre = '$objeto->nombre',
+                    email = '$objeto->email',
+                    password = '$passwordHash',
+                    idRol = $objeto->idRol,
+                    idEstadoUsuario = $objeto->idEstadoUsuario
+                WHERE idUsuario = $objeto->idUsuario";
+
+        // Ejecutar consulta
+        $this->enlace->executeSQL_DML($sql);
+
+        // Retornar usuario actualizado
+        return $this->get($objeto->idUsuario);
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
 }
