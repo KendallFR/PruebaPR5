@@ -30,4 +30,23 @@ class carta
             
         }
     }
+
+
+
+public function subastas($id)
+{
+    try {
+        $response = new Response();
+
+        $subasta = new SubastaModel();
+
+        $result = $subasta->getSubastasByCarta($id);
+
+        $response->toJSON($result);
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+    
 }

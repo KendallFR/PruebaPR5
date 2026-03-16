@@ -10,5 +10,10 @@ class CartaService {
   getCartaById(CartaId){
     return axios.get(BASE_URL+'/'+CartaId);
   }
+ 
+  getSubastasByCarta(id){
+  return axios.get(BASE_URL + '/subastas/' + id);
+}
+
 }
 export default new CartaService();

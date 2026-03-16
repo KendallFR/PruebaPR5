@@ -124,4 +124,34 @@ public function allSubastasFinalizadas()
             handleException($e);
         }
     }
+
+
+
+public function getSubastasByCarta($idCarta)
+{
+    try {
+
+        // convertir a entero por seguridad
+        $idCarta = (int)$idCarta;
+
+        $sql = "SELECT 
+                    idSubasta,
+                    precio,
+                    fechaInicio,
+                    fechaCierre,
+                    idEstadoSubasta
+                FROM subasta
+                WHERE idCarta = $idCarta
+                ORDER BY fechaInicio DESC";
+
+        // Ejecutar consulta
+        $vResultado = $this->enlace->ExecuteSQL($sql);
+
+        return $vResultado;
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
 }

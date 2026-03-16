@@ -19,6 +19,7 @@ import TablePujas from './components/Puja/TablePujas'
 import { CreateUsuario } from './components/Usuario/CreateUsuario'
 import { UpdateUsuario } from './components/Usuario/UpdateUsuario'
 import { DeleteUsuario } from './components/Usuario/DeleteUsuario'
+import { CartaSubastas } from './components/Carta/CartaSubastas'
 
 
 
@@ -46,7 +47,8 @@ const rutas = createBrowserRouter([
       {path:"puja/table/:id", element: <TablePujas/>},
       {path:"usuario/create", element: <CreateUsuario/>},
       {path:"usuario/edit/:id", element: <UpdateUsuario/>},
-      {path: "usuario/delete/:id", element: <DeleteUsuario />}
+      {path: "usuario/delete/:id", element: <DeleteUsuario />},
+      {path: "carta/:id/subastas", element: <CartaSubastas />}
     ]
   }
 ])
