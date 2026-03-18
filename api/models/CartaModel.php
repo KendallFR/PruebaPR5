@@ -111,4 +111,55 @@ class CartaModel
             handleException($e);
         }
     }
+
+    public function create($data)
+{
+    try {
+        $sql = "INSERT INTO carta 
+                (nombre, descripcion, idUsuario, idEstadoCarta, idCondicion, fechaRegistro)
+                VALUES (
+                    '$data->nombre',
+                    '$data->descripcion',
+                    $data->idUsuario,
+                    $data->idEstadoCarta,
+                    $data->idCondicion,
+                    NOW()
+                )";
+
+        return $this->enlace->executeSQL_DML($sql);
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
+public function update($id, $data)
+{
+    try {
+        $sql = "UPDATE carta SET
+                    nombre = '$data->nombre',
+                    descripcion = '$data->descripcion',
+                    idEstadoCarta = $data->idEstadoCarta,
+                    idCondicion = $data->idCondicion
+                WHERE idCarta = $id";
+
+        return $this->enlace->executeSQL_DML($sql);
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
+public function delete($id)
+{
+    try {
+        $sql = "DELETE FROM carta WHERE idCarta = $id";
+        return $this->enlace->executeSQL_DML($sql);
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
+
 }

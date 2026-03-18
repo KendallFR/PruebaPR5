@@ -40,7 +40,7 @@ public function subastas($id)
 
         $subasta = new SubastaModel();
 
-        $result = $subasta->getSubastasByCarta($id);
+        $result = $subasta->getSubastaCarta($id);
 
         $response->toJSON($result);
 
@@ -62,4 +62,55 @@ public function allCartasActivas()
             
         }
     }
+
+
+public function create()
+{
+    try {
+        $request = new Request();
+        $response = new Response();
+
+        $cartaM = new CartaModel();
+        $result = $cartaM->create($request->getJSON());
+
+        $response->toJSON($result);
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
+public function update($id)
+{
+    try {
+        $request = new Request();
+        $response = new Response();
+
+        $cartaM = new CartaModel();
+        $result = $cartaM->update($id, $request->getJSON());
+
+        $response->toJSON($result);
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
+public function delete($id)
+{
+    try {
+        $response = new Response();
+
+        $cartaM = new CartaModel();
+        $result = $cartaM->delete($id);
+
+        $response->toJSON($result);
+
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
+
+
 }
