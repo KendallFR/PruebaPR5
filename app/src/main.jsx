@@ -20,6 +20,8 @@ import { CreateUsuario } from './components/Usuario/CreateUsuario'
 import { UpdateUsuario } from './components/Usuario/UpdateUsuario'
 import { DeleteUsuario } from './components/Usuario/DeleteUsuario'
 import { CartaSubastas } from './components/Carta/CartaSubastas'
+import { CreateSubasta } from './components/Subasta/CreateSubasta'
+
 
 
 
@@ -48,7 +50,8 @@ const rutas = createBrowserRouter([
       {path:"usuario/create", element: <CreateUsuario/>},
       {path:"usuario/edit/:id", element: <UpdateUsuario/>},
       {path: "usuario/delete/:id", element: <DeleteUsuario />},
-      {path: "carta/:id/subastas", element: <CartaSubastas />}
+      {path: "carta/:id/subastas", element: <CartaSubastas />},
+      {path: "subasta/create", element: <CreateSubasta/>}
     ]
   }
 ])

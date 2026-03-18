@@ -15,5 +15,9 @@ class CartaService {
   return axios.get(BASE_URL + '/subastas/' + id);
 }
 
+  allCartasActivas(){
+    return axios.get(BASE_URL + "/allCartasActivas/");
+  }
+
 }
 export default new CartaService();

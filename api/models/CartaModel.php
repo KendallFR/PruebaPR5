@@ -43,6 +43,38 @@ class CartaModel
         }
     }
 
+    public function allCartasActivas()
+	{
+        try{
+            $imagenM = new ImageModel();
+            $categoriaM = new CategoriaModel();
+            $subastaM = new SubastaModel();
+            $condicionM = new CondicionModel();
+            $estadoCartaM = new EstadoCartaModel();
+            $usuarioM = new UsuarioModel();
+		    $vSQL = "SELECT * FROM carta where idEstadoCarta = 1 order by nombre desc;";
+		    $vResultado = $this->enlace->ExecuteSQL($vSQL);
+            if (!empty($vResultado) && is_array($vResultado)) {
+                for ($i = 0; $i < count($vResultado); $i++) {
+                    //Imagenes
+                    $vResultado[$i]->imagenes=$imagenM->getImageCarta($vResultado[$i]->idCarta);
+                    //Categorias
+                    $vResultado[$i]->categorias=$categoriaM->getCategoriaCarta($vResultado[$i]->idCarta);
+                    //Condicion
+                    $vResultado[$i]->condicion = $condicionM->get($vResultado[$i]->idCondicion);
+                    // Usuario dueño
+                    $vResultado[$i]->propietario = $usuarioM->get($vResultado[$i]->idUsuario);
+                    // Estado carta
+                    $vResultado[$i]->estadoCarta = $estadoCartaM->get($vResultado[$i]->idEstadoCarta);
+                    // Subasta
+                    $vResultado[$i]->subasta = $subastaM->getSubastaCarta($vResultado[$i]->idCarta);
+                }
+		    }
+		    return $vResultado;
+	    } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 
     /* 
        OBTENER UNA CARTA

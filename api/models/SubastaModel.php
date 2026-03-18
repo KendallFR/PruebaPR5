@@ -62,7 +62,7 @@ public function allSubastasFinalizadas()
                     (SELECT COUNT(*) FROM puja s WHERE s.idSubasta = u.idSubasta) 
                     AS cantidadPujas
 
-                    FROM subasta u where u.idEstadoSubasta = 2 or u.idEstadoSubasta = 3 order by idSubasta desc;";
+                    FROM subasta u where u.idEstadoSubasta = 2 or u.idEstadoSubasta = 3 or u.idEstadoSubasta = 4 order by idSubasta desc;";
 		    $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado) && is_array($vResultado)) {
                 for ($i = 0; $i < count($vResultado); $i++) {
@@ -124,33 +124,33 @@ public function allSubastasFinalizadas()
             handleException($e);
         }
     }
-
-
-
-public function getSubastasByCarta($idCarta)
+public function create($objeto)
 {
     try {
 
-        // convertir a entero por seguridad
-        $idCarta = (int)$idCarta;
+        $usuarioId = $objeto->idUsuario;
 
-        $sql = "SELECT 
-                    idSubasta,
-                    precio,
-                    fechaInicio,
-                    fechaCierre,
-                    idEstadoSubasta
-                FROM subasta
-                WHERE idCarta = $idCarta
-                ORDER BY fechaInicio DESC";
+        // Insert
+        $sql = "INSERT INTO subasta
+                (fechaInicio, fechaCierre, precio, incrementoMin, idUsuario, idEstadoSubasta, idCarta)
+                VALUES
+                (
+                    '$objeto->fechaInicio',
+                    '$objeto->fechaCierre',
+                    $objeto->precio,
+                    $objeto->incrementoMin,
+                    $usuarioId,
+                    4,
+                    $objeto->idCarta
+                )";
 
-        // Ejecutar consulta
-        $vResultado = $this->enlace->ExecuteSQL($sql);
+        $idSubasta = $this->enlace->executeSQL_DML_last($sql);
 
-        return $vResultado;
+        return $this->get($idSubasta);
 
     } catch (Exception $e) {
         handleException($e);
+        return null;
     }
 }
 

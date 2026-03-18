@@ -48,5 +48,18 @@ public function subastas($id)
         handleException($e);
     }
 }
-    
+
+public function allCartasActivas()
+    {
+        try {
+            $response = new Response();
+            $carta = new CartaModel();
+            $result = $carta->allCartasActivas();
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            $response->toJSON($result);
+            handleException($e);
+            
+        }
+    }
 }

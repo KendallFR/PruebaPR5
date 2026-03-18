@@ -16,8 +16,12 @@ class SubastaService {
     return axios.get(BASE_URL + '/' + SubastaId);
   }
 
-  getPujasBySubasta(idSubasta) {
-    return axios.get(BASE_URL + '/' + idSubasta + '/pujas');
+  getSubastaCarta(id) {
+  return axios.get(BASE_URL + "/getSubastaCarta/" + id);
+}
+
+  createSubasta(Subasta) {
+    return axios.post(BASE_URL + "/create", JSON.stringify(Subasta));
   }
 }
 
