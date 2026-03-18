@@ -21,7 +21,7 @@ import { UpdateUsuario } from './components/Usuario/UpdateUsuario'
 import { DeleteUsuario } from './components/Usuario/DeleteUsuario'
 import { CartaSubastas } from './components/Carta/CartaSubastas'
 import { CreateSubasta } from './components/Subasta/CreateSubasta'
-import { CartaCRUD } from './components/Carta/CrearCarta'
+import  CartaCRUD  from './components/Carta/CrearCarta'
 
 
 
@@ -53,7 +53,7 @@ const rutas = createBrowserRouter([
       {path: "usuario/delete/:id", element: <DeleteUsuario />},
       {path: "carta/:id/subastas", element: <CartaSubastas />},
       {path: "subasta/create", element: <CreateSubasta/>},
-      {path: "carta/crud", element: <CartaCRUD/>}
+      {path: "carta/crear", element: <CartaCRUD/>}
     ]
   }
 ])
