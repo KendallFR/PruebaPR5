@@ -27,6 +27,8 @@ import {
   Box,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import CartaService from "../../services/CartaService";
+import toast from "react-hot-toast";
 
 /* ── Opciones ── */
 const CATEGORIAS_OPCIONES = [
@@ -167,19 +169,26 @@ export default function CreateCarta() {
     setLoading(true);
     setError(null);
     try {
-      const BASE_URL = import.meta.env.VITE_BASE_URL;
+      // Construir FormData con los nombres que espera el PHP Model
+      // PHP: nombre, descripcion, idUsuario, idEstadoCarta, idCondicion
       const formData = new FormData();
       formData.append("nombre",        form.nombre);
       formData.append("descripcion",   form.descripcion);
-      formData.append("condicionId",   form.condicionId);
-      formData.append("estadoCartaId", form.estadoCartaId);
+      formData.append("idCondicion",   form.condicionId);
+      formData.append("idEstadoCarta", form.estadoCartaId);
+      // Categorías como array
       form.categorias.forEach((id) => formData.append("categorias[]", id));
-      form.imagenes.forEach((img)   => formData.append("imagenes", img));
-      const res = await fetch(`${BASE_URL}carta`, { method: "POST", body: formData });
-      if (!res.ok) throw new Error("Error al crear la carta.");
+      // Imágenes
+      form.imagenes.forEach((img) => formData.append("imagenes[]", img));
+
+      await CartaService.createCarta(formData);
+
+      toast.success("Carta creada correctamente");
       navigate("/carta");
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      toast.error("Error al crear la carta");
+      setError(err?.response?.data?.message ?? "Error al crear la carta.");
     } finally {
       setLoading(false);
     }

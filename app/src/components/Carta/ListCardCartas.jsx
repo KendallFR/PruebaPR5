@@ -137,12 +137,13 @@ function EditModal({ item, onClose, onSaved }) {
     }
     setLoading(true);
     try {
-      await CartaService.updateCarta(item.idCarta, {
-        nombre:        form.nombre,
-        descripcion:   form.descripcion,
-        condicionId:   Number(form.condicionId),
-        estadoCartaId: Number(form.estadoCartaId),
-      });
+      const formData = new FormData();
+      formData.append("nombre",        form.nombre);
+      formData.append("descripcion",   form.descripcion);
+      formData.append("idCondicion",   form.condicionId);   // key que espera PHP
+      formData.append("idEstadoCarta", form.estadoCartaId); // key que espera PHP
+
+      await CartaService.updateCarta(item.idCarta, formData);
       toast.success("Carta actualizada correctamente");
       onSaved();
     } catch (err) {
@@ -289,9 +290,9 @@ function DeleteModal({ item, onClose, onConfirmed }) {
     setLoading(true);
     try {
       // Borrado lógico: cambia estado a "No disponible" (id 2)
-      await CartaService.updateCarta(item.idCarta, {
-        estadoCartaId: 2,
-      });
+      const formData = new FormData();
+      formData.append("idEstadoCarta", 2); // estado "No disponible" — key que espera PHP
+      await CartaService.updateCarta(item.idCarta, formData);
       toast.success(`"${item.nombre}" desactivada correctamente`);
       onConfirmed();
     } catch (err) {
@@ -508,7 +509,9 @@ export function ListCardCartas({ data, onRefresh }) {
     const isInactive = item.estadoCarta?.descripcion?.toLowerCase().includes("no disponible");
     const nuevoEstado = isInactive ? 1 : 2;
     try {
-      await CartaService.updateCarta(item.idCarta, { estadoCartaId: nuevoEstado });
+      const formData = new FormData();
+      formData.append("idEstadoCarta", nuevoEstado); // key que espera PHP
+      await CartaService.updateCarta(item.idCarta, formData);
       toast.success(isInactive ? `"${item.nombre}" activada` : `"${item.nombre}" desactivada`);
       onRefresh?.();
     } catch (err) {
