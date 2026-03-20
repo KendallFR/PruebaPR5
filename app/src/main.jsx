@@ -19,6 +19,7 @@ import { DeleteUsuario } from './components/Usuario/DeleteUsuario'
 import { CartaSubastas } from './components/Carta/CartaSubastas'
 import { CreateSubasta } from './components/Subasta/CreateSubasta'
 import  CartaCRUD  from './components/Carta/CrearCarta'
+import { Toaster } from 'react-hot-toast'
 
 
 
@@ -53,6 +54,9 @@ const rutas = createBrowserRouter([
 ])
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+    <Toaster position="top-middle" reverseOrder={false} />
     <RouterProvider router={rutas} />
   </StrictMode>,
 )
+
+
