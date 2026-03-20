@@ -9,7 +9,10 @@ import {
   ArrowLeft,
   X,
   BadgeCheck,
-  ImagePlus
+  ImagePlus,
+  FileText,
+  Globe,
+  Zap,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CartaService from "../../services/CartaService";
@@ -19,143 +22,124 @@ import CategoriasService from "@/services/CategoriasService";
 import EstadoCartaService from "@/services/EstadoCartaService";
 import toast from "react-hot-toast";
 
-/* 🎨 COLORES */
+/*  COLORES */
 const categoriaStyles = {
-  Pokemon: "bg-purple-400/20 border-purple-400 text-purple-300",
-  Objeto: "bg-slate-400/20 border-slate-400 text-white",
-  Entrenador: "bg-orange-400/20 border-orange-400 text-orange-300",
-  Electrico: "bg-yellow-400/20 border-yellow-400 text-yellow-300",
-  Fuego: "bg-red-500/20 border-red-500 text-red-300",
-  Agua: "bg-blue-500/20 border-blue-500 text-blue-300",
+  Pokemon:    "bg-purple-400/20 border-purple-400 text-purple-300 shadow-purple-400/20",
+  Objeto:     "bg-slate-400/20 border-slate-400 text-white shadow-slate-300/20",
+  Entrenador: "bg-orange-400/20 border-orange-400 text-orange-300 shadow-orange-400/20",
+  Electrico:  "bg-yellow-400/20 border-yellow-400 text-yellow-300 shadow-yellow-400/20",
+  Fuego:      "bg-red-500/20 border-red-500 text-red-300 shadow-red-500/20",
+  Agua:       "bg-blue-500/20 border-blue-500 text-blue-300 shadow-blue-500/20",
+};
+
+const categoriaGlow = {
+  Pokemon:    "shadow-purple-400/30",
+  Objeto:     "shadow-slate-300/20",
+  Entrenador: "shadow-orange-400/30",
+  Electrico:  "shadow-yellow-400/30",
+  Fuego:      "shadow-red-500/30",
+  Agua:       "shadow-blue-500/30",
 };
 
 export default function CreateCarta() {
   const navigate = useNavigate();
 
-  const [categorias, setCategorias] = useState([]);
+  const [categorias,  setCategorias]  = useState([]);
   const [condiciones, setCondiciones] = useState([]);
-  const [estados, setEstados] = useState([]);
+  const [estados,     setEstados]     = useState([]);
 
-  const [files, setFiles] = useState([]);
+  const [files,    setFiles]    = useState([]);
   const [fileURLs, setFileURLs] = useState([]);
 
   const [form, setForm] = useState({
-    nombre: "",
-    descripcion: "",
-    idCondicion: "",
+    nombre:        "",
+    descripcion:   "",
+    idCondicion:   "",
     idEstadoCarta: "",
-    categorias: [],
-    idUsuario: ""
+    categorias:    [],
+    idUsuario:     ""
   });
 
-  const [errors, setErrors] = useState({});
+  const [errors,  setErrors]  = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const catRes = await CategoriasService.getCategorias();
+        const catRes  = await CategoriasService.getCategorias();
         const condRes = await CondicionService.getCondiciones();
-        const estRes = await EstadoCartaService.getEstadoCartas();
+        const estRes  = await EstadoCartaService.getEstadoCartas();
 
-        setCategorias(catRes.data?.data || []);
+        setCategorias(catRes.data?.data   || []);
         setCondiciones(condRes.data?.data || []);
-        setEstados(estRes.data?.data || []);
+        setEstados(estRes.data?.data      || []);
 
         setForm((prev) => ({ ...prev, idUsuario: 1 }));
       } catch {
         toast.error("Error cargando datos");
       }
     };
-
     fetchData();
   }, []);
 
-  /* 🔥 VALIDACIONES */
+  /*  VALIDACIONES */
   const validateField = (field, value) => {
     let message = "";
-
-    if (field === "nombre" && !value) {
-      message = "Debes ingresar un nombre";
-    }
-
-    if (field === "descripcion" && value.length < 20) {
-      message = "Mínimo 20 caracteres";
-    }
-
-    if (field === "idCondicion" && !value) {
-      message = "Selecciona una condición";
-    }
-
-    if (field === "idEstadoCarta" && !value) {
-      message = "Selecciona un estado";
-    }
-
+    if (field === "nombre"      && !value)            message = "Debes ingresar un nombre";
+    if (field === "descripcion" && value.length < 20) message = "Mínimo 20 caracteres";
+    if (field === "idCondicion"   && !value)          message = "Selecciona una condición";
+    if (field === "idEstadoCarta" && !value)          message = "Selecciona un estado";
     setErrors((prev) => ({ ...prev, [field]: message }));
   };
 
-  const handleChange = (field, value) => {
+  const handleChange = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
-  };
 
-  const toggleCategoria = (idCategoria) => {
+  const toggleCategoria = (idCategoria) =>
     setForm((prev) => ({
       ...prev,
       categorias: prev.categorias.includes(idCategoria)
         ? prev.categorias.filter((c) => c !== idCategoria)
         : [...prev.categorias, idCategoria],
     }));
-  };
 
-  /* 📸 MULTI IMAGES */
+  /*  MULTI IMAGES */
   const handleChangeImage = (e) => {
     const selectedFiles = Array.from(e.target.files);
-
-    const previews = selectedFiles.map((file) =>
-      URL.createObjectURL(file)
-    );
-
-    setFiles((prev) => [...prev, ...selectedFiles]);
+    const previews      = selectedFiles.map((file) => URL.createObjectURL(file));
+    setFiles((prev)    => [...prev, ...selectedFiles]);
     setFileURLs((prev) => [...prev, ...previews]);
   };
 
   const removeImage = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setFiles((prev)    => prev.filter((_, i) => i !== index));
     setFileURLs((prev) => prev.filter((_, i) => i !== index));
   };
 
-  /* 🚀 SUBMIT */
+  /*  SUBMIT */
   const handleSubmit = async () => {
-
     const newErrors = {};
-
-    if (!form.nombre) newErrors.nombre = "Nombre requerido";
-    if (form.descripcion.length < 20) newErrors.descripcion = "Mínimo 20 caracteres";
-    if (!form.idCondicion) newErrors.idCondicion = "Selecciona condición";
-    if (!form.idEstadoCarta) newErrors.idEstadoCarta = "Selecciona estado";
-    if (form.categorias.length === 0) newErrors.categorias = "Selecciona categoría";
-    if (files.length === 0) newErrors.imagenes = "Agrega al menos una imagen";
+    if (!form.nombre)                   newErrors.nombre        = "Nombre requerido";
+    if (form.descripcion.length < 20)   newErrors.descripcion   = "Mínimo 20 caracteres";
+    if (!form.idCondicion)              newErrors.idCondicion   = "Selecciona condición";
+    if (!form.idEstadoCarta)            newErrors.idEstadoCarta = "Selecciona estado";
+    if (form.categorias.length === 0)   newErrors.categorias    = "Selecciona categoría";
+    if (files.length === 0)             newErrors.imagenes      = "Agrega al menos una imagen";
 
     setErrors(newErrors);
-
     if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
-
     try {
       const response = await CartaService.createCarta(form);
-
       if (response?.data?.data) {
         const idCarta = response.data.data.idCarta;
-
         for (const file of files) {
           const formData = new FormData();
-          formData.append("file", file);
+          formData.append("file",    file);
           formData.append("idCarta", idCarta);
-
           await ImageService.createImage(formData);
         }
-
         toast.success("Carta creada correctamente");
         navigate("/carta");
       }
@@ -166,155 +150,340 @@ export default function CreateCarta() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#020617] to-[#0f172a] flex flex-col items-center py-10 px-4">
+  /* ── Categoría activa para el glow del card ── */
+  const firstCat = categorias.find((c) => form.categorias.includes(c.idCategoria));
+  const cardGlow = firstCat ? categoriaGlow[firstCat.descripcion] ?? "" : "";
 
-      <div className="w-full max-w-2xl mb-5">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0a0f1e] to-[#020617] flex flex-col items-center py-10 px-4">
+
+      {/* Partículas decorativas de fondo */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 left-10 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/3 rounded-full blur-3xl" />
+      </div>
+
+      {/* BACK */}
+      <div className="w-full max-w-2xl mb-6 relative z-10">
         <Link to="/carta">
-          <Button variant="ghost" className="text-white/40 hover:text-white flex gap-2">
-            <ArrowLeft className="w-4 h-4" /> Volver
+          <Button variant="ghost" className="text-white/40 hover:text-white/80 flex items-center gap-2 pl-0 transition-all duration-200 hover:gap-3">
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm">Volver al listado</span>
           </Button>
         </Link>
       </div>
 
-      <Card className="w-full max-w-2xl border !bg-[#0d1424]/90 rounded-2xl shadow-2xl">
+      {/* CARD PRINCIPAL */}
+      <Card className={`
+        w-full max-w-2xl relative overflow-hidden
+        border !bg-[#0d1424]/95 backdrop-blur-xl
+        rounded-3xl transition-all duration-700
+        shadow-2xl ${cardGlow}
+        border-white/[0.07]
+      `}>
 
-        <CardHeader className="text-center pt-8">
-          <div className="flex justify-center gap-2">
-            <Sparkles className="text-yellow-400" />
-            <CardTitle className="text-white text-2xl">
-              Nueva Carta
+        {/* Barra superior holográfica */}
+        <div className="absolute top-0 left-0 right-0 h-[2px]">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+        </div>
+
+        {/* Glow interno top-right */}
+        <div className="absolute -top-20 -right-20 w-60 h-60 bg-yellow-400/5 rounded-full blur-3xl pointer-events-none" />
+
+        {/* HEADER */}
+        <CardHeader className="relative z-10 text-center pb-0 pt-10 !bg-transparent">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-2xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-yellow-400" />
+            </div>
+            <CardTitle className="text-3xl font-black text-white tracking-tight">
+              Nueva <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">Carta</span>
             </CardTitle>
+          </div>
+          <p className="text-xs text-white/30 tracking-widest uppercase">
+            Registra tu carta en el sistema
+          </p>
+
+          {/* Separador decorativo */}
+          <div className="flex items-center gap-3 mt-6 px-7">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-white/10" />
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/40" />
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent to-white/10" />
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-5 px-7 pb-8">
+        <CardContent className="relative z-10 space-y-6 px-8 pb-9 pt-6 !bg-transparent">
 
           {/* NOMBRE */}
-          <div>
-            <Label className="text-white/60 text-xs flex gap-1">
+          <div className="space-y-2">
+            <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
               <BadgeCheck className="w-3 h-3 text-yellow-400" />
-              Nombre *
+              Nombre <span className="text-red-400">*</span>
             </Label>
-            <Input
-              value={form.nombre}
-              onBlur={(e) => validateField("nombre", e.target.value)}
-              onChange={(e) => handleChange("nombre", e.target.value)}
-              className="bg-white/5 text-white rounded-xl h-11"
-            />
-            {errors.nombre && <p className="text-red-400 text-xs">{errors.nombre}</p>}
+            <div className="relative group">
+              <Input
+                placeholder="Ej. Charizard Holográfico Edición Especial"
+                value={form.nombre}
+                onBlur={(e)   => validateField("nombre", e.target.value)}
+                onChange={(e) => handleChange("nombre", e.target.value)}
+                className="
+                  !bg-white/[0.03] border-white/[0.08] !text-white
+                  placeholder:text-white/15
+                  focus:border-yellow-400/40 focus:!ring-0
+                  focus:!bg-white/[0.05]
+                  rounded-2xl h-12 text-sm px-4
+                  transition-all duration-300
+                  group-hover:border-white/15
+                "
+              />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-yellow-400/0 via-yellow-400/0 to-yellow-400/0 group-focus-within:from-yellow-400/5 group-focus-within:via-transparent group-focus-within:to-yellow-400/5 pointer-events-none transition-all duration-500" />
+            </div>
+            {errors.nombre && (
+              <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
+                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                {errors.nombre}
+              </p>
+            )}
           </div>
 
-          {/* SELECTS */}
+          {/* CONDICIÓN + ESTADO */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="space-y-2">
+              <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                <BadgeCheck className="w-3 h-3 text-blue-400" />
+                Condición <span className="text-red-400">*</span>
+              </Label>
               <select
                 value={form.idCondicion || ""}
-                onBlur={(e) => validateField("idCondicion", e.target.value)}
-                onChange={(e) =>
-                  handleChange("idCondicion", e.target.value ? Number(e.target.value) : "")
-                }
-                className="bg-[#020617] text-white p-2 rounded-xl w-full"
+                onBlur={(e)   => validateField("idCondicion", e.target.value)}
+                onChange={(e) => handleChange("idCondicion", e.target.value ? Number(e.target.value) : "")}
+                className="
+                  w-full bg-white/[0.03] border border-white/[0.08] text-white
+                  rounded-2xl h-12 px-4 text-sm
+                  focus:outline-none focus:border-blue-400/40 focus:bg-white/[0.05]
+                  hover:border-white/15
+                  transition-all duration-300
+                  appearance-none cursor-pointer
+                "
               >
-                <option value="">Condición</option>
+                <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
                 {condiciones.map((c) => (
-                  <option key={c.idCondicion} value={c.idCondicion}>
+                  <option key={c.idCondicion} value={c.idCondicion} className="bg-[#0c1320]">
                     {c.descripcion}
                   </option>
                 ))}
               </select>
-              {errors.idCondicion && <p className="text-red-400 text-xs">{errors.idCondicion}</p>}
+              {errors.idCondicion && (
+                <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
+                  <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                  {errors.idCondicion}
+                </p>
+              )}
             </div>
 
-            <div>
+            <div className="space-y-2">
+              <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                <Globe className="w-3 h-3 text-green-400" />
+                Estado <span className="text-red-400">*</span>
+              </Label>
               <select
                 value={form.idEstadoCarta || ""}
-                onBlur={(e) => validateField("idEstadoCarta", e.target.value)}
-                onChange={(e) =>
-                  handleChange("idEstadoCarta", e.target.value ? Number(e.target.value) : "")
-                }
-                className="bg-[#020617] text-white p-2 rounded-xl w-full"
+                onBlur={(e)   => validateField("idEstadoCarta", e.target.value)}
+                onChange={(e) => handleChange("idEstadoCarta", e.target.value ? Number(e.target.value) : "")}
+                className="
+                  w-full bg-white/[0.03] border border-white/[0.08] text-white
+                  rounded-2xl h-12 px-4 text-sm
+                  focus:outline-none focus:border-green-400/40 focus:bg-white/[0.05]
+                  hover:border-white/15
+                  transition-all duration-300
+                  appearance-none cursor-pointer
+                "
               >
-                <option value="">Estado</option>
+                <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
                 {estados.map((e) => (
-                  <option key={e.idEstadoCarta} value={e.idEstadoCarta}>
+                  <option key={e.idEstadoCarta} value={e.idEstadoCarta} className="bg-[#0c1320]">
                     {e.descripcion}
                   </option>
                 ))}
               </select>
-              {errors.idEstadoCarta && <p className="text-red-400 text-xs">{errors.idEstadoCarta}</p>}
+              {errors.idEstadoCarta && (
+                <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
+                  <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                  {errors.idEstadoCarta}
+                </p>
+              )}
             </div>
           </div>
 
           {/* DESCRIPCIÓN */}
-          <textarea
-            placeholder="Describe la carta..."
-            value={form.descripcion}
-            onBlur={(e) => validateField("descripcion", e.target.value)}
-            onChange={(e) => handleChange("descripcion", e.target.value)}
-            className="w-full bg-white/5 text-white p-3 rounded-xl placeholder:text-white/30"
-          />
-          {errors.descripcion && <p className="text-red-400 text-xs">{errors.descripcion}</p>}
+          <div className="space-y-2">
+            <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+              <FileText className="w-3 h-3 text-purple-400" />
+              Descripción
+              <span className="text-white/20 font-normal normal-case tracking-normal text-[10px]">mín. 20 caracteres</span>
+            </Label>
+            <div className="relative">
+              <textarea
+                placeholder="Describe la carta: habilidades especiales, rareza, estado físico, historia..."
+                value={form.descripcion}
+                onBlur={(e)   => validateField("descripcion", e.target.value)}
+                onChange={(e) => handleChange("descripcion", e.target.value)}
+                rows={3}
+                className="
+                  w-full bg-white/[0.03] border border-white/[0.08] text-white
+                  placeholder:text-white/15
+                  focus:border-purple-400/40 focus:outline-none focus:bg-white/[0.05]
+                  hover:border-white/15
+                  rounded-2xl resize-none text-sm px-4 py-3
+                  transition-all duration-300
+                "
+              />
+              {form.descripcion.length > 0 && (
+                <div className="absolute bottom-3 right-4 text-[10px] text-white/20">
+                  {form.descripcion.length} / 20+
+                </div>
+              )}
+            </div>
+            {errors.descripcion && (
+              <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
+                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                {errors.descripcion}
+              </p>
+            )}
+          </div>
 
           {/* CATEGORÍAS */}
-          <div>
+          <div className="space-y-3">
+            <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+              <Zap className="w-3 h-3 text-yellow-400" />
+              Categorías <span className="text-red-400">*</span>
+            </Label>
             <div className="flex flex-wrap gap-2">
               {categorias.map((cat) => {
                 const selected = form.categorias.includes(cat.idCategoria);
-                const style = categoriaStyles[cat.descripcion] || "";
-
+                const style    = categoriaStyles[cat.descripcion] || "";
                 return (
                   <button
                     key={cat.idCategoria}
                     type="button"
                     onClick={() => toggleCategoria(cat.idCategoria)}
-                    className={`px-3 py-2 rounded-full border-2 text-xs font-bold transition
-                      ${selected ? style : "bg-white/5 text-white border-white/20"}
+                    className={`
+                      px-4 py-2 rounded-full border-2 text-xs font-bold
+                      transition-all duration-200
+                      ${selected
+                        ? `${style} shadow-lg scale-105`
+                        : "bg-white/[0.03] text-white/40 border-white/10 hover:border-white/20 hover:text-white/60 hover:bg-white/[0.06]"
+                      }
                     `}
                   >
                     {cat.descripcion}
+                    {selected && <span className="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-current animate-pulse" />}
                   </button>
                 );
               })}
             </div>
-            {errors.categorias && <p className="text-red-400 text-xs">{errors.categorias}</p>}
+            {errors.categorias && (
+              <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
+                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                {errors.categorias}
+              </p>
+            )}
           </div>
 
           {/* IMÁGENES */}
-          <div>
-            <Label className="text-white/60 text-xs flex gap-1">
+          <div className="space-y-3">
+            <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
               <ImagePlus className="w-3 h-3 text-pink-400" />
-              Imágenes
+              Imágenes <span className="text-red-400">*</span>
             </Label>
 
+            {/* Previews estilo carta TCG */}
             {fileURLs.length > 0 && (
-              <div className="flex flex-wrap gap-3 mt-3">
+              <div className="flex flex-wrap gap-3 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.05]">
                 {fileURLs.map((src, i) => (
-                  <div key={i} className="relative group">
-                    <div className="w-28 h-40 rounded-xl overflow-hidden border border-white/20">
+                  <div key={i} className="relative group/img">
+                    <div className="
+                      w-24 h-36 rounded-xl overflow-hidden
+                      border-2 border-white/20
+                      shadow-xl shadow-black/50
+                      transition-all duration-200
+                      group-hover/img:scale-105
+                      group-hover/img:border-white/40
+                      group-hover/img:shadow-black/80
+                      bg-[#0a0f1e]
+                    ">
                       <img src={src} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 opacity-0 group-hover/img:opacity-100 bg-gradient-to-br from-white/10 via-transparent to-white/5 transition-opacity duration-300 pointer-events-none" />
                     </div>
 
+                    {/* Número */}
+                    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/70 text-white/50 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                      {i + 1}
+                    </div>
+
+                    {/* Botón eliminar */}
                     <button
                       type="button"
                       onClick={() => removeImage(i)}
-                      className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100"
+                      className="
+                        absolute -top-1.5 -right-1.5
+                        w-5 h-5 bg-red-500 hover:bg-red-400
+                        rounded-full shadow-lg
+                        flex items-center justify-center
+                        opacity-0 group-hover/img:opacity-100
+                        transition-all duration-150 z-10
+                      "
                     >
-                      <X className="w-3 h-3 text-white" />
+                      <X className="w-2.5 h-2.5 text-white" />
                     </button>
                   </div>
                 ))}
+
+                {/* Botón agregar más inline */}
+                <div
+                  className="
+                    w-24 h-36 rounded-xl
+                    border-2 border-dashed border-white/10
+                    flex flex-col items-center justify-center gap-1
+                    cursor-pointer
+                    hover:border-pink-400/30 hover:bg-pink-400/[0.03]
+                    transition-all duration-200
+                  "
+                  onClick={() => document.getElementById("image").click()}
+                >
+                  <ImagePlus className="w-5 h-5 text-white/20" />
+                  <span className="text-[9px] text-white/20 text-center px-1">Agregar</span>
+                </div>
               </div>
             )}
 
-            <div
-              className="mt-3 w-28 h-40 border-2 border-dashed border-white/20 rounded-xl flex items-center justify-center cursor-pointer"
-              onClick={() => document.getElementById("image").click()}
-            >
-              <span className="text-white/30 text-xs text-center">
-                Subir imágenes
-              </span>
-            </div>
+            {/* Zona upload inicial */}
+            {fileURLs.length === 0 && (
+              <div
+                className="
+                  flex flex-col items-center justify-center gap-2
+                  w-full h-28
+                  border-2 border-dashed border-white/[0.08]
+                  rounded-2xl cursor-pointer
+                  hover:border-pink-400/30 hover:bg-pink-400/[0.03]
+                  transition-all duration-300
+                  group/upload
+                "
+                onClick={() => document.getElementById("image").click()}
+              >
+                <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center group-hover/upload:bg-pink-400/10 group-hover/upload:border-pink-400/20 transition-all duration-300">
+                  <ImagePlus className="w-5 h-5 text-white/20 group-hover/upload:text-pink-400/60 transition-colors" />
+                </div>
+                <div className="text-center">
+                  <p className="text-[11px] text-white/30 group-hover/upload:text-white/50 transition-colors font-medium">
+                    Click para subir imágenes
+                  </p>
+                  <p className="text-[10px] text-white/15 mt-0.5">PNG, JPG, GIF</p>
+                </div>
+              </div>
+            )}
 
             <input
               id="image"
@@ -325,13 +494,35 @@ export default function CreateCarta() {
               onChange={handleChangeImage}
             />
 
-            {errors.imagenes && <p className="text-red-400 text-xs">{errors.imagenes}</p>}
+            {errors.imagenes && (
+              <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
+                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                {errors.imagenes}
+              </p>
+            )}
           </div>
 
-          {/* BOTONES */}
+          {/* Separador */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-white/[0.06]" />
+            <div className="w-1 h-1 rounded-full bg-white/10" />
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent to-white/[0.06]" />
+          </div>
+
+          {/* ACTIONS */}
           <div className="flex gap-3">
             <Link to="/carta" className="flex-1">
-              <Button className="w-full bg-white/5 text-white/60">
+              <Button
+                type="button"
+                variant="ghost"
+                className="
+                  w-full rounded-2xl h-12
+                  border border-white/[0.07]
+                  text-white/30 hover:text-white/60
+                  hover:bg-white/[0.04] hover:border-white/10
+                  text-sm transition-all duration-200
+                "
+              >
                 Cancelar
               </Button>
             </Link>
@@ -339,10 +530,23 @@ export default function CreateCarta() {
             <Button
               onClick={handleSubmit}
               disabled={loading}
-              className="flex-1 bg-yellow-400 text-black flex gap-2 items-center justify-center"
+              className="
+                flex-1 rounded-2xl h-12
+                bg-gradient-to-r from-yellow-400 to-yellow-300
+                hover:from-yellow-300 hover:to-yellow-200
+                text-black font-bold text-sm
+                shadow-lg shadow-yellow-400/25
+                hover:shadow-yellow-400/40 hover:scale-[1.02]
+                transition-all duration-200
+                flex items-center justify-center gap-2
+                disabled:opacity-60 disabled:scale-100
+              "
             >
-              <Save className="w-4 h-4" />
-              {loading ? "Guardando..." : "Guardar"}
+              {loading
+                ? <span className="w-4 h-4 border-2 border-black/20 border-t-black/60 rounded-full animate-spin" />
+                : <Save className="w-4 h-4" />
+              }
+              {loading ? "Guardando..." : "Guardar Carta"}
             </Button>
           </div>
 

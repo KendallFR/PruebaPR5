@@ -14,6 +14,7 @@ class subasta
             
         }
     }
+    
     public function allSubastasFinalizadas()
     {
         try {
@@ -68,23 +69,36 @@ public function create()
         handleException($e);
     }
 }
-public function update()
-    {
-        try {
-            $request = new Request();
-            $response = new Response();
-            //Obtener json enviado
-            $inputJSON = $request->getJSON();
-            //Instancia del modelo
-            $subasta = new SubastaModel();
-            //Acción del modelo a ejecutar
-            $result = $subasta->update($inputJSON);
-            //Dar respuesta
-            $response->toJSON($result);
-        } catch (Exception $e) {
-            $response->toJSON($result);
-            handleException($e);
-            
-        }
+
+
+//inyectar el id de la URL al objeto
+public function update($id)
+{
+    try {
+        $request  = new Request();
+        $response = new Response();
+        $data     = $request->getJSON();
+        $data->idSubasta = $id;  
+        $subasta  = new SubastaModel();
+        $result   = $subasta->update($data);
+        $response->toJSON($result);
+    } catch (Exception $e) {
+        handleException($e);
     }
+}
+public function updateEstado($id)
+{
+    try {
+        $request  = new Request();
+        $response = new Response();
+        $data     = $request->getJSON();
+        $subasta  = new SubastaModel();
+        $result   = $subasta->updateEstado($id, $data->idEstadoSubasta);
+        $response->toJSON($result);
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
+    
 }

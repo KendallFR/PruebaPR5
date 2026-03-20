@@ -149,15 +149,37 @@ public function create($objeto)
     }
 }
 public function update($objeto)
-    {
-        //Consulta sql
-        $sql = "Update subasta SET fechaInicio ='$objeto->fechaInicio'," .
-            "fechaCierre ='$objeto->fechaCierre',precio=$objeto->precio,incrementoMin=$objeto->incrementoMin".
-            " Where idSubasta=$objeto->idSubasta";
+{
+    try {
+        
+        $fechaInicio = str_replace("T", " ", $objeto->fechaInicio);
+        $fechaCierre = str_replace("T", " ", $objeto->fechaCierre);
 
-        //Ejecutar la consulta
-        $cResults = $this->enlace->executeSQL_DML($sql);
-        //Retornar subasta
+        $sql = "UPDATE subasta SET
+                    fechaInicio  = '$fechaInicio',
+                    fechaCierre  = '$fechaCierre',
+                    precio       = $objeto->precio,
+                    incrementoMin = $objeto->incrementoMin
+                WHERE idSubasta = $objeto->idSubasta";
+
+        $this->enlace->executeSQL_DML($sql);
         return $this->get($objeto->idSubasta);
+
+    } catch (Exception $e) {
+        handleException($e);
     }
+}
+
+public function updateEstado($id, $idEstadoSubasta)
+{
+    try {
+        $sql = "UPDATE subasta SET idEstadoSubasta = $idEstadoSubasta WHERE idSubasta = $id";
+        $this->enlace->executeSQL_DML($sql);
+        return $this->get($id);
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
+
 }

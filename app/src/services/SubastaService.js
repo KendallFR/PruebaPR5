@@ -24,14 +24,24 @@ class SubastaService {
     return axios.post(BASE_URL, JSON.stringify(Subasta));
   }
 
-  updateSubasta(Subasta) {
-    return axios({
-      method: 'put',
-      url: BASE_URL,
-      data: JSON.stringify(Subasta)
 
-    })
-  }
+//  PUT /subasta/update/1 luego controller=subasta, action=update, param1=1
+updateSubasta(id, data) {
+  return axios.put(
+    BASE_URL + '/update/' + id,
+    JSON.stringify(data)
+  );
+}
+
+//  PUT /subasta/updateEstado/1  luego controller=subasta, action=updateEstado, param1=1
+updateEstado(id, idEstadoSubasta) {
+  return axios.put(
+    BASE_URL + '/updateEstado/' + id,
+    JSON.stringify({ idEstadoSubasta })
+  );
+}
+
+
 }
 
 export default new SubastaService();
