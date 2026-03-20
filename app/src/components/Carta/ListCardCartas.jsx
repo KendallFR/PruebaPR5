@@ -23,6 +23,8 @@ import {
   User,
   Zap,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
   Pencil,
   Trash2,
   Gavel,
@@ -33,8 +35,6 @@ import {
   BadgeCheck,
   ToggleLeft,
   ToggleRight,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -79,19 +79,12 @@ const getTypeStyles = (categorias) => {
         badge: "bg-blue-500/20 text-blue-300",
         gradient: "from-blue-500/30 via-blue-400/10 to-transparent",
       };
-    case "pokemon":
+    case "planta":
       return {
-        glow: "hover:shadow-purple-400/80 hover:border-purple-400/80",
-        ring: "group-hover:ring-purple-400/70",
-        badge: "bg-purple-400/20 text-purple-300",
-        gradient: "from-purple-400/30 via-purple-300/10 to-transparent",
-      };
-    case "entrenador":
-      return {
-        glow: "hover:shadow-orange-400/80 hover:border-orange-400/80",
-        ring: "group-hover:ring-orange-400/70",
-        badge: "bg-orange-400/20 text-orange-300",
-        gradient: "from-orange-400/30 via-orange-300/10 to-transparent",
+        glow: "hover:shadow-green-500/80 hover:border-green-500/80",
+        ring: "group-hover:ring-green-500/70",
+        badge: "bg-green-500/20 text-green-300",
+        gradient: "from-green-500/30 via-green-400/10 to-transparent",
       };
     case "objeto":
       return {
@@ -109,18 +102,6 @@ const getTypeStyles = (categorias) => {
       };
   }
 };
-
-const CONDICIONES_OPCIONES = [
-  { id: 1, descripcion: "Nuevo" },
-  { id: 2, descripcion: "Usado" },
-  { id: 3, descripcion: "Dañado" },
-];
-
-const ESTADOS_OPCIONES = [
-  { id: 1, descripcion: "Disponible" },
-  { id: 2, descripcion: "No disponible" },
-  { id: 3, descripcion: "En subasta" },
-];
 
 /* ══════════════════════════════════════
    MODAL EDITAR
@@ -562,14 +543,14 @@ export function ListCardCartas({ data, onRefresh }) {
                   <p className="text-sm text-white/70">{item.condicion.descripcion}</p>
                 </CardHeader>
 
-                {/* IMAGEN */}
+            {/* Imagen */}
                 <CardImageCarousel
                   imagenes={item.imagenes}
                   nombre={item.nombre}
                   BASE_URL={BASE_URL}
                 />
 
-                {/* CONTENT */}
+            {/* Contenido */}
                 <CardContent className="space-y-4 pt-4 text-white relative z-10">
 
                   <div className="flex items-center gap-3">
@@ -621,8 +602,7 @@ export function ListCardCartas({ data, onRefresh }) {
 
                   <div className="flex gap-2">
                     <TooltipProvider>
-
-                      {/* ── Editar — deshabilitado si inactiva ── */}
+                {/* Editar */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -639,7 +619,7 @@ export function ListCardCartas({ data, onRefresh }) {
                         </TooltipContent>
                       </Tooltip>
 
-                      {/* ── Borrado lógico — deshabilitado si ya inactiva ── */}
+                {/* Eliminar */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -656,7 +636,7 @@ export function ListCardCartas({ data, onRefresh }) {
                         </TooltipContent>
                       </Tooltip>
 
-                      {/* ── Toggle activar/desactivar — siempre activo ── */}
+                {/* Cambiar Estado */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -682,7 +662,7 @@ export function ListCardCartas({ data, onRefresh }) {
                         </TooltipContent>
                       </Tooltip>
 
-                      {/* ── Crear subasta — deshabilitado si inactiva ── */}
+                {/* Crear Subasta */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -694,7 +674,7 @@ export function ListCardCartas({ data, onRefresh }) {
                             <Gavel className="w-3.5 h-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>
+                  <TooltipContent>
                           {isInactive ? "Activa la carta para subastar" : "Crear subasta"}
                         </TooltipContent>
                       </Tooltip>

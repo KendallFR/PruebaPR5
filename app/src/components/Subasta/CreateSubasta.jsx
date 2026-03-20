@@ -29,7 +29,7 @@ export function CreateSubasta() {
   const cartaPreseleccionada = location.state?.carta ?? null;
 
   const [dataCartas, setDataCartas] = useState([]);
-  const [usuario]   = useState({ id: 1, nombre: "Usuario Simulado" });
+  const [usuario, setUsuario] = useState({ id: 1, nombre: "" }); // <-- ID por defecto
   const [error, setError] = useState("");
 
   /* ── Validación Yup ── */
@@ -108,6 +108,20 @@ export function CreateSubasta() {
     fetchCartas();
   }, []);
 
+  /* ── Cargar datos del usuario por ID ── */
+  useEffect(() => {
+    const fetchUsuario = async () => {
+      try {
+        const res = await SubastaService.getUsuario(usuario.id);
+        if (res.data?.data) setUsuario(res.data.data);
+      } catch (err) {
+        console.error("Error al cargar usuario:", err);
+        toast.error("No se pudo cargar la información del usuario");
+      }
+    };
+    fetchUsuario();
+  }, [usuario.id]);
+
   /* ── Submit ── */
   const onSubmit = async (dataForm) => {
     const subasta = {
@@ -126,7 +140,7 @@ export function CreateSubasta() {
       const response = await SubastaService.createSubasta(subasta);
       if (response.data) {
         toast.success("Subasta creada correctamente");
-        navigate("/subasta/SubastasFinalizadas");
+        navigate("/subasta/SubastasActivas");
       } else {
         toast.error("Error al crear subasta");
       }
@@ -225,7 +239,6 @@ export function CreateSubasta() {
                 )}
               </div>
             ) : (
-              /* Sin carta preseleccionada → selector normal */
               <Controller
                 name="idCarta"
                 control={control}
