@@ -88,20 +88,22 @@ export function CreateSubasta() {
 
   /* ── React Hook Form ── */
   const {
-    control,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      idCarta: cartaPreseleccionada ? cartaPreseleccionada.idCarta : "",
-      fechaInicio: "",
-      fechaCierre: "",
-      precio: "",
-      incrementoMin: "",
-    },
-    resolver: yupResolver(schema),
-  });
+  control,
+  handleSubmit,
+  setValue,
+  formState: { errors },
+} = useForm({
+  defaultValues: {
+    idCarta: cartaPreseleccionada ? cartaPreseleccionada.idCarta : "",
+    fechaInicio: "",
+    fechaCierre: "",
+    precio: "",
+    incrementoMin: "",
+  },
+  resolver: yupResolver(schema),
+  mode: "onBlur", // <- valida cuando un campo pierde el foco
+  reValidateMode: "onChange", // <- opcional, vuelve a validar mientras escriben
+});
 
   /* ── Sincronizar carta preseleccionada con RHF ── */
   useEffect(() => {
