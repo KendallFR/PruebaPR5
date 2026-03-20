@@ -23,7 +23,7 @@ import {
   Bolt,
   Flame,
   Droplets,
-  Leaf,
+  User,
   Box,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -34,62 +34,74 @@ import toast from "react-hot-toast";
 const CATEGORIAS_OPCIONES = [
   {
     id: 1,
-    descripcion: "Electrico",
-    icon: Bolt,
+    descripcion: "Pokemon",
+    icon: Sparkles,           // elige el icono que prefieras
     colors: {
-      idle:   "bg-yellow-400/10 border-yellow-400/30 text-yellow-400/60",
-      active: "bg-yellow-400/25 border-yellow-400 text-yellow-300 shadow-yellow-400/40",
-      glow:   "shadow-yellow-400/50 border-yellow-400/60",
-      gradient: "from-yellow-400/20 via-yellow-300/5 to-transparent",
-      dot:    "bg-yellow-400",
+      idle:     "bg-purple-400/10 border-purple-400/30 text-purple-400/60",
+      active:   "bg-purple-400/25 border-purple-400 text-purple-300 shadow-purple-400/40",
+      glow:     "shadow-purple-400/50 border-purple-400/60",
+      gradient: "from-purple-400/20 via-purple-300/5 to-transparent",
+      dot:      "bg-purple-400",
     },
   },
   {
     id: 2,
-    descripcion: "Fuego",
-    icon: Flame,
+    descripcion: "Objeto",
+    icon: Box,
     colors: {
-      idle:   "bg-red-500/10 border-red-500/30 text-red-400/60",
-      active: "bg-red-500/25 border-red-500 text-red-300 shadow-red-500/40",
-      glow:   "shadow-red-500/50 border-red-500/60",
-      gradient: "from-red-500/20 via-red-400/5 to-transparent",
-      dot:    "bg-red-500",
+      idle:     "bg-slate-400/10 border-slate-400/30 text-slate-300/60",
+      active:   "bg-slate-200/20 border-slate-200 text-white shadow-slate-300/30",
+      glow:     "shadow-slate-300/40 border-slate-300/50",
+      gradient: "from-slate-300/15 via-slate-200/5 to-transparent",
+      dot:      "bg-slate-300",
     },
   },
   {
     id: 3,
-    descripcion: "Agua",
-    icon: Droplets,
+    descripcion: "Entrenador",
+    icon: User,               // importa User de lucide-react
     colors: {
-      idle:   "bg-blue-500/10 border-blue-500/30 text-blue-400/60",
-      active: "bg-blue-500/25 border-blue-500 text-blue-300 shadow-blue-500/40",
-      glow:   "shadow-blue-500/50 border-blue-500/60",
-      gradient: "from-blue-500/20 via-blue-400/5 to-transparent",
-      dot:    "bg-blue-400",
+      idle:     "bg-orange-400/10 border-orange-400/30 text-orange-400/60",
+      active:   "bg-orange-400/25 border-orange-400 text-orange-300 shadow-orange-400/40",
+      glow:     "shadow-orange-400/50 border-orange-400/60",
+      gradient: "from-orange-400/20 via-orange-300/5 to-transparent",
+      dot:      "bg-orange-400",
     },
   },
   {
     id: 4,
-    descripcion: "Planta",
-    icon: Leaf,
+    descripcion: "Electrico",
+    icon: Bolt,
     colors: {
-      idle:   "bg-green-500/10 border-green-500/30 text-green-400/60",
-      active: "bg-green-500/25 border-green-500 text-green-300 shadow-green-500/40",
-      glow:   "shadow-green-500/50 border-green-500/60",
-      gradient: "from-green-500/20 via-green-400/5 to-transparent",
-      dot:    "bg-green-400",
+      idle:     "bg-yellow-400/10 border-yellow-400/30 text-yellow-400/60",
+      active:   "bg-yellow-400/25 border-yellow-400 text-yellow-300 shadow-yellow-400/40",
+      glow:     "shadow-yellow-400/50 border-yellow-400/60",
+      gradient: "from-yellow-400/20 via-yellow-300/5 to-transparent",
+      dot:      "bg-yellow-400",
     },
   },
   {
     id: 5,
-    descripcion: "Objeto",
-    icon: Box,
+    descripcion: "Fuego",
+    icon: Flame,
     colors: {
-      idle:   "bg-slate-400/10 border-slate-400/30 text-slate-300/60",
-      active: "bg-slate-200/20 border-slate-200 text-white shadow-slate-300/30",
-      glow:   "shadow-slate-300/40 border-slate-300/50",
-      gradient: "from-slate-300/15 via-slate-200/5 to-transparent",
-      dot:    "bg-slate-300",
+      idle:     "bg-red-500/10 border-red-500/30 text-red-400/60",
+      active:   "bg-red-500/25 border-red-500 text-red-300 shadow-red-500/40",
+      glow:     "shadow-red-500/50 border-red-500/60",
+      gradient: "from-red-500/20 via-red-400/5 to-transparent",
+      dot:      "bg-red-500",
+    },
+  },
+  {
+    id: 6,
+    descripcion: "Agua",
+    icon: Droplets,
+    colors: {
+      idle:     "bg-blue-500/10 border-blue-500/30 text-blue-400/60",
+      active:   "bg-blue-500/25 border-blue-500 text-blue-300 shadow-blue-500/40",
+      glow:     "shadow-blue-500/50 border-blue-500/60",
+      gradient: "from-blue-500/20 via-blue-400/5 to-transparent",
+      dot:      "bg-blue-400",
     },
   },
 ];
@@ -169,26 +181,33 @@ export default function CreateCarta() {
     setLoading(true);
     setError(null);
     try {
-      // Construir FormData con los nombres que espera el PHP Model
-      // PHP: nombre, descripcion, idUsuario, idEstadoCarta, idCondicion
+      // PHP lee: $_POST['nombre'], $_POST['idCondicion'], $_POST['idEstadoCarta'],
+      //          $_POST['categorias'][], $_FILES['imagenes'][]
       const formData = new FormData();
       formData.append("nombre",        form.nombre);
       formData.append("descripcion",   form.descripcion);
       formData.append("idCondicion",   form.condicionId);
       formData.append("idEstadoCarta", form.estadoCartaId);
-      // Categorías como array
+      formData.append("idUsuario",     1); // ← reemplaza con tu id de usuario real desde auth
+
+      // Categorías: PHP las lee como $_POST['categorias']
       form.categorias.forEach((id) => formData.append("categorias[]", id));
-      // Imágenes
+
+      // Imágenes: PHP las lee como $_FILES['imagenes']
       form.imagenes.forEach((img) => formData.append("imagenes[]", img));
 
-      await CartaService.createCarta(formData);
+      const response = await CartaService.createCarta(formData);
 
-      toast.success("Carta creada correctamente");
-      navigate("/carta");
+      if (response.data) {
+        toast.success("Carta creada correctamente");
+        navigate("/carta");
+      } else {
+        toast.error("Error al crear la carta");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Error al crear la carta");
-      setError(err?.response?.data?.message ?? "Error al crear la carta.");
+      setError(err?.response?.data?.error ?? "Error al crear la carta.");
     } finally {
       setLoading(false);
     }

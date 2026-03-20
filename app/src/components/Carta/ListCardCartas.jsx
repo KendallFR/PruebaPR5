@@ -43,7 +43,7 @@ import toast from "react-hot-toast";
 
 ListCardCartas.propTypes = {
   data: PropTypes.array,
-  onRefresh: PropTypes.func, // callback para recargar lista tras editar/borrar
+  onRefresh: PropTypes.func,
 };
 
 /* ── ESTILOS POR TIPO ── */
@@ -79,12 +79,19 @@ const getTypeStyles = (categorias) => {
         badge: "bg-blue-500/20 text-blue-300",
         gradient: "from-blue-500/30 via-blue-400/10 to-transparent",
       };
-    case "planta":
+    case "pokemon":
       return {
-        glow: "hover:shadow-green-500/80 hover:border-green-500/80",
-        ring: "group-hover:ring-green-500/70",
-        badge: "bg-green-500/20 text-green-300",
-        gradient: "from-green-500/30 via-green-400/10 to-transparent",
+        glow: "hover:shadow-purple-400/80 hover:border-purple-400/80",
+        ring: "group-hover:ring-purple-400/70",
+        badge: "bg-purple-400/20 text-purple-300",
+        gradient: "from-purple-400/30 via-purple-300/10 to-transparent",
+      };
+    case "entrenador":
+      return {
+        glow: "hover:shadow-orange-400/80 hover:border-orange-400/80",
+        ring: "group-hover:ring-orange-400/70",
+        badge: "bg-orange-400/20 text-orange-300",
+        gradient: "from-orange-400/30 via-orange-300/10 to-transparent",
       };
     case "objeto":
       return {
@@ -140,8 +147,8 @@ function EditModal({ item, onClose, onSaved }) {
       const formData = new FormData();
       formData.append("nombre",        form.nombre);
       formData.append("descripcion",   form.descripcion);
-      formData.append("idCondicion",   form.condicionId);   // key que espera PHP
-      formData.append("idEstadoCarta", form.estadoCartaId); // key que espera PHP
+      formData.append("idCondicion",   form.condicionId);
+      formData.append("idEstadoCarta", form.estadoCartaId);
 
       await CartaService.updateCarta(item.idCarta, formData);
       toast.success("Carta actualizada correctamente");
@@ -155,7 +162,6 @@ function EditModal({ item, onClose, onSaved }) {
   };
 
   return (
-    /* Backdrop */
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
@@ -289,9 +295,8 @@ function DeleteModal({ item, onClose, onConfirmed }) {
   const handleDelete = async () => {
     setLoading(true);
     try {
-      // Borrado lógico: cambia estado a "No disponible" (id 2)
       const formData = new FormData();
-      formData.append("idEstadoCarta", 2); // estado "No disponible" — key que espera PHP
+      formData.append("idEstadoCarta", 2);
       await CartaService.updateCarta(item.idCarta, formData);
       toast.success(`"${item.nombre}" desactivada correctamente`);
       onConfirmed();
@@ -336,7 +341,7 @@ function DeleteModal({ item, onClose, onConfirmed }) {
             <span className="text-white font-semibold">"{item.nombre}"</span>?
           </p>
           <p className="text-white/35 text-xs mt-2">
-            El estado cambiará a <span className="text-red-300 font-semibold">No disponible</span>. Podrás reactivarla desde editar.
+            El estado cambiará a <span className="text-red-300 font-semibold">No disponible</span>. Podrás reactivarla con el botón de toggle.
           </p>
         </div>
 
@@ -370,7 +375,7 @@ function DeleteModal({ item, onClose, onConfirmed }) {
 /* ══════════════════════════════════════
    CARRUSEL DE IMÁGENES ESTILO CARTA TCG
 ══════════════════════════════════════ */
-function CardImageCarousel({ imagenes, nombre, BASE_URL, typeStyles }) {
+function CardImageCarousel({ imagenes, nombre, BASE_URL }) {
   const [current, setCurrent] = useState(0);
   const total = imagenes?.length ?? 0;
 
@@ -385,97 +390,66 @@ function CardImageCarousel({ imagenes, nombre, BASE_URL, typeStyles }) {
 
   return (
     <div className="flex justify-center px-4 py-4">
-      {/* Marco carta TCG */}
-      <div
-        className="
-          relative w-56 h-80
-          rounded-[14px] overflow-hidden
-          border-[3px] border-white/30
-          shadow-[0_10px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.18)]
-          ring-1 ring-black/50
-          bg-[#0a0f1e]
-          transition-all duration-300
-          group-hover:border-white/50
-          group-hover:shadow-[0_16px_50px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.25)]
-        "
-      >
+      <div className="
+        relative w-56 h-80
+        rounded-[14px] overflow-hidden
+        border-[3px] border-white/30
+        shadow-[0_10px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.18)]
+        ring-1 ring-black/50
+        bg-[#0a0f1e]
+        transition-all duration-300
+        group-hover:border-white/50
+        group-hover:shadow-[0_16px_50px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.25)]
+      ">
         {total > 0 ? (
           <>
-            {/* Imagen activa */}
             <img
               src={`${BASE_URL}/${imagenes[current].imagen}`}
               alt={`${nombre}-${current}`}
               className="w-full h-full object-cover transition-opacity duration-300"
             />
-
-            {/* Reflejo superior */}
             <div className="absolute top-0 left-0 right-0 h-[25%] bg-gradient-to-b from-white/12 to-transparent pointer-events-none" />
-
-            {/* Brillo holográfico hover */}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-white/10 via-transparent to-white/5 transition-opacity duration-300 pointer-events-none" />
-
-            {/* Sombra inferior para controles */}
             <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
 
-            {/* Controles carrusel — solo si hay más de 1 imagen */}
             {total > 1 && (
               <>
-                {/* Botón anterior */}
-                <button
-                  onClick={prev}
-                  className="
-                    absolute left-2 top-1/2 -translate-y-1/2
-                    w-7 h-7 rounded-full
-                    bg-black/60 hover:bg-black/90
-                    backdrop-blur-sm
-                    flex items-center justify-center
-                    text-white/70 hover:text-white
-                    border border-white/15 hover:border-white/40
-                    transition-all duration-150
-                    z-10
-                    opacity-0 group-hover:opacity-100
-                  "
-                >
+                <button onClick={prev} className="
+                  absolute left-2 top-1/2 -translate-y-1/2
+                  w-7 h-7 rounded-full bg-black/60 hover:bg-black/90
+                  backdrop-blur-sm flex items-center justify-center
+                  text-white/70 hover:text-white
+                  border border-white/15 hover:border-white/40
+                  transition-all duration-150 z-10
+                  opacity-0 group-hover:opacity-100
+                ">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
 
-                {/* Botón siguiente */}
-                <button
-                  onClick={next}
-                  className="
-                    absolute right-2 top-1/2 -translate-y-1/2
-                    w-7 h-7 rounded-full
-                    bg-black/60 hover:bg-black/90
-                    backdrop-blur-sm
-                    flex items-center justify-center
-                    text-white/70 hover:text-white
-                    border border-white/15 hover:border-white/40
-                    transition-all duration-150
-                    z-10
-                    opacity-0 group-hover:opacity-100
-                  "
-                >
+                <button onClick={next} className="
+                  absolute right-2 top-1/2 -translate-y-1/2
+                  w-7 h-7 rounded-full bg-black/60 hover:bg-black/90
+                  backdrop-blur-sm flex items-center justify-center
+                  text-white/70 hover:text-white
+                  border border-white/15 hover:border-white/40
+                  transition-all duration-150 z-10
+                  opacity-0 group-hover:opacity-100
+                ">
                   <ChevronRight className="w-4 h-4" />
                 </button>
 
-                {/* Dots indicadores */}
                 <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10">
                   {imagenes.map((_, i) => (
                     <button
                       key={i}
                       onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
-                      className={`
-                        rounded-full transition-all duration-200
-                        ${i === current
-                          ? "w-4 h-1.5 bg-white"
-                          : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"
-                        }
-                      `}
+                      className={`rounded-full transition-all duration-200 ${
+                        i === current ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"
+                      }`}
                     />
                   ))}
                 </div>
 
-                {/* Contador */}
                 <div className="absolute top-2 right-2 bg-black/60 text-white/70 text-[9px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-sm z-10">
                   {current + 1}/{total}
                 </div>
@@ -492,25 +466,26 @@ function CardImageCarousel({ imagenes, nombre, BASE_URL, typeStyles }) {
   );
 }
 
-
+/* ══════════════════════════════════════
+   COMPONENTE PRINCIPAL
+══════════════════════════════════════ */
 export function ListCardCartas({ data, onRefresh }) {
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BASE_URL + "uploads";
 
-  const [editItem,   setEditItem]   = useState(null); // carta a editar
-  const [deleteItem, setDeleteItem] = useState(null); // carta a borrar
+  const [editItem,   setEditItem]   = useState(null);
+  const [deleteItem, setDeleteItem] = useState(null);
 
   const handleSubasta = (item) => {
     navigate("/subasta/create", { state: { carta: item } });
   };
 
   const handleToggleEstado = async (item) => {
-    // Si está inactiva (id 2) → activar (id 1). Si está activa → desactivar (id 2).
     const isInactive = item.estadoCarta?.descripcion?.toLowerCase().includes("no disponible");
     const nuevoEstado = isInactive ? 1 : 2;
     try {
       const formData = new FormData();
-      formData.append("idEstadoCarta", nuevoEstado); // key que espera PHP
+      formData.append("idEstadoCarta", nuevoEstado);
       await CartaService.updateCarta(item.idCarta, formData);
       toast.success(isInactive ? `"${item.nombre}" activada` : `"${item.nombre}" desactivada`);
       onRefresh?.();
@@ -587,12 +562,11 @@ export function ListCardCartas({ data, onRefresh }) {
                   <p className="text-sm text-white/70">{item.condicion.descripcion}</p>
                 </CardHeader>
 
-                {/* IMAGEN — carrusel estilo carta TCG */}
+                {/* IMAGEN */}
                 <CardImageCarousel
                   imagenes={item.imagenes}
                   nombre={item.nombre}
                   BASE_URL={BASE_URL}
-                  typeStyles={typeStyles}
                 />
 
                 {/* CONTENT */}
@@ -645,25 +619,27 @@ export function ListCardCartas({ data, onRefresh }) {
                 {/* BOTONES */}
                 <div className="flex justify-between items-center border-t border-white/10 p-3 relative z-10 bg-white/5 backdrop-blur-md">
 
-                  {/* IZQUIERDA: acciones */}
                   <div className="flex gap-2">
                     <TooltipProvider>
 
-                      {/* Editar */}
+                      {/* ── Editar — deshabilitado si inactiva ── */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             size="icon"
                             onClick={() => setEditItem(item)}
-                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200"
+                            disabled={isInactive}
+                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Editar</TooltipContent>
+                        <TooltipContent>
+                          {isInactive ? "Activa la carta para editar" : "Editar"}
+                        </TooltipContent>
                       </Tooltip>
 
-                      {/* Borrado lógico */}
+                      {/* ── Borrado lógico — deshabilitado si ya inactiva ── */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -680,7 +656,7 @@ export function ListCardCartas({ data, onRefresh }) {
                         </TooltipContent>
                       </Tooltip>
 
-                      {/* Activar / Desactivar toggle */}
+                      {/* ── Toggle activar/desactivar — siempre activo ── */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -706,7 +682,7 @@ export function ListCardCartas({ data, onRefresh }) {
                         </TooltipContent>
                       </Tooltip>
 
-                      {/* Crear subasta */}
+                      {/* ── Crear subasta — deshabilitado si inactiva ── */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -719,14 +695,14 @@ export function ListCardCartas({ data, onRefresh }) {
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          {isInactive ? "Carta inactiva" : "Crear subasta"}
+                          {isInactive ? "Activa la carta para subastar" : "Crear subasta"}
                         </TooltipContent>
                       </Tooltip>
 
                     </TooltipProvider>
                   </div>
 
-                  {/* DERECHA: detalle */}
+                  {/* Detalle — siempre activo */}
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>

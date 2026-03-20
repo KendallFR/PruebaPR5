@@ -43,6 +43,17 @@ class CategoriaModel
         }
     }
 
+
+
+public function insertCategoriaCarta($idCarta, $idCategoria)
+{
+    $sql = "INSERT INTO carta_categoria (idCarta, idCategoria)
+            VALUES ($idCarta, $idCategoria)";
+
+    return $this->enlace->executeSQL_DML($sql);
+}
+
+
     public function getCartasbyCategoria($param)
     {
         try{
@@ -59,3 +70,4 @@ class CategoriaModel
         }
     }
 }
+

@@ -14,6 +14,23 @@ class ImageModel
         return false;
     }
 
+
+public function insertImageCarta($idCarta, $file)
+{
+    // ✅ Nombre original sin time()
+    $nombre = $file['name'];
+    $ruta   = "uploads/" . $nombre;
+
+    move_uploaded_file($file['tmp_name'], $ruta);
+
+    // ✅ Tabla imagen_carta, columna imagen (igual que getImageCarta)
+    $sql = "INSERT INTO imagen_carta (idCarta, imagen)
+            VALUES ($idCarta, '$nombre')";
+
+    return $this->enlace->executeSQL_DML($sql);
+}
+
+
     public function getImageCarta($idCarta)
     {
         try{
@@ -25,3 +42,4 @@ class ImageModel
         }
     }
 }
+

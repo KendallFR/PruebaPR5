@@ -112,7 +112,7 @@ class CartaModel
         }
     }
 
-    public function create($data)
+ public function create($data)
 {
     try {
         $sql = "INSERT INTO carta 
@@ -126,7 +126,10 @@ class CartaModel
                     NOW()
                 )";
 
-        return $this->enlace->executeSQL_DML($sql);
+        // ✅ executeSQL_DML_last retorna el insert_id directamente
+        $idCarta = $this->enlace->executeSQL_DML_last($sql);
+
+        return ["idCarta" => $idCarta];
 
     } catch (Exception $e) {
         handleException($e);
@@ -136,12 +139,23 @@ class CartaModel
 public function update($id, $data)
 {
     try {
-        $sql = "UPDATE carta SET
-                    nombre = '$data->nombre',
-                    descripcion = '$data->descripcion',
-                    idEstadoCarta = $data->idEstadoCarta,
-                    idCondicion = $data->idCondicion
-                WHERE idCarta = $id";
+        $sets = [];
+
+        if (!empty($data->nombre))
+            $sets[] = "nombre = '$data->nombre'";
+
+        if (isset($data->descripcion))
+            $sets[] = "descripcion = '$data->descripcion'";
+
+        if (!empty($data->idEstadoCarta))
+            $sets[] = "idEstadoCarta = " . intval($data->idEstadoCarta);
+
+        if (!empty($data->idCondicion))
+            $sets[] = "idCondicion = " . intval($data->idCondicion);
+
+        if (empty($sets)) return ["updated" => 0];
+
+        $sql = "UPDATE carta SET " . implode(', ', $sets) . " WHERE idCarta = $id";
 
         return $this->enlace->executeSQL_DML($sql);
 
