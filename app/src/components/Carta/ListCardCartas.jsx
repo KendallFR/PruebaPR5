@@ -103,7 +103,6 @@ const getTypeStyles = (categorias) => {
   }
 };
 
-
   const handleChange = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 

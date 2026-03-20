@@ -187,7 +187,6 @@ export default function CreateCarta() {
             </CardTitle>
           </div>
         </CardHeader>
-
         <CardContent className="space-y-5 px-7 pb-8">
 
           {/* NOMBRE */}
