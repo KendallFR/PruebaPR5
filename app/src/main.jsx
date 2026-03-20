@@ -5,9 +5,6 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Layout } from './components/Layout/Layout'
 import { Home } from './components/Home/Home'
 import { PageNotFound } from './components/Home/PageNotFound'
-import TableMovies from './components/Movie/TableMovies'
-import { ListMovies } from './components/Movie/ListMovies'
-import { DetailMovie } from './components/Movie/DetailMovie'
 import TableUsuarios from './components/Usuario/TableUsuarios'
 import { DetailUsuario } from './components/Usuario/DetailUsuario'
 import { ListCartas } from './components/Carta/ListCartas'
@@ -37,9 +34,6 @@ const rutas = createBrowserRouter([
       // Ruta comodín (404)
       { path: "*", element: <PageNotFound /> },
        //Rutas componentes
-      {path:"movie/table", element: <TableMovies/>},
-      {path:"movie", element: <ListMovies/>},
-      {path:"movie/detail/:id", element: <DetailMovie />},
       {path:"usuario/table", element: <TableUsuarios/>},
       {path:"usuario/detail/:id", element: <DetailUsuario/>},
       {path:"carta", element: <ListCartas/>},

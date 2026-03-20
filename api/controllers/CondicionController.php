@@ -1,5 +1,5 @@
 <?php
-class CondicionController
+class condicion
 {
     public function index()
     {
