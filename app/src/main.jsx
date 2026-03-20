@@ -54,7 +54,7 @@ const rutas = createBrowserRouter([
 ])
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Toaster position="top-middle" reverseOrder={false} />
+    <Toaster position="top-center" reverseOrder={false} />
     <RouterProvider router={rutas} />
   </StrictMode>,
 )
