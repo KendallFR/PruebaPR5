@@ -103,17 +103,6 @@ const getTypeStyles = (categorias) => {
   }
 };
 
-/* ══════════════════════════════════════
-   MODAL EDITAR
-══════════════════════════════════════ */
-function EditModal({ item, onClose, onSaved }) {
-  const [form, setForm] = useState({
-    nombre:        item.nombre        ?? "",
-    descripcion:   item.descripcion   ?? "",
-    idCondicion:   String(item.condicion?.idCondicion  ?? item.idCondicion  ?? ""),
-    idEstadoCarta: String(item.estadoCarta?.idEstadoCarta ?? item.idEstadoCarta ?? ""),
-  });
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -123,7 +112,7 @@ function EditModal({ item, onClose, onSaved }) {
       toast.error("El nombre es obligatorio");
       return;
     }
-    setLoading(true);
+setLoading(true);
     try {
       const formData = new FormData();
       formData.append("nombre",        form.nombre);
@@ -141,131 +130,6 @@ function EditModal({ item, onClose, onSaved }) {
       setLoading(false);
     }
   };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="
-        w-full max-w-lg
-        bg-[#0d1424]/95 border border-white/10
-        rounded-2xl shadow-2xl shadow-black/60
-        overflow-hidden
-        animate-in fade-in zoom-in-95 duration-200
-      ">
-        {/* Header modal */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/8">
-          <div className="flex items-center gap-2">
-            <Pencil className="w-4 h-4 text-blue-400" />
-            <h3 className="text-white font-bold text-lg">Editar Carta</h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-white/50 hover:text-white transition-all"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Body modal */}
-        <div className="px-6 py-5 space-y-4">
-
-          {/* Nombre */}
-          <div className="space-y-1.5">
-            <Label className="text-white/60 text-[11px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-              <BadgeCheck className="w-3.5 h-3.5 text-yellow-400" />
-              Nombre <span className="text-red-400">*</span>
-            </Label>
-            <Input
-              value={form.nombre}
-              onChange={(e) => handleChange("nombre", e.target.value)}
-              className="!bg-white/[0.04] border-white/10 !text-white placeholder:text-white/20 focus:border-yellow-400/50 rounded-xl h-10 text-sm"
-            />
-          </div>
-
-          {/* Descripción */}
-          <div className="space-y-1.5">
-            <Label className="text-white/60 text-[11px] font-bold uppercase tracking-widest">
-              Descripción
-            </Label>
-            <textarea
-              value={form.descripcion}
-              onChange={(e) => handleChange("descripcion", e.target.value)}
-              rows={3}
-              placeholder="Descripción de la carta..."
-              className="w-full bg-white/[0.04] border border-white/10 text-white placeholder:text-white/20 focus:border-purple-400/40 focus:outline-none focus:ring-1 focus:ring-purple-400/15 rounded-xl resize-none text-sm px-3 py-2.5 transition-colors"
-            />
-          </div>
-
-          {/* Condición + Estado */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-white/60 text-[11px] font-bold uppercase tracking-widest">
-                Condición
-              </Label>
-              <Select value={form.condicionId} onValueChange={(v) => handleChange("condicionId", v)}>
-                <SelectTrigger className="!bg-white/[0.04] border-white/10 !text-white rounded-xl h-10 text-sm [&>span]:text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="!bg-[#0c1320] border border-white/10 z-[60]">
-                  {CONDICIONES_OPCIONES.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}
-                      className="!text-white/80 hover:!bg-white/8 focus:!bg-white/8 focus:!text-white cursor-pointer text-sm">
-                      {c.descripcion}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-white/60 text-[11px] font-bold uppercase tracking-widest">
-                Estado
-              </Label>
-              <Select value={form.estadoCartaId} onValueChange={(v) => handleChange("estadoCartaId", v)}>
-                <SelectTrigger className="!bg-white/[0.04] border-white/10 !text-white rounded-xl h-10 text-sm [&>span]:text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="!bg-[#0c1320] border border-white/10 z-[60]">
-                  {ESTADOS_OPCIONES.map((e) => (
-                    <SelectItem key={e.id} value={String(e.id)}
-                      className="!text-white/80 hover:!bg-white/8 focus:!bg-white/8 focus:!text-white cursor-pointer text-sm">
-                      {e.descripcion}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer modal */}
-        <div className="flex gap-3 px-6 pb-6">
-          <Button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-xl border border-white/10 bg-transparent text-white/50 hover:text-white hover:bg-white/5 text-sm"
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="button"
-            disabled={loading}
-            onClick={handleSave}
-            className="flex-1 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-bold text-sm shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
-          >
-            {loading
-              ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              : <Save className="w-4 h-4" />
-            }
-            {loading ? "Guardando..." : "Guardar Cambios"}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ══════════════════════════════════════
    MODAL CONFIRMAR BORRADO LÓGICO
@@ -454,7 +318,6 @@ export function ListCardCartas({ data, onRefresh }) {
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BASE_URL + "uploads";
 
-  const [editItem,   setEditItem]   = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
 
   const handleSubasta = (item) => {
@@ -476,10 +339,9 @@ export function ListCardCartas({ data, onRefresh }) {
     }
   };
 
-  const handleEditSaved = () => {
-    setEditItem(null);
-    onRefresh?.();
-  };
+  const handleEdit = (item) => {
+  navigate(`/carta/edit/${item.idCarta}`, { state: { carta: item } });
+};
 
   const handleDeleteConfirmed = () => {
     setDeleteItem(null);
@@ -606,13 +468,13 @@ export function ListCardCartas({ data, onRefresh }) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      size="icon"
-                            onClick={() => setEditItem(item)}
-                            disabled={isInactive}
-                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                            <Pencil className="w-3.5 h-3.5" />
-                    </Button>
+  size="icon"
+  onClick={() => handleEdit(item)}
+  disabled={isInactive}
+  className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+>
+  <Pencil className="w-3.5 h-3.5" />
+</Button>
                   </TooltipTrigger>
                         <TooltipContent>
                           {isInactive ? "Activa la carta para editar" : "Editar"}
@@ -704,13 +566,6 @@ export function ListCardCartas({ data, onRefresh }) {
       </div>
 
       {/* MODALES */}
-      {editItem && (
-        <EditModal
-          item={editItem}
-          onClose={() => setEditItem(null)}
-          onSaved={handleEditSaved}
-        />
-      )}
       {deleteItem && (
         <DeleteModal
           item={deleteItem}
