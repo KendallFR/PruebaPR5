@@ -112,57 +112,58 @@ class CartaModel
         }
     }
 
- public function create($data)
+ public function create($objeto)
 {
     try {
         $sql = "INSERT INTO carta 
                 (nombre, descripcion, idUsuario, idEstadoCarta, idCondicion, fechaRegistro)
                 VALUES (
-                    '$data->nombre',
-                    '$data->descripcion',
-                    $data->idUsuario,
-                    $data->idEstadoCarta,
-                    $data->idCondicion,
+                    '$objeto->nombre',
+                    '$objeto->descripcion',
+                    $objeto->idUsuario,
+                    $objeto->idEstadoCarta,
+                    $objeto->idCondicion,
                     NOW()
                 )";
 
-        // ✅ executeSQL_DML_last retorna el insert_id directamente
         $idCarta = $this->enlace->executeSQL_DML_last($sql);
+        //Crear elementos a insertar en categorias
+        foreach ($objeto->categorias as $value) {
+            $sql = "Insert into carta_categoria(idCarta,idCategoria)" .
+                " Values($idCarta,$value)";
+            $vResultadoCat = $this->enlace->executeSQL_DML($sql);
+        }
 
-        return ["idCarta" => $idCarta];
-
-    } catch (Exception $e) {
-        handleException($e);
-    }
-}
-
-public function update($id, $data)
-{
-    try {
-        $sets = [];
-
-        if (!empty($data->nombre))
-            $sets[] = "nombre = '$data->nombre'";
-
-        if (isset($data->descripcion))
-            $sets[] = "descripcion = '$data->descripcion'";
-
-        if (!empty($data->idEstadoCarta))
-            $sets[] = "idEstadoCarta = " . intval($data->idEstadoCarta);
-
-        if (!empty($data->idCondicion))
-            $sets[] = "idCondicion = " . intval($data->idCondicion);
-
-        if (empty($sets)) return ["updated" => 0];
-
-        $sql = "UPDATE carta SET " . implode(', ', $sets) . " WHERE idCarta = $id";
-
-        return $this->enlace->executeSQL_DML($sql);
+        return $this->get($idCarta);
 
     } catch (Exception $e) {
         handleException($e);
     }
 }
+
+public function update($objeto)
+    {
+        //Consulta sql
+        $sql = "Update carta SET nombre ='$objeto->nombre'," .
+            "descripcion ='$objeto->descripcion',fechaRegistro='$objeto->fechaRegistro',idUsuario=$objeto->idUsuario,idEstadoCarta =$objeto->idEstadoCarta," .
+            "idCondicion=$objeto->idCondicion" .
+            " Where idCarta=$objeto->idCarta";
+
+        //Ejecutar la consulta
+        $cResults = $this->enlace->executeSQL_DML($sql);
+        //--- Generos ---
+        //Eliminar generos asociados a la pelicula
+        $sql = "Delete from carta_categoria where idCarta=$objeto->idCarta";
+        $vResultadoD = $this->enlace->executeSQL_DML($sql);
+        //Insertar generos
+        foreach ($objeto->categorias as $item) {
+            $sql = "Insert into carta_categoria(idCarta,idCategoria)" .
+                " Values($objeto->idCarta,$item)";
+            $vResultadoCat = $this->enlace->executeSQL_DML($sql);
+        }
+        //Retornar carta
+        return $this->get($objeto->idCarta);
+    }
 
 public function delete($id)
 {

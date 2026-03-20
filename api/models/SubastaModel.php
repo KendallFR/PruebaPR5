@@ -127,10 +127,6 @@ public function allSubastasFinalizadas()
 public function create($objeto)
 {
     try {
-
-        $usuarioId = $objeto->idUsuario;
-
-        // Insert
         $sql = "INSERT INTO subasta
                 (fechaInicio, fechaCierre, precio, incrementoMin, idUsuario, idEstadoSubasta, idCarta)
                 VALUES
@@ -139,8 +135,8 @@ public function create($objeto)
                     '$objeto->fechaCierre',
                     $objeto->precio,
                     $objeto->incrementoMin,
-                    $usuarioId,
-                    4,
+                    $objeto->idUsuario,
+                    1,
                     $objeto->idCarta
                 )";
 
@@ -150,8 +146,18 @@ public function create($objeto)
 
     } catch (Exception $e) {
         handleException($e);
-        return null;
     }
 }
+public function update($objeto)
+    {
+        //Consulta sql
+        $sql = "Update subasta SET fechaInicio ='$objeto->fechaInicio'," .
+            "fechaCierre ='$objeto->fechaCierre',precio=$objeto->precio,incrementoMin=$objeto->incrementoMin".
+            " Where idSubasta=$objeto->idSubasta";
 
+        //Ejecutar la consulta
+        $cResults = $this->enlace->executeSQL_DML($sql);
+        //Retornar subasta
+        return $this->get($objeto->idSubasta);
+    }
 }
