@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + 'carta';
-const CATEGORIA_URL = import.meta.env.VITE_BASE_URL + 'categoria'; 
 
 class CartaService {
 
@@ -21,27 +20,21 @@ class CartaService {
     return axios.get(BASE_URL + "/allCartasActivas/");
   }
 
-  createCarta(data){
-    return axios.post(BASE_URL, data, {
-      headers: { "Content-Type": "multipart/form-data" } //  para imagen
-    });
+  createCarta(Carta) {
+    return axios.post(BASE_URL, JSON.stringify(Carta));
   }
 
-  updateCarta(id, data){
-    return axios.post(BASE_URL + '/' + id, data, { // usa POST para formData
-      headers: { "Content-Type": "multipart/form-data" }
-    });
+  updateCarta(Carta) {
+    return axios({
+      method: 'put',
+      url: BASE_URL,
+      data: JSON.stringify(Carta)
+
+    })
   }
 
   deleteCarta(id){
     return axios.delete(BASE_URL + '/' + id);
   }
-
-  //  CLAVE CATEGORÍA 
-  getCategorias(){
-    return axios.get(CATEGORIA_URL);
-  }
-
 }
-
 export default new CartaService();
