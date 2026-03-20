@@ -20,7 +20,8 @@ import { CartaSubastas } from './components/Carta/CartaSubastas'
 import { CreateSubasta } from './components/Subasta/CreateSubasta'
 import  CartaCRUD  from './components/Carta/CrearCarta'
 import { EditSubasta } from './components/Subasta/EditSubasta'
-import { Toaster } from "react-hot-toast";
+import { CustomToaster } from './components/ui/CustomToaster'
+
 
 
 
@@ -59,24 +60,6 @@ const rutas = createBrowserRouter([
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <RouterProvider router={rutas} />
-    <Toaster                          
-      position="top-right"
-      toastOptions={{
-        duration: 3000,
-        style: {
-          background: "#0d1424",
-          color: "#fff",
-          border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: "12px",
-          fontSize: "13px",
-        },
-        success: {
-          iconTheme: { primary: "#facc15", secondary: "#000" },
-        },
-        error: {
-          iconTheme: { primary: "#ef4444", secondary: "#fff" },
-        },
-      }}
-    />
+    <CustomToaster />
   </StrictMode>
-);
+)
