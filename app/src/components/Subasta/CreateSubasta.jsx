@@ -17,19 +17,20 @@ import { Save, ArrowLeft, Gavel, Sparkles, BadgeCheck, CalendarClock, DollarSign
 // Servicios
 import SubastaService from "../../services/SubastaService";
 import CartaService from "../../services/CartaService";
+import UsuarioService from "@/services/UsuarioService";
 
 // Select custom
 import { CustomSelect } from "../ui/custom/custom-select";
 
 export function CreateSubasta() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Carta preseleccionada desde ListCardCartas (navigate con state)
   const cartaPreseleccionada = location.state?.carta ?? null;
 
   const [dataCartas, setDataCartas] = useState([]);
-  const [usuario, setUsuario] = useState({ id: 1, nombre: "" }); // <-- ID por defecto
+  const [usuario, setUsuario] = useState({ idUsuario: 1, nombre: "" }); // ID por defecto
   const [error, setError] = useState("");
 
   /* ── Validación Yup ── */
@@ -38,31 +39,41 @@ export function CreateSubasta() {
       .number()
       .typeError("Seleccione una carta")
       .required("Seleccione una carta")
-      .test("subasta-activa", "Esta carta ya tiene una subasta activa", async function (value) {
-        if (!value) return true;
-        try {
-          const res = await SubastaService.getSubastaCarta(value);
-          return !(res.data?.data?.length > 0);
-        } catch (err) {
-          if (err.response?.status === 404) return true;
-          return this.createError({ message: "Error al validar subasta de la carta" });
+      .test(
+        "subasta-activa",
+        "Esta carta ya tiene una subasta activa",
+        async function (value) {
+          if (!value) return true;
+          try {
+            const res = await SubastaService.getSubastaCarta(value);
+            return !(res.data?.data?.length > 0);
+          } catch (err) {
+            if (err.response?.status === 404) return true;
+            return this.createError({
+              message: "Error al validar subasta de la carta",
+            });
+          }
         }
-      }),
+      ),
     fechaInicio: yup
       .date()
-      .transform((val, orig) => orig ? new Date(orig) : val)
+      .transform((val, orig) => (orig ? new Date(orig) : val))
       .typeError("Fecha inicio inválida")
       .required("Fecha inicio requerida"),
     fechaCierre: yup
       .date()
-      .transform((val, orig) => orig ? new Date(orig) : val)
+      .transform((val, orig) => (orig ? new Date(orig) : val))
       .typeError("Fecha cierre inválida")
       .required("Fecha cierre requerida")
-      .test("fecha-valida", "La fecha cierre debe ser mayor que inicio", function (value) {
-        const { fechaInicio } = this.parent;
-        if (!fechaInicio || !value) return true;
-        return new Date(value) > new Date(fechaInicio);
-      }),
+      .test(
+        "fecha-valida",
+        "La fecha cierre debe ser mayor que inicio",
+        function (value) {
+          const { fechaInicio } = this.parent;
+          if (!fechaInicio || !value) return true;
+          return new Date(value) > new Date(fechaInicio);
+        }
+      ),
     precio: yup
       .number()
       .typeError("Debe ser número")
@@ -76,12 +87,17 @@ export function CreateSubasta() {
   });
 
   /* ── React Hook Form ── */
-  const { control, handleSubmit, setValue, formState: { errors } } = useForm({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
-      idCarta:       cartaPreseleccionada ? cartaPreseleccionada.idCarta : "",
-      fechaInicio:   "",
-      fechaCierre:   "",
-      precio:        "",
+      idCarta: cartaPreseleccionada ? cartaPreseleccionada.idCarta : "",
+      fechaInicio: "",
+      fechaCierre: "",
+      precio: "",
       incrementoMin: "",
     },
     resolver: yupResolver(schema),
@@ -102,7 +118,8 @@ export function CreateSubasta() {
         setDataCartas(res.data.data || []);
       } catch (err) {
         console.error(err);
-        if (err.name !== "AbortError") setError("Error al cargar cartas: " + err.message);
+        if (err.name !== "AbortError")
+          setError("Error al cargar cartas: " + err.message);
       }
     };
     fetchCartas();
@@ -112,7 +129,7 @@ export function CreateSubasta() {
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
-        const res = await SubastaService.getUsuario(usuario.id);
+        const res = await UsuarioService.getUsuarioById(usuario.idUsuario);
         if (res.data?.data) setUsuario(res.data.data);
       } catch (err) {
         console.error("Error al cargar usuario:", err);
@@ -120,22 +137,25 @@ export function CreateSubasta() {
       }
     };
     fetchUsuario();
-  }, [usuario.id]);
+  }, [usuario.idUsuario]);
 
   /* ── Submit ── */
   const onSubmit = async (dataForm) => {
     const subasta = {
-      idCarta:       Number(dataForm.idCarta),
-      fechaInicio:   dataForm.fechaInicio instanceof Date
-                       ? dataForm.fechaInicio.toISOString()
-                       : new Date(dataForm.fechaInicio).toISOString(),
-      fechaCierre:   dataForm.fechaCierre instanceof Date
-                       ? dataForm.fechaCierre.toISOString()
-                       : new Date(dataForm.fechaCierre).toISOString(),
-      precio:        Number(dataForm.precio),
+      idCarta: Number(dataForm.idCarta),
+      fechaInicio:
+        dataForm.fechaInicio instanceof Date
+          ? dataForm.fechaInicio.toISOString()
+          : new Date(dataForm.fechaInicio).toISOString(),
+      fechaCierre:
+        dataForm.fechaCierre instanceof Date
+          ? dataForm.fechaCierre.toISOString()
+          : new Date(dataForm.fechaCierre).toISOString(),
+      precio: Number(dataForm.precio),
       incrementoMin: Number(dataForm.incrementoMin),
-      idUsuario:     usuario.id,
+      idUsuario: usuario.idUsuario, // <-- enviamos el ID correcto
     };
+
     try {
       const response = await SubastaService.createSubasta(subasta);
       if (response.data) {
@@ -197,9 +217,7 @@ export function CreateSubasta() {
                   <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
                   Carta seleccionada
                 </Label>
-                {/* Card preview compacta */}
                 <div className="flex items-center gap-4 bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3">
-                  {/* Miniatura */}
                   <div className="w-12 h-16 rounded-lg overflow-hidden border border-white/20 flex-shrink-0 bg-[#0a0f1e]">
                     {cartaPreseleccionada.imagenes?.length > 0 ? (
                       <img
@@ -213,7 +231,6 @@ export function CreateSubasta() {
                       </div>
                     )}
                   </div>
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-bold text-sm truncate">{cartaPreseleccionada.nombre}</p>
                     <p className="text-white/40 text-xs mt-0.5">{cartaPreseleccionada.condicion?.descripcion}</p>
@@ -225,7 +242,6 @@ export function CreateSubasta() {
                       ))}
                     </div>
                   </div>
-                  {/* Campo registrado en RHF con el id de la carta */}
                   <Controller
                     name="idCarta"
                     control={control}
@@ -234,9 +250,7 @@ export function CreateSubasta() {
                     )}
                   />
                 </div>
-                {errors.idCarta && (
-                  <p className="text-red-400 text-xs mt-1">{errors.idCarta.message}</p>
-                )}
+                {errors.idCarta && <p className="text-red-400 text-xs mt-1">{errors.idCarta.message}</p>}
               </div>
             ) : (
               <Controller

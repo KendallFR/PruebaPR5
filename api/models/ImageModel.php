@@ -51,9 +51,6 @@ class ImageModel
         try{
             $vSql = "SELECT * FROM imagen_carta where idCarta=$idCarta order by id desc";
             $vResultado = $this->enlace->ExecuteSQL($vSql);
-            if (!empty($vResultado)){
-                return $vResultado[0];
-            }
             return $vResultado;
         } catch (Exception $e) {
             handleException($e);

@@ -110,8 +110,8 @@ function EditModal({ item, onClose, onSaved }) {
   const [form, setForm] = useState({
     nombre:        item.nombre        ?? "",
     descripcion:   item.descripcion   ?? "",
-    condicionId:   String(item.condicion?.idCondicion  ?? item.condicionId  ?? ""),
-    estadoCartaId: String(item.estadoCarta?.idEstadoCarta ?? item.estadoCartaId ?? ""),
+    idCondicion:   String(item.condicion?.idCondicion  ?? item.idCondicion  ?? ""),
+    idEstadoCarta: String(item.estadoCarta?.idEstadoCarta ?? item.idEstadoCarta ?? ""),
   });
   const [loading, setLoading] = useState(false);
 
@@ -507,12 +507,12 @@ export function ListCardCartas({ data, onRefresh }) {
         {/* GRID */}
         <div className="grid gap-8 p-6 sm:grid-cols-2 lg:grid-cols-3">
           {data && data.map((item) => {
-            const typeStyles = getTypeStyles(item.categorias);
+        const typeStyles = getTypeStyles(item.categorias);
             const isInactive = item.estadoCarta?.descripcion?.toLowerCase().includes("no disponible");
 
-            return (
-              <Card
-                key={item.idCarta}
+        return (
+          <Card
+            key={item.idCarta}
                 className={`
                   group relative overflow-hidden
                   border border-white/10 bg-white/10
@@ -522,7 +522,7 @@ export function ListCardCartas({ data, onRefresh }) {
                   ${isInactive ? "opacity-60 grayscale-[40%]" : ""}
                   ${typeStyles.glow}
                 `}
-              >
+          >
                 {/* Efectos hover */}
                 <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br ${typeStyles.gradient} pointer-events-none`} />
                 <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none ring-2 ${typeStyles.ring} blur-[2px]`} />
@@ -535,112 +535,112 @@ export function ListCardCartas({ data, onRefresh }) {
                 )}
 
                 {/* HEADER */}
-                <CardHeader className="text-center pb-2 relative z-10">
-                  <CardTitle className="text-xl font-bold text-yellow-400 flex items-center justify-center gap-2">
-                    <Sparkles className="w-5 h-5" />
-                    {item.nombre}
-                  </CardTitle>
+            <CardHeader className="text-center pb-2 relative z-10">
+              <CardTitle className="text-xl font-bold text-yellow-400 flex items-center justify-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                {item.nombre}
+              </CardTitle>
                   <p className="text-sm text-white/70">{item.condicion.descripcion}</p>
-                </CardHeader>
+            </CardHeader>
 
             {/* Imagen */}
-                <CardImageCarousel
-                  imagenes={item.imagenes}
-                  nombre={item.nombre}
-                  BASE_URL={BASE_URL}
-                />
+            <CardImageCarousel
+              imagenes={item.imagenes}
+              nombre={item.nombre}
+              BASE_URL={BASE_URL}
+            />
 
             {/* Contenido */}
-                <CardContent className="space-y-4 pt-4 text-white relative z-10">
+            <CardContent className="space-y-4 pt-4 text-white relative z-10">
 
-                  <div className="flex items-center gap-3">
-                    <div className="bg-blue-500/20 p-2 rounded-lg">
-                      <User className="w-4 h-4 text-blue-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-white/60">Propietario</p>
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-500/20 p-2 rounded-lg">
+                  <User className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-white/60">Propietario</p>
                       <p className="font-semibold">{item.propietario.nombre}</p>
-                    </div>
-                  </div>
+                </div>
+              </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="bg-yellow-500/20 p-2 rounded-lg">
-                      <Zap className="w-4 h-4 text-yellow-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-white/60">Categorías</p>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {item.categorias?.map((categoria, index) => (
+              <div className="flex items-center gap-3">
+                <div className="bg-yellow-500/20 p-2 rounded-lg">
+                  <Zap className="w-4 h-4 text-yellow-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-white/60">Categorías</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {item.categorias?.map((categoria, index) => (
                           <span key={index} className={`px-2 py-1 text-xs font-semibold rounded-full ${typeStyles.badge}`}>
-                            {categoria.descripcion}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                        {categoria.descripcion}
+                      </span>
+                    ))}
                   </div>
+                </div>
+              </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="bg-green-500/20 p-2 rounded-lg">
-                      <Globe className="w-4 h-4 text-green-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-white/60">Disponibilidad</p>
+              <div className="flex items-center gap-3">
+                <div className="bg-green-500/20 p-2 rounded-lg">
+                  <Globe className="w-4 h-4 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-white/60">Disponibilidad</p>
                       <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                         isInactive
                           ? "bg-red-500/20 text-red-300"
                           : "bg-green-400/20 text-green-300"
                       }`}>
                         {item.estadoCarta.descripcion}
-                      </span>
-                    </div>
-                  </div>
+                  </span>
+                </div>
+              </div>
 
-                </CardContent>
+            </CardContent>
 
                 {/* BOTONES */}
                 <div className="flex justify-between items-center border-t border-white/10 p-3 relative z-10 bg-white/5 backdrop-blur-md">
 
                   <div className="flex gap-2">
-                    <TooltipProvider>
+              <TooltipProvider>
                 {/* Editar */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
                             onClick={() => setEditItem(item)}
                             disabled={isInactive}
                             className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                          >
+                    >
                             <Pencil className="w-3.5 h-3.5" />
-                          </Button>
-                        </TooltipTrigger>
+                    </Button>
+                  </TooltipTrigger>
                         <TooltipContent>
                           {isInactive ? "Activa la carta para editar" : "Editar"}
                         </TooltipContent>
-                      </Tooltip>
+                </Tooltip>
 
                 {/* Eliminar */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
                             onClick={() => setDeleteItem(item)}
                             disabled={isInactive}
                             className="w-8 h-8 rounded-full bg-white/10 hover:bg-red-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                          >
+                    >
                             <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </TooltipTrigger>
+                    </Button>
+                  </TooltipTrigger>
                         <TooltipContent>
                           {isInactive ? "Ya está desactivada" : "Desactivar"}
                         </TooltipContent>
-                      </Tooltip>
+                </Tooltip>
 
                 {/* Cambiar Estado */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
                             onClick={() => handleToggleEstado(item)}
                             className={`
                               w-8 h-8 rounded-full border shadow
@@ -655,52 +655,52 @@ export function ListCardCartas({ data, onRefresh }) {
                               ? <ToggleLeft  className="w-3.5 h-3.5" />
                               : <ToggleRight className="w-3.5 h-3.5" />
                             }
-                          </Button>
-                        </TooltipTrigger>
+                    </Button>
+                  </TooltipTrigger>
                         <TooltipContent>
                           {isInactive ? "Activar carta" : "Desactivar carta"}
                         </TooltipContent>
-                      </Tooltip>
+                </Tooltip>
 
                 {/* Crear Subasta */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
                             onClick={() => handleSubasta(item)}
                             disabled={isInactive}
                             className="w-8 h-8 rounded-full bg-white/10 hover:bg-yellow-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                          >
+                    >
                             <Gavel className="w-3.5 h-3.5" />
-                          </Button>
-                        </TooltipTrigger>
+                    </Button>
+                  </TooltipTrigger>
                   <TooltipContent>
                           {isInactive ? "Activa la carta para subastar" : "Crear subasta"}
                         </TooltipContent>
-                      </Tooltip>
+                </Tooltip>
 
                     </TooltipProvider>
                   </div>
 
                   {/* Detalle — siempre activo */}
                   <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link to={`/carta/detail/${item.idCarta}`}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link to={`/carta/detail/${item.idCarta}`}>
                           <Button size="icon" className="rounded-full bg-yellow-400 hover:bg-yellow-300 text-black shadow-lg hover:scale-110 transition">
-                            <Info className="w-4 h-4" />
-                          </Button>
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent>Detalle</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                        <Info className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>Detalle</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+            </div>
+          </Card>
+        );
+      })}
+    </div>
       </div>
 
       {/* MODALES */}
