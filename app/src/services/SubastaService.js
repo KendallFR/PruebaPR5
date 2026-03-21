@@ -24,13 +24,13 @@ class SubastaService {
     return axios.post(BASE_URL, JSON.stringify(Subasta));
   }
 
-updateSubasta(id, data) {
-  return axios.put(
-    BASE_URL + '/update/' + id,
-    JSON.stringify(data)
-  );
-}
-
+updateUsuario(Subasta) {
+    return axios({
+      method: 'put',
+      url: BASE_URL,
+      data: JSON.stringify(Subasta)
+    })
+  }
 updateEstado(Subasta) {
     return axios({
       method: 'put',
