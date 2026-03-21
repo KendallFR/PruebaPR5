@@ -152,10 +152,10 @@ public function update($objeto)
         //Ejecutar la consulta
         $cResults = $this->enlace->executeSQL_DML($sql);
         //--- Generos ---
-        //Eliminar generos asociados a la pelicula
+        //Eliminar generos asociados a la carta
         $sql = "Delete from carta_categoria where idCarta=$objeto->idCarta";
         $vResultadoD = $this->enlace->executeSQL_DML($sql);
-        //Insertar generos
+        //Insertar categorias
         foreach ($objeto->categorias as $item) {
             $sql = "Insert into carta_categoria(idCarta,idCategoria)" .
                 " Values($objeto->idCarta,$item)";
@@ -165,12 +165,22 @@ public function update($objeto)
         return $this->get($objeto->idCarta);
     }
 
-public function delete($id)
+    public function updateEstado($objeto)
 {
     try {
-        $sql = "DELETE FROM carta WHERE idCarta = $id";
-        return $this->enlace->executeSQL_DML($sql);
-
+        $sql = "Update carta SET idEstadoCarta=$objeto->idEstadoCarta" . "WHERE idCarta =$objeto->idCarta";
+        $this->enlace->executeSQL_DML($sql);
+        return $this->get($objeto->idCarta);
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+public function delete($objeto)
+{
+    try {
+        $sql = "Update carta SET idEstadoCarta=4" . "WHERE idCarta =$objeto->idCarta";
+        $this->enlace->executeSQL_DML($sql);
+        return $this->get($objeto->idCarta);
     } catch (Exception $e) {
         handleException($e);
     }

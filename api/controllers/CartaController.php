@@ -84,37 +84,45 @@ public function create()
         }
 }
 
-public function update()
+public function update($id)
     {
         try {
             $request = new Request();
             $response = new Response();
-            //Obtener json enviado
             $inputJSON = $request->getJSON();
-            //Instancia del modelo
             $carta = new CartaModel();
-            //Acción del modelo a ejecutar
             $result = $carta->update($inputJSON);
-            //Dar respuesta
             $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);
             handleException($e);
-            
         }
     }
-
+    public function updateEstado($id)
+{
+    try {
+        $request  = new Request();
+        $response = new Response();
+        $inputJSON     = $request->getJSON();
+        $carta  = new CartaModel();
+        $result   = $carta->updateEstado($inputJSON);
+        $response->toJSON($result);
+    } catch (Exception $e) {
+        $response->toJSON($result);
+        handleException($e);
+    }
+}
 public function delete($id)
 {
     try {
+        $request  = new Request();
         $response = new Response();
-
-        $cartaM = new CartaModel();
-        $result = $cartaM->delete($id);
-
+        $inputJSON     = $request->getJSON();
+        $carta  = new CartaModel();
+        $result   = $carta->delete($inputJSON);
         $response->toJSON($result);
-
     } catch (Exception $e) {
+        $response->toJSON($result);
         handleException($e);
     }
 }

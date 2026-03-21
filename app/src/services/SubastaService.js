@@ -24,8 +24,6 @@ class SubastaService {
     return axios.post(BASE_URL, JSON.stringify(Subasta));
   }
 
-
-//  PUT /subasta/update/1 luego controller=subasta, action=update, param1=1
 updateSubasta(id, data) {
   return axios.put(
     BASE_URL + '/update/' + id,
@@ -33,14 +31,23 @@ updateSubasta(id, data) {
   );
 }
 
-//  PUT /subasta/updateEstado/1  luego controller=subasta, action=updateEstado, param1=1
-updateEstado(id, idEstadoSubasta) {
-  return axios.put(
-    BASE_URL + '/updateEstado/' + id,
-    JSON.stringify({ idEstadoSubasta })
-  );
-}
+updateEstado(Subasta) {
+    return axios({
+      method: 'put',
+      url: BASE_URL,
+      data: JSON.stringify(Subasta)
 
+    })
+  }
+
+delete(Subasta) {
+    return axios({
+      method: 'put',
+      url: BASE_URL,
+      data: JSON.stringify(Subasta)
+
+    })
+  }
 
 }
 

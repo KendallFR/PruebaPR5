@@ -33,8 +33,13 @@ class CartaService {
     })
   }
 
-  deleteCarta(id){
-    return axios.delete(BASE_URL + '/' + id);
+  delete(Carta) {
+    return axios({
+      method: 'put',
+      url: BASE_URL,
+      data: JSON.stringify(Carta)
+
+    })
   }
 }
 export default new CartaService();

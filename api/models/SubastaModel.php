@@ -62,7 +62,7 @@ public function allSubastasFinalizadas()
                     (SELECT COUNT(*) FROM puja s WHERE s.idSubasta = u.idSubasta) 
                     AS cantidadPujas
 
-                    FROM subasta u where u.idEstadoSubasta = 2 or u.idEstadoSubasta = 3 or u.idEstadoSubasta = 4 order by idSubasta desc;";
+                    FROM subasta u where u.idEstadoSubasta = 2 or u.idEstadoSubasta = 3 order by idSubasta desc;";
 		    $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado) && is_array($vResultado)) {
                 for ($i = 0; $i < count($vResultado); $i++) {
@@ -170,16 +170,14 @@ public function update($objeto)
     }
 }
 
-public function updateEstado($id, $idEstadoSubasta)
+public function delete($objeto)
 {
     try {
-        $sql = "UPDATE subasta SET idEstadoSubasta = $idEstadoSubasta WHERE idSubasta = $id";
+        $sql = "Update subasta SET idEstadoSubasta=3" . "WHERE idSubasta =$objeto->idSubasta";
         $this->enlace->executeSQL_DML($sql);
-        return $this->get($id);
+        return $this->get($objeto->idSubasta);
     } catch (Exception $e) {
         handleException($e);
     }
 }
-
-
 }

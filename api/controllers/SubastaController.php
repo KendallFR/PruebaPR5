@@ -70,32 +70,30 @@ public function create()
     }
 }
 
-
-//inyectar el id de la URL al objeto
 public function update($id)
 {
     try {
         $request  = new Request();
         $response = new Response();
-        $data     = $request->getJSON();
-        $data->idSubasta = $id;  
+        $inputJSON     = $request->getJSON();  
         $subasta  = new SubastaModel();
-        $result   = $subasta->update($data);
+        $result   = $subasta->update($inputJSON);
         $response->toJSON($result);
     } catch (Exception $e) {
         handleException($e);
     }
 }
-public function updateEstado($id)
+public function delete($id)
 {
     try {
         $request  = new Request();
         $response = new Response();
-        $data     = $request->getJSON();
+        $inputJSON     = $request->getJSON();
         $subasta  = new SubastaModel();
-        $result   = $subasta->updateEstado($id, $data->idEstadoSubasta);
+        $result   = $subasta->delete($inputJSON);
         $response->toJSON($result);
     } catch (Exception $e) {
+        $response->toJSON($result);
         handleException($e);
     }
 }
