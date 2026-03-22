@@ -38,22 +38,15 @@ export function EditSubasta() {
 useEffect(() => {
   const fetchSubasta = async () => {
     try {
-      const res  = await SubastaService.getSubastaById(id);
-      
-      //  la subasta viene en res.data.data o res.data según la API
+        const res = await SubastaService.getSubastaById(id);
       const data = res.data?.data ?? res.data;
       
       setSubasta(data);
 
-      const toDatetimeLocal = (str) => {
-        if (!str) return "";
-        return str.replace(" ", "T").substring(0, 16);
-      };
-
       setForm({
-        fechaInicio:   toDatetimeLocal(data.fechaInicio),
-        fechaCierre:   toDatetimeLocal(data.fechaCierre),
-        precio:        data.precio        ?? "",
+  fechaInicio: formatToInputDate(data.fechaInicio),
+  fechaCierre: formatToInputDate(data.fechaCierre),
+  precio: data.precio ?? "",
         incrementoMin: data.incrementoMin ?? "",
       });
     } catch (err) {
@@ -65,6 +58,16 @@ useEffect(() => {
   };
   fetchSubasta();
 }, [id]);
+
+  const formatToInputDate = (dateString) => {
+  if (!dateString || dateString === "0000-00-00 00:00:00") return "";
+
+  const date = new Date(dateString);
+
+  const pad = (n) => n.toString().padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
