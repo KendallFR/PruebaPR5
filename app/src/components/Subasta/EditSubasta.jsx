@@ -18,46 +18,46 @@ import SubastaService from "@/services/SubastaService";
 import toast from "react-hot-toast";
 
 export function EditSubasta() {
-  const { id }    = useParams();
-  const navigate  = useNavigate();
-  const BASE_URL  = import.meta.env.VITE_BASE_URL + "uploads";
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const BASE_URL = import.meta.env.VITE_BASE_URL + "uploads";
 
-  const [subasta,  setSubasta]  = useState(null);
-  const [loading,  setLoading]  = useState(true);
-  const [saving,   setSaving]   = useState(false);
-  const [errors,   setErrors]   = useState({});
+  const [subasta, setSubasta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
-    fechaInicio:   "",
-    fechaCierre:   "",
-    precio:        "",
+    fechaInicio: "",
+    fechaCierre: "",
+    precio: "",
     incrementoMin: "",
   });
 
   /* ── Cargar subasta ── */
-useEffect(() => {
-  const fetchSubasta = async () => {
-    try {
+  useEffect(() => {
+    const fetchSubasta = async () => {
+      try {
         const res = await SubastaService.getSubastaById(id);
-      const data = res.data?.data ?? res.data;
-      
-      setSubasta(data);
+        const data = res.data?.data ?? res.data;
 
-      setForm({
+        setSubasta(data);
+
+        setForm({
   fechaInicio: formatToInputDate(data.fechaInicio),
   fechaCierre: formatToInputDate(data.fechaCierre),
   precio: data.precio ?? "",
-        incrementoMin: data.incrementoMin ?? "",
-      });
-    } catch (err) {
-      console.error(err);
-      toast.error("Error al cargar la subasta");
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchSubasta();
-}, [id]);
+  incrementoMin: data.incrementoMin ?? "",
+});
+      } catch (err) {
+        console.error(err);
+        toast.error("Error al cargar la subasta");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSubasta();
+  }, [id]);
 
   const formatToInputDate = (dateString) => {
   if (!dateString || dateString === "0000-00-00 00:00:00") return "";
@@ -77,14 +77,19 @@ useEffect(() => {
   /* ── Validar ── */
   const validate = () => {
     const newErrors = {};
-    if (!form.fechaInicio)              newErrors.fechaInicio   = "Fecha de inicio requerida";
-    if (!form.fechaCierre)              newErrors.fechaCierre   = "Fecha de cierre requerida";
+
+    if (!form.fechaInicio)
+      newErrors.fechaInicio = "Fecha de inicio requerida";
+
+    if (!form.fechaCierre)
+      newErrors.fechaCierre = "Fecha de cierre requerida";
+
     if (!form.precio || Number(form.precio) <= 0)
-                                        newErrors.precio        = "Precio debe ser mayor a 0";
+      newErrors.precio = "Precio debe ser mayor a 0";
+
     if (!form.incrementoMin || Number(form.incrementoMin) <= 0)
-                                        newErrors.incrementoMin = "Incremento debe ser mayor a 0";
-    if (form.fechaInicio && form.fechaCierre && form.fechaCierre <= form.fechaInicio)
-                                        newErrors.fechaCierre   = "El cierre debe ser después del inicio";
+      newErrors.incrementoMin = "Incremento debe ser mayor a 0";
+
     return newErrors;
   };
 
@@ -96,12 +101,16 @@ useEffect(() => {
 
     setSaving(true);
     try {
-      await SubastaService.updateSubasta(id, {
-        fechaInicio:   form.fechaInicio,
-        fechaCierre:   form.fechaCierre,
-        precio:        Number(form.precio),
+      const subastaUpdate = {
+        idSubasta: Number(id),
+        fechaInicio: form.fechaInicio,
+        fechaCierre: form.fechaCierre,
+        precio: Number(form.precio),
         incrementoMin: Number(form.incrementoMin),
-      });
+      };
+
+      await SubastaService.updateSubasta(subastaUpdate);
+
       toast.success("Subasta actualizada correctamente");
       navigate("/subasta/SubastasActivas");
     } catch (err) {
@@ -185,11 +194,11 @@ useEffect(() => {
             ">
               {carta?.imagenes?.length > 0 ? (
                 <>
-                  <img
-                    src={`${BASE_URL}/${carta.imagenes[0].imagen}`}
-                    alt={carta.nombre}
-                    className="w-full h-full object-cover"
-                  />
+                <img
+                  src={`${BASE_URL}/${carta.imagenes[0].imagen}`}
+                  alt={carta.nombre}
+                  className="w-full h-full object-cover"
+                />
                   <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
                 </>
               ) : (
@@ -238,11 +247,12 @@ useEffect(() => {
                 Fecha inicio <span className="text-red-400">*</span>
               </Label>
               <Input
-                type="datetime-local"
-                value={form.fechaInicio}
-                onChange={(e) => handleChange("fechaInicio", e.target.value)}
-                className="!bg-white/[0.04] border-white/10 !text-white rounded-xl h-11 text-sm focus:border-purple-400/50"
-              />
+  type="datetime-local"
+  placeholder="YYYY/MM/DD HH:mm:ss"
+  value={form.fechaInicio}
+  onChange={(e) => handleChange("fechaInicio", e.target.value)}
+  className="!bg-white/[0.04] border-white/10 !text-white rounded-xl h-11 text-sm focus:border-purple-400/50"
+/>
               {errors.fechaInicio && <p className="text-red-400 text-xs mt-1">{errors.fechaInicio}</p>}
             </div>
 
@@ -252,11 +262,12 @@ useEffect(() => {
                 Fecha cierre <span className="text-red-400">*</span>
               </Label>
               <Input
-                type="datetime-local"
-                value={form.fechaCierre}
-                onChange={(e) => handleChange("fechaCierre", e.target.value)}
-                className="!bg-white/[0.04] border-white/10 !text-white rounded-xl h-11 text-sm focus:border-red-400/50"
-              />
+  type="datetime-local"
+  placeholder="YYYY/MM/DD HH:mm:ss"
+  value={form.fechaCierre}
+  onChange={(e) => handleChange("fechaCierre", e.target.value)}
+  className="!bg-white/[0.04] border-white/10 !text-white rounded-xl h-11 text-sm focus:border-red-400/50"
+/>
               {errors.fechaCierre && <p className="text-red-400 text-xs mt-1">{errors.fechaCierre}</p>}
             </div>
           </div>
@@ -270,14 +281,14 @@ useEffect(() => {
               </Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm">$</span>
-                <Input
-                  type="number"
+              <Input
+                type="number"
                   min="0"
                   step="0.01"
-                  value={form.precio}
-                  onChange={(e) => handleChange("precio", e.target.value)}
+                value={form.precio}
+                onChange={(e) => handleChange("precio", e.target.value)}
                   className="!bg-white/[0.04] border-white/10 !text-white rounded-xl h-11 text-sm pl-7 focus:border-yellow-400/50"
-                />
+              />
               </div>
               {errors.precio && <p className="text-red-400 text-xs mt-1">{errors.precio}</p>}
             </div>
@@ -289,14 +300,14 @@ useEffect(() => {
               </Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm">$</span>
-                <Input
-                  type="number"
+              <Input
+                type="number"
                   min="0"
                   step="0.01"
-                  value={form.incrementoMin}
-                  onChange={(e) => handleChange("incrementoMin", e.target.value)}
+                value={form.incrementoMin}
+                onChange={(e) => handleChange("incrementoMin", e.target.value)}
                   className="!bg-white/[0.04] border-white/10 !text-white rounded-xl h-11 text-sm pl-7 focus:border-green-400/50"
-                />
+              />
               </div>
               {errors.incrementoMin && <p className="text-red-400 text-xs mt-1">{errors.incrementoMin}</p>}
             </div>

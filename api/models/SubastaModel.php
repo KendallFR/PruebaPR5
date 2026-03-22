@@ -151,13 +151,9 @@ public function create($objeto)
 public function update($objeto)
 {
     try {
-        
-        $fechaInicio = str_replace("T", " ", $objeto->fechaInicio);
-        $fechaCierre = str_replace("T", " ", $objeto->fechaCierre);
-
         $sql = "UPDATE subasta SET
-                    fechaInicio  = '$fechaInicio',
-                    fechaCierre  = '$fechaCierre',
+                    fechaInicio  = '$objeto->fechaInicio',
+                    fechaCierre  = '$objeto->fechaCierre',
                     precio       = $objeto->precio,
                     incrementoMin = $objeto->incrementoMin
                 WHERE idSubasta = $objeto->idSubasta";

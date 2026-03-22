@@ -70,20 +70,21 @@ public function create()
     }
 }
 
-public function update($id)
+public function update()
 {
     try {
         $request  = new Request();
         $response = new Response();
-        $inputJSON     = $request->getJSON();  
+        $inputJSON = $request->getJSON();  
         $subasta  = new SubastaModel();
         $result   = $subasta->update($inputJSON);
         $response->toJSON($result);
     } catch (Exception $e) {
+        $response->toJSON($result);
         handleException($e);
     }
 }
-public function delete($id)
+public function delete()
 {
     try {
         $request  = new Request();
@@ -96,7 +97,5 @@ public function delete($id)
         $response->toJSON($result);
         handleException($e);
     }
-}
-
-    
+}  
 }

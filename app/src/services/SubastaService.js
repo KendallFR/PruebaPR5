@@ -24,7 +24,7 @@ class SubastaService {
     return axios.post(BASE_URL, JSON.stringify(Subasta));
   }
 
-updateUsuario(Subasta) {
+updateSubasta(Subasta) {
     return axios({
       method: 'put',
       url: BASE_URL,
