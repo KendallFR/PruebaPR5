@@ -72,7 +72,15 @@ export default function CreateCarta() {
         ]);
         setCategorias(catRes.data?.data   ?? catRes.data  ?? []);
         setCondiciones(condRes.data?.data ?? condRes.data ?? []);
-        setEstados(estRes.data?.data      ?? estRes.data  ?? []);
+
+        const estadosList = estRes.data?.data ?? estRes.data ?? [];
+        setEstados(estadosList);
+
+        // Autoseleccionar "Disponible" al cargar
+        const disponible = estadosList.find((e) => e.descripcion === "Disponible");
+        if (disponible) {
+          setForm((prev) => ({ ...prev, idEstadoCarta: disponible.idEstadoCarta }));
+        }
       } catch {
         toast.error("Error cargando datos del formulario");
       }
@@ -113,7 +121,6 @@ export default function CreateCarta() {
     const newErrors = {};
     if (!form.nombre)                   newErrors.nombre        = "Nombre requerido";
     if (!form.idCondicion)              newErrors.idCondicion   = "Selecciona condición";
-    if (!form.idEstadoCarta)            newErrors.idEstadoCarta = "Selecciona estado";
     if (form.categorias.length === 0)   newErrors.categorias    = "Selecciona al menos una categoría";
     if (files.length === 0)             newErrors.imagenes      = "Agrega al menos una imagen";
 
@@ -122,6 +129,7 @@ export default function CreateCarta() {
 
     setLoading(true);
     try {
+      
       // 1. Crear la carta con JSON (getJSON en PHP)
       const response = await CartaService.createCarta({
         nombre:        form.nombre,
@@ -226,8 +234,8 @@ export default function CreateCarta() {
             {errors.nombre && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.nombre}</p>}
           </div>
 
-          {/* CONDICIÓN + ESTADO — del backend */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* CONDICIÓN — del backend */}
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                 <BadgeCheck className="w-3 h-3 text-blue-400" />
@@ -247,27 +255,10 @@ export default function CreateCarta() {
               </select>
               {errors.idCondicion && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.idCondicion}</p>}
             </div>
-
-            <div className="space-y-2">
-              <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-                <Globe className="w-3 h-3 text-green-400" />
-                Estado <span className="text-red-400">*</span>
-              </Label>
-              <select
-                value={form.idEstadoCarta || ""}
-                onChange={(e) => handleChange("idEstadoCarta", e.target.value ? Number(e.target.value) : "")}
-                className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-green-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer"
-              >
-                <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
-                {estados.map((e) => (
-                  <option key={e.idEstadoCarta} value={e.idEstadoCarta} className="bg-[#0c1320]">
-                    {e.descripcion}
-                  </option>
-                ))}
-              </select>
-              {errors.idEstadoCarta && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.idEstadoCarta}</p>}
-            </div>
           </div>
+
+          {/* Estado oculto — siempre "Disponible", se autoselecciona del backend */}
+          <input type="hidden" value={form.idEstadoCarta} />
 
           {/* DESCRIPCIÓN */}
           <div className="space-y-2">
