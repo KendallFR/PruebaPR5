@@ -6,41 +6,45 @@ import { ListCardSubastasActivas } from "./ListCardSubastasActivas";
 import SubastaService from "@/services/SubastaService";
 
 export function ListSubastasActivas() {
-    const [data, setData] = useState(null);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        const fetchData = async() => {
-            try {
-                const response = await SubastaService.allSubastasActivas();
-                // Si la petición es exitosa, se guardan los datos
-                console.log(response.data)
-                setData(response.data);
-                if(!response.data.success){
-                    setError(response.data.message)
-                }
-            } catch (err) {
-                // Si el error no es por cancelación, se registra
-                if (err.name !== "AbortError") setError(err.message);
-            } finally {
-                // Independientemente del resultado, se actualiza el loading
-                setLoading(false);
-            }
-        };
-        fetchData()
-    }, []);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await SubastaService.allSubastasActivas();
+      console.log(response.data);
 
-    if (loading) return <LoadingGrid type="grid" />;
-    if (error) return <ErrorAlert title="Error al cargar subastas activas" message={error} />;
-    if (!data || data.data.length === 0)
-        return <EmptyState message="No se encontraron subastas activas." />;
+      if (response.data.success === false) {
+        setError(response.data.message || "Error desconocido");
+        setData([]);
+      } else {
+        setData(response.data.data || []);
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") setError(err.message || "Error desconocido");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="mx-auto max-w-7xl p-6">
-        {data && (
-            <ListCardSubastasActivas data={data.data}/>
-        )}
-        </div>
-    );
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (loading) return <LoadingGrid type="grid" />;
+  if (error) return <ErrorAlert title="Error al cargar subastas activas" message={error} />;
+  if (!data || data.length === 0)
+    return <EmptyState message="No se encontraron subastas activas." />;
+
+  return (
+    <div className="mx-auto max-w-7xl p-6">
+      <ListCardSubastasActivas 
+        data={data}
+        onRefresh={fetchData} 
+      />
+    </div>
+  );
 }

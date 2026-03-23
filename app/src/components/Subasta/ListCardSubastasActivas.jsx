@@ -60,13 +60,17 @@ function DeleteModalSubasta({ item, onClose, onConfirmed }) {
   try {
     const subastaEliminar = {
       idSubasta: item.idSubasta,
-      idEstadoSubasta: 3 
+      idEstadoSubasta: 3
     };
 
-    await SubastaService.delete(subastaEliminar);
+    const response = await SubastaService.delete(subastaEliminar);
 
-    toast.success(`Subasta #${item.idSubasta} cancelada correctamente`);
-    onConfirmed();
+    if (response?.data?.success) {
+      toast.success(`Subasta #${item.idSubasta} cancelada correctamente`);
+      onConfirmed();
+    } else {
+      toast.error(response?.data?.message || "No se pudo cancelar la subasta");
+    }
   } catch (err) {
     console.error(err);
     toast.error("Error al cancelar la subasta");
