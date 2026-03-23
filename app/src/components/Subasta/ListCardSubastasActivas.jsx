@@ -56,18 +56,24 @@ function DeleteModalSubasta({ item, onClose, onConfirmed }) {
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
-    setLoading(true);
-    try {
-      await SubastaService.updateEstado(item.idSubasta, 3);
-      toast.success(`Subasta #${item.idSubasta} cancelada correctamente`);
-      onConfirmed();
-    } catch (err) {
-      console.error(err);
-      toast.error("Error al cancelar la subasta");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const subastaEliminar = {
+      idSubasta: item.idSubasta,
+      idEstadoSubasta: 3 
+    };
+
+    await SubastaService.delete(subastaEliminar);
+
+    toast.success(`Subasta #${item.idSubasta} cancelada correctamente`);
+    onConfirmed();
+  } catch (err) {
+    console.error(err);
+    toast.error("Error al cancelar la subasta");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div
@@ -161,23 +167,6 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
     const desc = item.estadoSubasta?.descripcion?.toLowerCase();
     return desc === "cancelada" || desc === "finalizada";
   };
-
-  const handleToggleEstado = async (item) => {
-    const inactive    = isInactive(item);
-    const nuevoEstado = inactive ? 1 : 3;
-    try {
-      await SubastaService.updateEstado(item.idSubasta, nuevoEstado);
-      toast.success(inactive
-        ? `Subasta #${item.idSubasta} reactivada`
-        : `Subasta #${item.idSubasta} cancelada`
-      );
-      onRefresh?.();
-    } catch (err) {
-      console.error(err);
-      toast.error("Error al cambiar el estado");
-    }
-  };
-
   const handleDeleteConfirmed = () => {
     setDeleteItem(null);
     onRefresh?.();
@@ -318,7 +307,7 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                   <div className="flex gap-2">
                     <TooltipProvider>
 
-                      {/* ✅ Editar — navega a página separada /subasta/edit/:id */}
+                      {/*  Editar — navega a página separada /subasta/edit/:id */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -347,28 +336,6 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                         </TooltipTrigger>
                         <TooltipContent>{inactive ? "Ya está cancelada" : "Cancelar subasta"}</TooltipContent>
                       </Tooltip>
-
-                      {/* Toggle activar/desactivar — siempre activo */}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            onClick={() => handleToggleEstado(item)}
-                            className={`w-8 h-8 rounded-full border shadow hover:scale-110 transition-all duration-200
-                              ${inactive
-                                ? "bg-green-500/20 hover:bg-green-500/80 border-green-500/40 text-green-400 hover:text-white"
-                                : "bg-orange-500/20 hover:bg-orange-500/80 border-orange-500/40 text-orange-400 hover:text-white"
-                              }`}
-                          >
-                            {inactive
-                              ? <ToggleLeft  className="w-3.5 h-3.5" />
-                              : <ToggleRight className="w-3.5 h-3.5" />
-                            }
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{inactive ? "Reactivar subasta" : "Cancelar subasta"}</TooltipContent>
-                      </Tooltip>
-
                     </TooltipProvider>
                   </div>
 

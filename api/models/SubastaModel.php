@@ -169,7 +169,9 @@ public function update($objeto)
 public function delete($objeto)
 {
     try {
-        $sql = "Update subasta SET idEstadoSubasta=3" . "WHERE idSubasta =$objeto->idSubasta";
+        $sql = "UPDATE subasta 
+                SET idEstadoSubasta= $objeto->idEstadoSubasta
+                WHERE idSubasta = $objeto->idSubasta";
         $this->enlace->executeSQL_DML($sql);
         return $this->get($objeto->idSubasta);
     } catch (Exception $e) {

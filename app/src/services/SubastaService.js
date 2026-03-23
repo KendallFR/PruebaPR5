@@ -32,11 +32,11 @@ updateSubasta(Subasta) {
     })
   }
 
-delete(Subasta) {
+delete(subasta) {
     return axios({
       method: 'put',
-      url: BASE_URL,
-      data: JSON.stringify(Subasta)
+      url: BASE_URL+ "/delete",
+      data: JSON.stringify(subasta)
 
     })
   }
