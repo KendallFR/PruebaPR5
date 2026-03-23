@@ -369,6 +369,7 @@ export function ListCardCartas({ data, onRefresh }) {
             const activo       = isDisponible(item);
             const inactivo     = isInactivo(item);
             const eliminado    = isEliminado(item);
+            const tieneSubastaActiva = item.subasta?.some(s => s.idEstadoSubasta === "1") ?? false;
 
             return (
               <Card key={item.idCarta} className={`
@@ -498,21 +499,28 @@ export function ListCardCartas({ data, onRefresh }) {
                           {eliminado ? "Carta eliminada" : activo ? "Desactivar temporalmente" : "Activar carta"}
                         </TooltipContent>
                       </Tooltip>
-
                       {/* SUBASTA — solo si está activa */}
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button size="icon"
-                            onClick={() => navigate("/subasta/create", { state: { carta: item } })}
-                            disabled={!activo || eliminado}
-                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-yellow-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-white/10">
-                            <Gavel className="w-3.5 h-3.5" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {eliminado ? "Carta eliminada" : !activo ? "Activa la carta para subastar" : "Crear subasta"}
-                        </TooltipContent>
-                      </Tooltip>
+  <TooltipTrigger asChild>
+    <Button
+  size="icon"
+  onClick={() => navigate("/subasta/create", { state: { carta: item } })}
+  disabled={tieneSubastaActiva || eliminado || !activo} 
+  className="w-8 h-8 rounded-full bg-white/10 hover:bg-yellow-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-white/10"
+>
+  <Gavel className="w-3.5 h-3.5" />
+</Button>
+  </TooltipTrigger>
+  <TooltipContent>
+  {eliminado
+    ? "Carta eliminada"
+    : !activo
+      ? "Activa la carta para subastar"
+      : tieneSubastaActiva
+        ? "Esta carta ya tiene una subasta activa"
+        : "Crear subasta"}
+</TooltipContent>
+</Tooltip>
 
                     </TooltipProvider>
                   </div>

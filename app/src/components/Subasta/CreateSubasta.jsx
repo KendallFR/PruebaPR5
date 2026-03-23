@@ -38,23 +38,7 @@ export function CreateSubasta() {
     idCarta: yup
       .number()
       .typeError("Seleccione una carta")
-      .required("Seleccione una carta")
-      .test(
-        "subasta-activa",
-        "Esta carta ya tiene una subasta activa",
-        async function (value) {
-          if (!value) return true;
-          try {
-            const res = await SubastaService.getSubastaCarta(value);
-            return !(res.data?.data?.length > 0);
-          } catch (err) {
-            if (err.response?.status === 404) return true;
-            return this.createError({
-              message: "Error al validar subasta de la carta",
-            });
-          }
-        }
-      ),
+      .required("Seleccione una carta"),
     fechaInicio: yup
       .date()
       .transform((val, orig) => (orig ? new Date(orig) : val))
