@@ -56,5 +56,34 @@ class ImageModel
             handleException($e);
         }
     }
+
+
+   public function deleteImage($id)
+{
+    try {
+        // Obtener nombre del archivo antes de borrar
+        $sql    = "SELECT imagen FROM imagen_carta WHERE id = $id";
+        $result = $this->enlace->ExecuteSQL($sql);
+
+        if (!empty($result)) {
+            $fileName = $result[0]->imagen;
+            $filePath = $this->upload_path . $fileName;
+
+            // Borrar de la BD
+            $sqlDelete = "DELETE FROM imagen_carta WHERE id = $id";
+            $this->enlace->executeSQL_DML($sqlDelete);
+
+            // Borrar archivo físico
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
+            return true;
+        }
+        return false;
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
 }
 

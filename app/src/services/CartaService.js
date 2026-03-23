@@ -24,14 +24,20 @@ class CartaService {
     return axios.post(BASE_URL, JSON.stringify(Carta));
   }
 
-  updateCarta(Carta) {
-    return axios({
-      method: 'put',
-      url: BASE_URL,
-      data: JSON.stringify(Carta)
+updateCarta(carta) {
+  return axios({
+    method: 'put',
+    url: BASE_URL + '/update/' + carta.idCarta,
+    data: JSON.stringify(carta)
+  });
+}
 
-    })
-  }
+updateEstadoCarta(carta) {
+  return axios.put(
+    `${BASE_URL}/updateEstado`,  
+    JSON.stringify(carta)
+  );
+}
 
   delete(Carta) {
     return axios({

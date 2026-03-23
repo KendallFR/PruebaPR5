@@ -4,25 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Sparkles,
-  Save,
-  ArrowLeft,
-  X,
-  BadgeCheck,
-  ImagePlus,
-  FileText,
-  Globe,
-  Zap,
+  Sparkles, ImagePlus, X, Save, ArrowLeft,
+  Zap, Globe, BadgeCheck, FileText,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import CartaService from "../../services/CartaService";
-import CondicionService from "../../services/CondicionService";
-import ImageService from "../../services/ImageService";
 import CategoriasService from "@/services/CategoriasService";
+import CondicionService from "../../services/CondicionService";
 import EstadoCartaService from "@/services/EstadoCartaService";
+import ImageService from "../../services/ImageService";
 import toast from "react-hot-toast";
 
-/*  COLORES */
+/* ── Colores por categoría desde el backend ── */
 const categoriaStyles = {
   Pokemon:    "bg-purple-400/20 border-purple-400 text-purple-300 shadow-purple-400/20",
   Objeto:     "bg-slate-400/20 border-slate-400 text-white shadow-slate-300/20",
@@ -30,68 +23,68 @@ const categoriaStyles = {
   Electrico:  "bg-yellow-400/20 border-yellow-400 text-yellow-300 shadow-yellow-400/20",
   Fuego:      "bg-red-500/20 border-red-500 text-red-300 shadow-red-500/20",
   Agua:       "bg-blue-500/20 border-blue-500 text-blue-300 shadow-blue-500/20",
+  Planta:     "bg-green-500/20 border-green-500 text-green-300 shadow-green-500/20",
 };
 
 const categoriaGlow = {
-  Pokemon:    "shadow-purple-400/30",
-  Objeto:     "shadow-slate-300/20",
-  Entrenador: "shadow-orange-400/30",
-  Electrico:  "shadow-yellow-400/30",
-  Fuego:      "shadow-red-500/30",
-  Agua:       "shadow-blue-500/30",
+  Pokemon:    "shadow-purple-400/30 border-purple-400/30",
+  Objeto:     "shadow-slate-300/20 border-slate-300/20",
+  Entrenador: "shadow-orange-400/30 border-orange-400/30",
+  Electrico:  "shadow-yellow-400/30 border-yellow-400/30",
+  Fuego:      "shadow-red-500/30 border-red-500/30",
+  Agua:       "shadow-blue-500/30 border-blue-500/30",
+  Planta:     "shadow-green-500/30 border-green-500/30",
 };
 
 export default function CreateCarta() {
   const navigate = useNavigate();
 
+  /* ── Datos del backend ── */
   const [categorias,  setCategorias]  = useState([]);
   const [condiciones, setCondiciones] = useState([]);
   const [estados,     setEstados]     = useState([]);
 
+  /* ── Imágenes ── */
   const [files,    setFiles]    = useState([]);
   const [fileURLs, setFileURLs] = useState([]);
 
+  /* ── Formulario ── */
   const [form, setForm] = useState({
     nombre:        "",
     descripcion:   "",
     idCondicion:   "",
     idEstadoCarta: "",
     categorias:    [],
-    idUsuario:     ""
+    idUsuario:     1, // ← reemplaza con tu contexto de auth
   });
 
   const [errors,  setErrors]  = useState({});
   const [loading, setLoading] = useState(false);
 
+  /* ── Cargar todo del backend ── */
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const catRes  = await CategoriasService.getCategorias();
-        const condRes = await CondicionService.getCondiciones();
-        const estRes  = await EstadoCartaService.getEstadoCartas();
-
-        setCategorias(catRes.data?.data   || []);
-        setCondiciones(condRes.data?.data || []);
-        setEstados(estRes.data?.data      || []);
-
-        setForm((prev) => ({ ...prev, idUsuario: 1 }));
+        const [catRes, condRes, estRes] = await Promise.all([
+          CategoriasService.getCategorias(),
+          CondicionService.getCondiciones(),
+          EstadoCartaService.getEstadoCartas(),
+        ]);
+        setCategorias(catRes.data?.data   ?? catRes.data  ?? []);
+        setCondiciones(condRes.data?.data ?? condRes.data ?? []);
+        setEstados(estRes.data?.data      ?? estRes.data  ?? []);
       } catch {
-        toast.error("Error cargando datos");
+        toast.error("Error cargando datos del formulario");
       }
     };
     fetchData();
   }, []);
 
-  /*  VALIDACIONES */
-  const validateField = (field, value) => {
-    let message = "";
-    if (field === "nombre"      && !value)            message = "Debes ingresar un nombre";
-    if (field === "descripcion" && value.length < 20) message = "Mínimo 20 caracteres";
-    if (field === "idCondicion"   && !value)          message = "Selecciona una condición";
-    if (field === "idEstadoCarta" && !value)          message = "Selecciona un estado";
-    setErrors((prev) => ({ ...prev, [field]: message }));
-  };
+  /* ── Glow dinámico según primera categoría seleccionada ── */
+  const firstCat   = categorias.find((c) => form.categorias.includes(c.idCategoria));
+  const glowClass  = firstCat ? (categoriaGlow[firstCat.descripcion] ?? "") : "border-white/[0.07]";
 
+  /* ── Handlers ── */
   const handleChange = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -103,10 +96,9 @@ export default function CreateCarta() {
         : [...prev.categorias, idCategoria],
     }));
 
-  /*  MULTI IMAGES */
   const handleChangeImage = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    const previews      = selectedFiles.map((file) => URL.createObjectURL(file));
+    const previews      = selectedFiles.map((f) => URL.createObjectURL(f));
     setFiles((prev)    => [...prev, ...selectedFiles]);
     setFileURLs((prev) => [...prev, ...previews]);
   };
@@ -116,14 +108,13 @@ export default function CreateCarta() {
     setFileURLs((prev) => prev.filter((_, i) => i !== index));
   };
 
-  /*  SUBMIT */
+  /* ── Submit ── */
   const handleSubmit = async () => {
     const newErrors = {};
     if (!form.nombre)                   newErrors.nombre        = "Nombre requerido";
-    if (form.descripcion.length < 20)   newErrors.descripcion   = "Mínimo 20 caracteres";
     if (!form.idCondicion)              newErrors.idCondicion   = "Selecciona condición";
     if (!form.idEstadoCarta)            newErrors.idEstadoCarta = "Selecciona estado";
-    if (form.categorias.length === 0)   newErrors.categorias    = "Selecciona categoría";
+    if (form.categorias.length === 0)   newErrors.categorias    = "Selecciona al menos una categoría";
     if (files.length === 0)             newErrors.imagenes      = "Agrega al menos una imagen";
 
     setErrors(newErrors);
@@ -131,65 +122,71 @@ export default function CreateCarta() {
 
     setLoading(true);
     try {
-      const response = await CartaService.createCarta(form);
-      if (response?.data?.data) {
-        const idCarta = response.data.data.idCarta;
+      // 1. Crear la carta con JSON (getJSON en PHP)
+      const response = await CartaService.createCarta({
+        nombre:        form.nombre,
+        descripcion:   form.descripcion,
+        idCondicion:   Number(form.idCondicion),
+        idEstadoCarta: Number(form.idEstadoCarta),
+        idUsuario:     Number(form.idUsuario),
+        categorias:    form.categorias.map(Number),
+      });
+
+      const idCarta = response.data?.data?.idCarta ?? response.data?.idCarta;
+
+      // 2. Subir imágenes una por una con ImageService
+      if (idCarta) {
         for (const file of files) {
           const formData = new FormData();
           formData.append("file",    file);
           formData.append("idCarta", idCarta);
           await ImageService.createImage(formData);
         }
-        toast.success("Carta creada correctamente");
-        navigate("/carta");
       }
-    } catch {
-      toast.error("Error al crear carta");
+
+      toast.success("Carta creada correctamente");
+      navigate("/carta");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al crear la carta");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ── Categoría activa para el glow del card ── */
-  const firstCat = categorias.find((c) => form.categorias.includes(c.idCategoria));
-  const cardGlow = firstCat ? categoriaGlow[firstCat.descripcion] ?? "" : "";
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0a0f1e] to-[#020617] flex flex-col items-center py-10 px-4">
 
-      {/* Partículas decorativas de fondo */}
+      {/* Partículas fondo */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-20 left-10 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/3 rounded-full blur-3xl" />
       </div>
 
       {/* BACK */}
       <div className="w-full max-w-2xl mb-6 relative z-10">
         <Link to="/carta">
-          <Button variant="ghost" className="text-white/40 hover:text-white/80 flex items-center gap-2 pl-0 transition-all duration-200 hover:gap-3">
+          <Button variant="ghost" className="text-white/40 hover:text-white/80 flex items-center gap-2 pl-0 transition-all duration-200">
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Volver al listado</span>
           </Button>
         </Link>
       </div>
 
-      {/* CARD PRINCIPAL */}
+      {/* CARD */}
       <Card className={`
         w-full max-w-2xl relative overflow-hidden
         border !bg-[#0d1424]/95 backdrop-blur-xl
         rounded-3xl transition-all duration-700
-        shadow-2xl ${cardGlow}
-        border-white/[0.07]
+        shadow-2xl ${glowClass}
       `}>
 
-        {/* Barra superior holográfica */}
+        {/* Barra superior */}
         <div className="absolute top-0 left-0 right-0 h-[2px]">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
         </div>
 
-        {/* Glow interno top-right */}
+        {/* Glow interno */}
         <div className="absolute -top-20 -right-20 w-60 h-60 bg-yellow-400/5 rounded-full blur-3xl pointer-events-none" />
 
         {/* HEADER */}
@@ -205,8 +202,6 @@ export default function CreateCarta() {
           <p className="text-xs text-white/30 tracking-widest uppercase">
             Registra tu carta en el sistema
           </p>
-
-          {/* Separador decorativo */}
           <div className="flex items-center gap-3 mt-6 px-7">
             <div className="flex-1 h-px bg-gradient-to-r from-transparent to-white/10" />
             <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/40" />
@@ -222,33 +217,16 @@ export default function CreateCarta() {
               <BadgeCheck className="w-3 h-3 text-yellow-400" />
               Nombre <span className="text-red-400">*</span>
             </Label>
-            <div className="relative group">
-              <Input
-                placeholder="Ej. Charizard Holográfico Edición Especial"
-                value={form.nombre}
-                onBlur={(e)   => validateField("nombre", e.target.value)}
-                onChange={(e) => handleChange("nombre", e.target.value)}
-                className="
-                  !bg-white/[0.03] border-white/[0.08] !text-white
-                  placeholder:text-white/15
-                  focus:border-yellow-400/40 focus:!ring-0
-                  focus:!bg-white/[0.05]
-                  rounded-2xl h-12 text-sm px-4
-                  transition-all duration-300
-                  group-hover:border-white/15
-                "
-              />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-yellow-400/0 via-yellow-400/0 to-yellow-400/0 group-focus-within:from-yellow-400/5 group-focus-within:via-transparent group-focus-within:to-yellow-400/5 pointer-events-none transition-all duration-500" />
-            </div>
-            {errors.nombre && (
-              <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
-                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
-                {errors.nombre}
-              </p>
-            )}
+            <Input
+              placeholder="Ej. Charizard Holográfico Edición Especial"
+              value={form.nombre}
+              onChange={(e) => handleChange("nombre", e.target.value)}
+              className="!bg-white/[0.03] border-white/[0.08] !text-white placeholder:text-white/15 focus:border-yellow-400/40 focus:!ring-0 rounded-2xl h-12 text-sm px-4 transition-all duration-300"
+            />
+            {errors.nombre && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.nombre}</p>}
           </div>
 
-          {/* CONDICIÓN + ESTADO */}
+          {/* CONDICIÓN + ESTADO — del backend */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
@@ -257,16 +235,8 @@ export default function CreateCarta() {
               </Label>
               <select
                 value={form.idCondicion || ""}
-                onBlur={(e)   => validateField("idCondicion", e.target.value)}
                 onChange={(e) => handleChange("idCondicion", e.target.value ? Number(e.target.value) : "")}
-                className="
-                  w-full bg-white/[0.03] border border-white/[0.08] text-white
-                  rounded-2xl h-12 px-4 text-sm
-                  focus:outline-none focus:border-blue-400/40 focus:bg-white/[0.05]
-                  hover:border-white/15
-                  transition-all duration-300
-                  appearance-none cursor-pointer
-                "
+                className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-blue-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer"
               >
                 <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
                 {condiciones.map((c) => (
@@ -275,12 +245,7 @@ export default function CreateCarta() {
                   </option>
                 ))}
               </select>
-              {errors.idCondicion && (
-                <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
-                  <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
-                  {errors.idCondicion}
-                </p>
-              )}
+              {errors.idCondicion && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.idCondicion}</p>}
             </div>
 
             <div className="space-y-2">
@@ -290,16 +255,8 @@ export default function CreateCarta() {
               </Label>
               <select
                 value={form.idEstadoCarta || ""}
-                onBlur={(e)   => validateField("idEstadoCarta", e.target.value)}
                 onChange={(e) => handleChange("idEstadoCarta", e.target.value ? Number(e.target.value) : "")}
-                className="
-                  w-full bg-white/[0.03] border border-white/[0.08] text-white
-                  rounded-2xl h-12 px-4 text-sm
-                  focus:outline-none focus:border-green-400/40 focus:bg-white/[0.05]
-                  hover:border-white/15
-                  transition-all duration-300
-                  appearance-none cursor-pointer
-                "
+                className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-green-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer"
               >
                 <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
                 {estados.map((e) => (
@@ -308,12 +265,7 @@ export default function CreateCarta() {
                   </option>
                 ))}
               </select>
-              {errors.idEstadoCarta && (
-                <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
-                  <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
-                  {errors.idEstadoCarta}
-                </p>
-              )}
+              {errors.idEstadoCarta && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.idEstadoCarta}</p>}
             </div>
           </div>
 
@@ -322,39 +274,17 @@ export default function CreateCarta() {
             <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
               <FileText className="w-3 h-3 text-purple-400" />
               Descripción
-              <span className="text-white/20 font-normal normal-case tracking-normal text-[10px]">mín. 20 caracteres</span>
             </Label>
-            <div className="relative">
-              <textarea
-                placeholder="Describe la carta: habilidades especiales, rareza, estado físico, historia..."
-                value={form.descripcion}
-                onBlur={(e)   => validateField("descripcion", e.target.value)}
-                onChange={(e) => handleChange("descripcion", e.target.value)}
-                rows={3}
-                className="
-                  w-full bg-white/[0.03] border border-white/[0.08] text-white
-                  placeholder:text-white/15
-                  focus:border-purple-400/40 focus:outline-none focus:bg-white/[0.05]
-                  hover:border-white/15
-                  rounded-2xl resize-none text-sm px-4 py-3
-                  transition-all duration-300
-                "
-              />
-              {form.descripcion.length > 0 && (
-                <div className="absolute bottom-3 right-4 text-[10px] text-white/20">
-                  {form.descripcion.length} / 20+
-                </div>
-              )}
-            </div>
-            {errors.descripcion && (
-              <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
-                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
-                {errors.descripcion}
-              </p>
-            )}
+            <textarea
+              placeholder="Describe la carta: habilidades especiales, rareza, estado físico..."
+              value={form.descripcion}
+              onChange={(e) => handleChange("descripcion", e.target.value)}
+              rows={3}
+              className="w-full bg-white/[0.03] border border-white/[0.08] text-white placeholder:text-white/15 focus:border-purple-400/40 focus:outline-none hover:border-white/15 rounded-2xl resize-none text-sm px-4 py-3 transition-all duration-300"
+            />
           </div>
 
-          {/* CATEGORÍAS */}
+          {/* CATEGORÍAS — del backend */}
           <div className="space-y-3">
             <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
               <Zap className="w-3 h-3 text-yellow-400" />
@@ -363,7 +293,7 @@ export default function CreateCarta() {
             <div className="flex flex-wrap gap-2">
               {categorias.map((cat) => {
                 const selected = form.categorias.includes(cat.idCategoria);
-                const style    = categoriaStyles[cat.descripcion] || "";
+                const style    = categoriaStyles[cat.descripcion] ?? "bg-white/10 border-white/20 text-white/60";
                 return (
                   <button
                     key={cat.idCategoria}
@@ -384,12 +314,7 @@ export default function CreateCarta() {
                 );
               })}
             </div>
-            {errors.categorias && (
-              <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
-                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
-                {errors.categorias}
-              </p>
-            )}
+            {errors.categorias && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.categorias}</p>}
           </div>
 
           {/* IMÁGENES */}
@@ -399,59 +324,30 @@ export default function CreateCarta() {
               Imágenes <span className="text-red-400">*</span>
             </Label>
 
-            {/* Previews estilo carta TCG */}
+            {/* Previews */}
             {fileURLs.length > 0 && (
               <div className="flex flex-wrap gap-3 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.05]">
                 {fileURLs.map((src, i) => (
                   <div key={i} className="relative group/img">
-                    <div className="
-                      w-24 h-36 rounded-xl overflow-hidden
-                      border-2 border-white/20
-                      shadow-xl shadow-black/50
-                      transition-all duration-200
-                      group-hover/img:scale-105
-                      group-hover/img:border-white/40
-                      group-hover/img:shadow-black/80
-                      bg-[#0a0f1e]
-                    ">
-                      <img src={src} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 opacity-0 group-hover/img:opacity-100 bg-gradient-to-br from-white/10 via-transparent to-white/5 transition-opacity duration-300 pointer-events-none" />
+                    <div className="w-24 h-36 rounded-xl overflow-hidden border-2 border-white/20 shadow-xl shadow-black/50 transition-all duration-200 group-hover/img:scale-105 group-hover/img:border-white/40 bg-[#0a0f1e]">
+                      <img src={src} className="w-full h-full object-cover" alt={`preview-${i}`} />
                     </div>
-
-                    {/* Número */}
                     <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/70 text-white/50 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                       {i + 1}
                     </div>
-
-                    {/* Botón eliminar */}
                     <button
                       type="button"
                       onClick={() => removeImage(i)}
-                      className="
-                        absolute -top-1.5 -right-1.5
-                        w-5 h-5 bg-red-500 hover:bg-red-400
-                        rounded-full shadow-lg
-                        flex items-center justify-center
-                        opacity-0 group-hover/img:opacity-100
-                        transition-all duration-150 z-10
-                      "
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 hover:bg-red-400 rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-all duration-150 z-10"
                     >
                       <X className="w-2.5 h-2.5 text-white" />
                     </button>
                   </div>
                 ))}
-
-                {/* Botón agregar más inline */}
+                {/* Agregar más */}
                 <div
-                  className="
-                    w-24 h-36 rounded-xl
-                    border-2 border-dashed border-white/10
-                    flex flex-col items-center justify-center gap-1
-                    cursor-pointer
-                    hover:border-pink-400/30 hover:bg-pink-400/[0.03]
-                    transition-all duration-200
-                  "
-                  onClick={() => document.getElementById("image").click()}
+                  className="w-24 h-36 rounded-xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-pink-400/30 hover:bg-pink-400/[0.03] transition-all duration-200"
+                  onClick={() => document.getElementById("imageInput").click()}
                 >
                   <ImagePlus className="w-5 h-5 text-white/20" />
                   <span className="text-[9px] text-white/20 text-center px-1">Agregar</span>
@@ -462,44 +358,21 @@ export default function CreateCarta() {
             {/* Zona upload inicial */}
             {fileURLs.length === 0 && (
               <div
-                className="
-                  flex flex-col items-center justify-center gap-2
-                  w-full h-28
-                  border-2 border-dashed border-white/[0.08]
-                  rounded-2xl cursor-pointer
-                  hover:border-pink-400/30 hover:bg-pink-400/[0.03]
-                  transition-all duration-300
-                  group/upload
-                "
-                onClick={() => document.getElementById("image").click()}
+                className="flex flex-col items-center justify-center gap-2 w-full h-28 border-2 border-dashed border-white/[0.08] rounded-2xl cursor-pointer hover:border-pink-400/30 hover:bg-pink-400/[0.03] transition-all duration-300 group/upload"
+                onClick={() => document.getElementById("imageInput").click()}
               >
                 <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center group-hover/upload:bg-pink-400/10 group-hover/upload:border-pink-400/20 transition-all duration-300">
                   <ImagePlus className="w-5 h-5 text-white/20 group-hover/upload:text-pink-400/60 transition-colors" />
                 </div>
                 <div className="text-center">
-                  <p className="text-[11px] text-white/30 group-hover/upload:text-white/50 transition-colors font-medium">
-                    Click para subir imágenes
-                  </p>
+                  <p className="text-[11px] text-white/30 group-hover/upload:text-white/50 transition-colors font-medium">Click para subir imágenes</p>
                   <p className="text-[10px] text-white/15 mt-0.5">PNG, JPG, GIF</p>
                 </div>
               </div>
             )}
 
-            <input
-              id="image"
-              type="file"
-              multiple
-              className="hidden"
-              accept="image/*"
-              onChange={handleChangeImage}
-            />
-
-            {errors.imagenes && (
-              <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1">
-                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
-                {errors.imagenes}
-              </p>
-            )}
+            <input id="imageInput" type="file" multiple className="hidden" accept="image/*" onChange={handleChangeImage} />
+            {errors.imagenes && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.imagenes}</p>}
           </div>
 
           {/* Separador */}
@@ -512,35 +385,14 @@ export default function CreateCarta() {
           {/* ACTIONS */}
           <div className="flex gap-3">
             <Link to="/carta" className="flex-1">
-              <Button
-                type="button"
-                variant="ghost"
-                className="
-                  w-full rounded-2xl h-12
-                  border border-white/[0.07]
-                  text-white/30 hover:text-white/60
-                  hover:bg-white/[0.04] hover:border-white/10
-                  text-sm transition-all duration-200
-                "
-              >
+              <Button type="button" variant="ghost" className="w-full rounded-2xl h-12 border border-white/[0.07] text-white/30 hover:text-white/60 hover:bg-white/[0.04] hover:border-white/10 text-sm transition-all duration-200">
                 Cancelar
               </Button>
             </Link>
-
             <Button
               onClick={handleSubmit}
               disabled={loading}
-              className="
-                flex-1 rounded-2xl h-12
-                bg-gradient-to-r from-yellow-400 to-yellow-300
-                hover:from-yellow-300 hover:to-yellow-200
-                text-black font-bold text-sm
-                shadow-lg shadow-yellow-400/25
-                hover:shadow-yellow-400/40 hover:scale-[1.02]
-                transition-all duration-200
-                flex items-center justify-center gap-2
-                disabled:opacity-60 disabled:scale-100
-              "
+              className="flex-1 rounded-2xl h-12 bg-gradient-to-r from-yellow-400 to-yellow-300 hover:from-yellow-300 hover:to-yellow-200 text-black font-bold text-sm shadow-lg shadow-yellow-400/25 hover:shadow-yellow-400/40 hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 disabled:scale-100"
             >
               {loading
                 ? <span className="w-4 h-4 border-2 border-black/20 border-t-black/60 rounded-full animate-spin" />

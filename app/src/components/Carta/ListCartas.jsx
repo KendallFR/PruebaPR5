@@ -9,26 +9,24 @@ export function ListCartas() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        const fetchData = async() => {
-            try {
-                const response = await CartaService.getCartas();
-                console.log(response.data)
-                setData(response.data);
-                if(!response.data.success){
-                    setError(response.data.message)
-                }
-            } catch (err) {
 
-                if (err.name !== "AbortError") setError(err.message);
-            } finally {
-
-                setLoading(false);
+    const fetchData = async () => {
+        try {
+            const response = await CartaService.getCartas();
+            setData(response.data);
+            if (!response.data.success) {
+                setError(response.data.message);
             }
-        };
-        fetchData()
-    }, []);
+        } catch (err) {
+            if (err.name !== "AbortError") setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     if (loading) return <LoadingGrid type="grid" />;
     if (error) return <ErrorAlert title="Error al cargar cartas" message={error} />;
@@ -37,9 +35,12 @@ export function ListCartas() {
 
     return (
         <div className="mx-auto max-w-7xl p-6">
-        {data && (
-            <ListCardCartas data={data.data}/>
-        )}
+            {data && (
+                <ListCardCartas 
+                    data={data.data}
+                    onRefresh={fetchData}  // ← esto es lo que faltaba
+                />
+            )}
         </div>
     );
 }

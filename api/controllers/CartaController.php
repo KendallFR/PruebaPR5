@@ -98,7 +98,7 @@ public function update($id)
             handleException($e);
         }
     }
-    public function updateEstado($id)
+    public function updateEstado()
 {
     try {
         $request  = new Request();
@@ -112,7 +112,7 @@ public function update($id)
         handleException($e);
     }
 }
-public function delete($id)
+public function delete()
 {
     try {
         $request  = new Request();
