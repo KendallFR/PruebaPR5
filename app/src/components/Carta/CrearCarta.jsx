@@ -59,7 +59,30 @@ export default function CreateCarta() {
   });
 
   const [errors,  setErrors]  = useState({});
+  const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
+
+  // Al salir del campo, marcarlo como tocado y validar
+  const handleBlur = (field, value) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    let msg = "";
+    if (field === "nombre"      && !(value ?? "").trim()) msg = "Nombre requerido";
+    if (field === "idCondicion" && !value)                msg = "Selecciona una condición";
+    if (field === "descripcion" && !(value ?? "").trim()) msg = "Agrega una descripción";
+    setErrors((prev) => ({ ...prev, [field]: msg }));
+  };
+
+  // Al escribir, limpiar error si ya tiene contenido
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (touched[field]) {
+      let msg = "";
+      if (field === "nombre"      && !(value ?? "").trim()) msg = "Nombre requerido";
+      if (field === "idCondicion" && !value)                msg = "Selecciona una condición";
+      if (field === "descripcion" && !(value ?? "").trim()) msg = "Agrega una descripción";
+      setErrors((prev) => ({ ...prev, [field]: msg }));
+    }
+  };
 
   /* ── Cargar todo del backend ── */
   useEffect(() => {
@@ -93,26 +116,37 @@ export default function CreateCarta() {
   const glowClass  = firstCat ? (categoriaGlow[firstCat.descripcion] ?? "") : "border-white/[0.07]";
 
   /* ── Handlers ── */
-  const handleChange = (field, value) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
-
   const toggleCategoria = (idCategoria) =>
-    setForm((prev) => ({
-      ...prev,
-      categorias: prev.categorias.includes(idCategoria)
+    setForm((prev) => {
+      const nuevas = prev.categorias.includes(idCategoria)
         ? prev.categorias.filter((c) => c !== idCategoria)
-        : [...prev.categorias, idCategoria],
-    }));
+        : [...prev.categorias, idCategoria];
+      if (nuevas.length === 0) {
+        setErrors((e) => ({ ...e, categorias: "Selecciona al menos una categoría" }));
+      } else {
+        setErrors((e) => ({ ...e, categorias: "" }));
+      }
+      return { ...prev, categorias: nuevas };
+    });
 
   const handleChangeImage = (e) => {
     const selectedFiles = Array.from(e.target.files);
     const previews      = selectedFiles.map((f) => URL.createObjectURL(f));
     setFiles((prev)    => [...prev, ...selectedFiles]);
     setFileURLs((prev) => [...prev, ...previews]);
+    // Limpiar error al subir imágenes
+    setErrors((err) => ({ ...err, imagenes: "" }));
   };
 
   const removeImage = (index) => {
-    setFiles((prev)    => prev.filter((_, i) => i !== index));
+    setFiles((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      // Solo mostrar error si ya había imágenes y las quitó todas
+      if (updated.length === 0) {
+        setErrors((e) => ({ ...e, imagenes: "Agrega al menos una imagen" }));
+      }
+      return updated;
+    });
     setFileURLs((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -129,7 +163,6 @@ export default function CreateCarta() {
 
     setLoading(true);
     try {
-      
       // 1. Crear la carta con JSON (getJSON en PHP)
       const response = await CartaService.createCarta({
         nombre:        form.nombre,
@@ -229,6 +262,7 @@ export default function CreateCarta() {
               placeholder="Ej. Charizard Holográfico Edición Especial"
               value={form.nombre}
               onChange={(e) => handleChange("nombre", e.target.value)}
+              onBlur={(e)   => handleBlur("nombre", e.target.value)}
               className="!bg-white/[0.03] border-white/[0.08] !text-white placeholder:text-white/15 focus:border-yellow-400/40 focus:!ring-0 rounded-2xl h-12 text-sm px-4 transition-all duration-300"
             />
             {errors.nombre && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.nombre}</p>}
@@ -244,6 +278,7 @@ export default function CreateCarta() {
               <select
                 value={form.idCondicion || ""}
                 onChange={(e) => handleChange("idCondicion", e.target.value ? Number(e.target.value) : "")}
+                onBlur={(e)   => handleBlur("idCondicion", e.target.value)}
                 className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-blue-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer"
               >
                 <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
@@ -264,15 +299,17 @@ export default function CreateCarta() {
           <div className="space-y-2">
             <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
               <FileText className="w-3 h-3 text-purple-400" />
-              Descripción
+              Descripción <span className="text-red-400">*</span>
             </Label>
             <textarea
               placeholder="Describe la carta: habilidades especiales, rareza, estado físico..."
               value={form.descripcion}
               onChange={(e) => handleChange("descripcion", e.target.value)}
+              onBlur={(e)   => handleBlur("descripcion", e.target.value)}
               rows={3}
               className="w-full bg-white/[0.03] border border-white/[0.08] text-white placeholder:text-white/15 focus:border-purple-400/40 focus:outline-none hover:border-white/15 rounded-2xl resize-none text-sm px-4 py-3 transition-all duration-300"
             />
+            {errors.descripcion && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.descripcion}</p>}
           </div>
 
           {/* CATEGORÍAS — del backend */}
