@@ -75,14 +75,14 @@ public function update()
             
         }
     }
-public function delete()
+public function updateEstado()
     {
         try {
             $request = new Request();
             $response = new Response();
             $inputJSON = $request->getJSON();
             $usuario = new UsuarioModel();
-            $result = $usuario->delete($inputJSON);
+            $result = $usuario->updateEstado($inputJSON);
             $response->toJSON($result);
         } catch (Exception $e) {
             $response->toJSON($result);

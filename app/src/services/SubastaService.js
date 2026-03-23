@@ -31,14 +31,6 @@ updateSubasta(Subasta) {
       data: JSON.stringify(Subasta)
     })
   }
-updateEstado(Subasta) {
-    return axios({
-      method: 'put',
-      url: BASE_URL,
-      data: JSON.stringify(Subasta)
-
-    })
-  }
 
 delete(Subasta) {
     return axios({

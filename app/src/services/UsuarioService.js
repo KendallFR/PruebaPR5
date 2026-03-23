@@ -24,11 +24,11 @@ class UsuarioService {
       data: JSON.stringify(Usuario)
     })
   }
-  deleteUsuario(Usuario) {
+  updateEstadoUsuario(usuario) {
     return axios({
       method: 'put',
-      url: BASE_URL+ "/delete",
-      data: JSON.stringify(Usuario)
+      url: BASE_URL+ "/updateEstado",
+      data: JSON.stringify(usuario)
 
     })
   }
