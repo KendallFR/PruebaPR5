@@ -21,6 +21,7 @@ import { CreateSubasta } from './components/Subasta/CreateSubasta'
 import  CartaCRUD  from './components/Carta/CrearCarta'
 import { EditSubasta } from './components/Subasta/EditSubasta'
 import { CustomToaster } from './components/ui/CustomToaster'
+import EditCarta from './components/Carta/EditCarta'
 
 
 
@@ -52,7 +53,9 @@ const rutas = createBrowserRouter([
       {path: "carta/:id/subastas", element: <CartaSubastas />},
       {path: "subasta/create", element: <CreateSubasta/>},
       {path: "carta/crear", element: <CartaCRUD/>},
-      { path: "subasta/edit/:id", element: <EditSubasta /> }
+      { path: "subasta/edit/:id", element: <EditSubasta /> },
+      { path: "carta/editar/:id", element: <EditCarta /> }
+
 
     ]
   }

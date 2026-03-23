@@ -168,7 +168,7 @@ public function update($objeto)
     public function updateEstado($objeto)
 {
     try {
-        $sql = "Update carta SET idEstadoCarta=$objeto->idEstadoCarta" . "WHERE idCarta =$objeto->idCarta";
+        $sql = "Update carta SET idEstadoCarta=$objeto->idEstadoCarta WHERE idCarta=$objeto->idCarta";
         $this->enlace->executeSQL_DML($sql);
         return $this->get($objeto->idCarta);
     } catch (Exception $e) {
@@ -178,7 +178,7 @@ public function update($objeto)
 public function delete($objeto)
 {
     try {
-        $sql = "Update carta SET idEstadoCarta=4" . "WHERE idCarta =$objeto->idCarta";
+        $sql = "Update carta SET idEstadoCarta=3 WHERE idCarta=$objeto->idCarta";
         $this->enlace->executeSQL_DML($sql);
         return $this->get($objeto->idCarta);
     } catch (Exception $e) {

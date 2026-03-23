@@ -34,4 +34,17 @@ class image{
             handleException($e);
         }
     }
+
+    public function delete($id)
+{
+    try {
+        $response = new Response();
+        $imagen   = new ImageModel();
+        $result   = $imagen->deleteImage($id);
+        $response->toJSON($result);
+    } catch (Exception $e) {
+        handleException($e);
+    }
+}
+
 }
