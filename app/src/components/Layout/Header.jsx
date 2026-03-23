@@ -39,7 +39,6 @@ export default function Header() {
   const mantItems = [
     { title: "Subastas Activas", href: "/subasta/SubastasActivas", icon: <Wrench className="h-4 w-4" /> },
     { title: "Subastas Finalizadas", href: "/subasta/SubastasFinalizadas", icon: <Wrench className="h-4 w-4" /> },
-    { title: "Crear Subasta", href: "/subasta/create", icon: <Wrench className="h-4 w-4" /> },
     { title: "Cartas", href: "/carta", icon: <ShoppingBasket className="h-4 w-4" /> },
     { title: "Usuarios", href: "/usuario/table", icon: <ChartArea className="h-4 w-4" /> },
     { title: "Pujas", href: "/puja/table/1", icon: <ChartArea className="h-4 w-4" /> }
