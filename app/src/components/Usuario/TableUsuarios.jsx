@@ -1,52 +1,167 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Edit, Trash2, Info, Users, ArrowLeft, Shield, Activity } from "lucide-react";
+import {
+  Edit, Info, Users, ArrowLeft, Shield, Activity,
+  ToggleLeft, ToggleRight,
+} from "lucide-react";
 import UsuarioService from "@/services/UsuarioService";
-import { useEffect, useState } from "react";
-import { LoadingGrid } from "../ui/custom/LoadingGrid";
-import { ErrorAlert } from "../ui/custom/ErrorAlert";
-import { EmptyState } from "../ui/custom/EmptyState";
+import EstadoUsuarioService from "@/services/EstadoUsuarioService";
+import { useEffect, useState, useRef } from "react";
+import { LoadingGrid }  from "../ui/custom/LoadingGrid";
+import { ErrorAlert }   from "../ui/custom/ErrorAlert";
+import { EmptyState }   from "../ui/custom/EmptyState";
+import toast from "react-hot-toast";
 
 const usuarioColumns = [
-  { key: "nombre",   label: "Nombre" },
-  { key: "rol",      label: "Rol" },
-  { key: "estado",   label: "Estado" },
+  { key: "nombre",   label: "Nombre"   },
+  { key: "rol",      label: "Rol"      },
+  { key: "estado",   label: "Estado"   },
   { key: "acciones", label: "Acciones" },
-  { key: "detalle",  label: "Detalle" },
+  { key: "detalle",  label: "Detalle"  },
 ];
 
+/* ── Animación de strips por fila ── */
+function animateRowStrips(canvas, toBlocked, onMidpoint) {
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W   = canvas.offsetWidth;
+  const H   = canvas.offsetHeight;
+  canvas.width  = W;
+  canvas.height = H;
+
+  const [r,g,b] = toBlocked ? [249,115,22] : [34,197,94];
+  const STRIPS  = 10;
+  const stripH  = H / STRIPS;
+  const TOTAL   = 550;
+  const start   = performance.now();
+  let changed   = false;
+
+  const easeOut = (t) => 1 - Math.pow(1-t, 3);
+  const easeIn  = (t) => t * t * t;
+
+  const frame = (now) => {
+    const t = Math.min((now - start) / TOTAL, 1);
+    ctx.clearRect(0, 0, W, H);
+
+    if (t < 0.5) {
+      const p = easeOut(t / 0.5);
+      for (let i = 0; i < STRIPS; i++) {
+        const delay  = (i / STRIPS) * 0.4;
+        const localT = Math.max(0, Math.min(1, (p - delay) / (1 - delay)));
+        const w      = W * localT;
+        const y      = i * stripH;
+
+        ctx.fillStyle = `rgba(${r},${g},${b},${localT * 0.75})`;
+        ctx.fillRect(0, y, w, stripH + 1);
+
+        if (localT > 0 && localT < 1) {
+          const grad = ctx.createLinearGradient(w - 12, y, w, y);
+          grad.addColorStop(0, `rgba(255,255,255,0)`);
+          grad.addColorStop(1, `rgba(255,255,255,0.7)`);
+          ctx.fillStyle = grad;
+          ctx.fillRect(w - 12, y, 12, stripH + 1);
+        }
+      }
+      if (p > 0.65 && !changed) { changed = true; onMidpoint(); }
+
+    } else {
+      if (!changed) { changed = true; onMidpoint(); }
+      const p = easeIn((t - 0.5) / 0.5);
+      for (let i = 0; i < STRIPS; i++) {
+        const delay  = ((STRIPS - 1 - i) / STRIPS) * 0.4;
+        const localT = Math.max(0, Math.min(1, (p - delay) / (1 - delay)));
+        const w      = W * (1 - localT);
+        const y      = i * stripH;
+
+        ctx.fillStyle = `rgba(${r},${g},${b},${(1-localT) * 0.75})`;
+        ctx.fillRect(0, y, w, stripH + 1);
+
+        if (localT > 0 && localT < 1 && w > 0) {
+          const grad = ctx.createLinearGradient(w - 12, y, w, y);
+          grad.addColorStop(0, `rgba(255,255,255,0)`);
+          grad.addColorStop(1, `rgba(255,255,255,0.5)`);
+          ctx.fillStyle = grad;
+          ctx.fillRect(w - 12, y, 12, stripH + 1);
+        }
+      }
+    }
+
+    if (t < 1) requestAnimationFrame(frame);
+    else ctx.clearRect(0, 0, W, H);
+  };
+
+  requestAnimationFrame(frame);
+}
+
 export default function TableUsuarios() {
-  const navigate  = useNavigate();
+  const navigate   = useNavigate();
+  const canvasRefs = useRef({});
+
   const [usuarios, setUsuarios] = useState([]);
+  const [estados,  setEstados]  = useState([]);
   const [error,    setError]    = useState(null);
   const [loading,  setLoading]  = useState(true);
+  const [animando, setAnimando] = useState({}); // bloquea botón durante animación
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await UsuarioService.getUsuarios();
-        console.log(response);
-        const result = response.data;
-        console.log(result);
-        if (result.success) {
-          setUsuarios(result.data || []);
-        } else {
-          setError(result.message || "Error desconocido");
-        }
-      } catch (err) {
-        setError(err.message || "Error al conectar con el servidor");
-      } finally {
-        setLoading(false);
+  /* ── Cargar usuarios y estados del backend ── */
+  const fetchData = async () => {
+    try {
+      const [usuRes, estRes] = await Promise.all([
+        UsuarioService.getUsuarios(),
+        EstadoUsuarioService.getEstadoUsuarios(),
+      ]);
+      if (usuRes.data.success) {
+        setUsuarios(usuRes.data.data ?? []);
+      } else {
+        setError(usuRes.data.message ?? "Error desconocido");
       }
-    };
-    fetchData();
-  }, []);
+      setEstados(estRes.data?.data ?? estRes.data ?? []);
+    } catch (err) {
+      setError(err.message ?? "Error al conectar con el servidor");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  /* ── Busca id de estado por nombre exacto ── */
+  const getEstadoId = (descripcion) =>
+    estados.find((e) => e.descripcion === descripcion)?.idEstadoUsuario;
+
+  /* ── Toggle Activo ↔ Bloqueado con animación ── */
+  const handleToggle = async (usuario) => {
+    if (animando[usuario.idUsuario]) return;
+
+    const esActivo  = usuario.estadoUsuario?.descripcion === "Activo";
+    const idDestino = esActivo ? getEstadoId("Bloqueado") : getEstadoId("Activo");
+    if (!idDestino) { toast.error("Estado no encontrado"); return; }
+
+    setAnimando((prev) => ({ ...prev, [usuario.idUsuario]: true }));
+
+    const canvas    = canvasRefs.current[usuario.idUsuario];
+    const toBlocked = esActivo;
+
+    animateRowStrips(canvas, toBlocked, async () => {
+      // Llama al backend en el punto medio de la animación
+      try {
+        await UsuarioService.updateEstadoUsuario({
+          idUsuario:       usuario.idUsuario,
+          idEstadoUsuario: idDestino,
+        });
+        toast.success(toBlocked ? `"${usuario.nombre}" bloqueado` : `"${usuario.nombre}" activado`);
+        fetchData();
+      } catch (err) {
+        console.error(err);
+        toast.error("Error al cambiar el estado");
+      } finally {
+        setAnimando((prev) => ({ ...prev, [usuario.idUsuario]: false }));
+      }
+    });
+  };
 
   if (loading) return <LoadingGrid type="grid" />;
   if (error)   return <ErrorAlert title="Error al cargar usuarios" message={error} />;
@@ -72,7 +187,10 @@ export default function TableUsuarios() {
             </div>
             <div>
               <h1 className="text-2xl font-black text-white tracking-tight">
-                Gestión de <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-200">Usuarios</span>
+                Gestión de{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-200">
+                  Usuarios
+                </span>
               </h1>
               <p className="text-white/30 text-xs tracking-widest uppercase mt-0.5">
                 {usuarios.length} usuario{usuarios.length !== 1 ? "s" : ""} registrado{usuarios.length !== 1 ? "s" : ""}
@@ -83,13 +201,7 @@ export default function TableUsuarios() {
           <Button
             type="button"
             onClick={() => navigate(-1)}
-            className="
-              flex items-center gap-2 h-10 px-4
-              bg-white/[0.04] hover:bg-white/[0.08]
-              border border-white/[0.08] hover:border-white/15
-              text-white/50 hover:text-white/80
-              rounded-xl text-sm transition-all duration-200
-            "
+            className="flex items-center gap-2 h-10 px-4 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/15 text-white/50 hover:text-white/80 rounded-xl text-sm transition-all duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
             Regresar
@@ -97,13 +209,8 @@ export default function TableUsuarios() {
         </div>
 
         {/* TABLA */}
-        <div className="
-          relative overflow-hidden
-          rounded-2xl
-          border border-white/[0.07]
-          bg-[#0d1424]/80 backdrop-blur-xl
-          shadow-2xl shadow-black/50
-        ">
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0d1424]/80 backdrop-blur-xl shadow-2xl shadow-black/50">
+
           {/* Barra superior */}
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-400/40 to-transparent" />
 
@@ -122,28 +229,29 @@ export default function TableUsuarios() {
           {/* ROWS */}
           <div className="divide-y divide-white/[0.04]">
             {usuarios.map((usuario, idx) => {
-              const isActive = usuario.estadoUsuario?.descripcion?.toLowerCase().includes("activ");
+              const esActivo    = usuario.estadoUsuario?.descripcion === "Activo";
+              const esBloqueado = usuario.estadoUsuario?.descripcion === "Bloqueado";
+              const esInactivo  = usuario.estadoUsuario?.descripcion === "Inactivo";
 
               return (
                 <div
                   key={usuario.idUsuario}
-                  className="
+                  className={`
                     grid grid-cols-5 px-6 py-4 items-center
-                    hover:bg-white/[0.03]
-                    transition-colors duration-200
-                    group
-                  "
+                    hover:bg-white/[0.03] transition-all duration-500 group
+                    relative overflow-hidden
+                    ${esInactivo  ? "opacity-40 grayscale-[60%]" : ""}
+                    ${esBloqueado ? "opacity-55 grayscale-[30%]" : ""}
+                  `}
                 >
+                  {/* Canvas animación strips */}
+                  <canvas
+                    ref={(el) => { if (el) canvasRefs.current[usuario.idUsuario] = el; }}
+                    className="absolute inset-0 w-full h-full pointer-events-none z-10"
+                  />
                   {/* Nombre */}
                   <div className="flex items-center gap-3">
-                    {/* Avatar inicial */}
-                    <div className="
-                      w-9 h-9 rounded-xl shrink-0
-                      bg-gradient-to-br from-blue-500/20 to-purple-500/20
-                      border border-white/10
-                      flex items-center justify-center
-                      text-white/60 text-sm font-bold
-                    ">
+                    <div className="w-9 h-9 rounded-xl shrink-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center text-white/60 text-sm font-bold">
                       {usuario.nombre?.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -158,10 +266,7 @@ export default function TableUsuarios() {
 
                   {/* Rol */}
                   <div>
-                    <span className="
-                      px-2.5 py-1 rounded-lg text-[11px] font-semibold
-                      bg-blue-500/10 text-blue-300 border border-blue-500/20
-                    ">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-500/10 text-blue-300 border border-blue-500/20">
                       {usuario.rol.nombre}
                     </span>
                   </div>
@@ -169,14 +274,16 @@ export default function TableUsuarios() {
                   {/* Estado */}
                   <div>
                     <span className={`
-                      flex items-center gap-1.5 w-fit
-                      px-2.5 py-1 rounded-lg text-[11px] font-semibold
-                      ${isActive
-                        ? "bg-green-500/10 text-green-300 border border-green-500/20"
-                        : "bg-red-500/10 text-red-300 border border-red-500/20"
-                      }
+                      flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-lg text-[11px] font-semibold
+                      ${esActivo    ? "bg-green-500/10 text-green-300 border border-green-500/20"
+                      : esBloqueado ? "bg-orange-500/10 text-orange-300 border border-orange-500/20"
+                      :               "bg-red-500/10 text-red-300 border border-red-500/20"}
                     `}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-green-400 animate-pulse" : "bg-red-400"}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        esActivo    ? "bg-green-400 animate-pulse"
+                        : esBloqueado ? "bg-orange-400"
+                        :               "bg-red-400"
+                      }`} />
                       {usuario.estadoUsuario.descripcion}
                     </span>
                   </div>
@@ -184,47 +291,46 @@ export default function TableUsuarios() {
                   {/* Acciones */}
                   <div className="flex items-center gap-1.5">
                     <TooltipProvider>
+
+                      {/* Editar */}
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
+                          <Button variant="ghost" size="icon"
                             onClick={() => navigate(`/usuario/edit/${usuario.idUsuario}`)}
-                            className="
-                              w-8 h-8 rounded-xl
-                              bg-white/[0.03] hover:bg-blue-500/20
-                              border border-white/[0.06] hover:border-blue-500/30
-                              text-white/30 hover:text-blue-400
-                              transition-all duration-200
-                            "
-                          >
+                            className="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-blue-500/20 border border-white/[0.06] hover:border-blue-500/30 text-white/30 hover:text-blue-400 transition-all duration-200">
                             <Edit className="w-3.5 h-3.5" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Editar</TooltipContent>
                       </Tooltip>
-                    </TooltipProvider>
 
-                    <TooltipProvider>
+                      {/* Toggle Activo ↔ Bloqueado */}
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(`/usuario/delete/${usuario.idUsuario}`)}
-                            className="
-                              w-8 h-8 rounded-xl
-                              bg-white/[0.03] hover:bg-red-500/20
-                              border border-white/[0.06] hover:border-red-500/30
-                              text-white/30 hover:text-red-400
-                              transition-all duration-200
-                            "
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
+                          <Button variant="ghost" size="icon"
+                            onClick={() => handleToggle(usuario)}
+                            disabled={esInactivo || !!animando[usuario.idUsuario]}
+                            className={`
+                              w-8 h-8 rounded-xl border transition-all duration-200
+                              disabled:opacity-25 disabled:cursor-not-allowed
+                              ${esActivo
+                                ? "bg-orange-500/10 hover:bg-orange-500/25 border-orange-500/20 hover:border-orange-500/40 text-orange-400/60 hover:text-orange-400"
+                                : "bg-green-500/10 hover:bg-green-500/25 border-green-500/20 hover:border-green-500/40 text-green-400/60 hover:text-green-400"
+                              }
+                            `}>
+                            {esActivo
+                              ? <ToggleRight className="w-3.5 h-3.5" />
+                              : <ToggleLeft  className="w-3.5 h-3.5" />
+                            }
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Eliminar</TooltipContent>
+                        <TooltipContent>
+                          {esInactivo   ? "Usuario inactivo"
+                          : esActivo    ? "Bloquear usuario"
+                          :               "Activar usuario"}
+                        </TooltipContent>
                       </Tooltip>
+
                     </TooltipProvider>
                   </div>
 
@@ -234,17 +340,8 @@ export default function TableUsuarios() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Link to={`/usuario/detail/${usuario.idUsuario}`}>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="
-                                w-8 h-8 rounded-xl
-                                bg-yellow-400/10 hover:bg-yellow-400/20
-                                border border-yellow-400/20 hover:border-yellow-400/40
-                                text-yellow-400/60 hover:text-yellow-400
-                                transition-all duration-200
-                              "
-                            >
+                            <Button variant="ghost" size="icon"
+                              className="w-8 h-8 rounded-xl bg-yellow-400/10 hover:bg-yellow-400/20 border border-yellow-400/20 hover:border-yellow-400/40 text-yellow-400/60 hover:text-yellow-400 transition-all duration-200">
                               <Info className="w-3.5 h-3.5" />
                             </Button>
                           </Link>
@@ -258,7 +355,7 @@ export default function TableUsuarios() {
             })}
           </div>
 
-          {/* Footer tabla */}
+          {/* Footer */}
           <div className="px-6 py-3 border-t border-white/[0.04] bg-white/[0.01] flex items-center justify-between">
             <p className="text-white/20 text-[11px]">
               Mostrando {usuarios.length} resultado{usuarios.length !== 1 ? "s" : ""}
