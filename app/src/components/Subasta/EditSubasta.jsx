@@ -84,6 +84,14 @@ export function EditSubasta() {
     if (!form.fechaCierre)
       newErrors.fechaCierre = "Fecha de cierre requerida";
 
+    if (form.fechaInicio && form.fechaCierre) {
+    const inicio = new Date(form.fechaInicio);
+    const cierre = new Date(form.fechaCierre);
+
+    if (cierre <= inicio) {
+      newErrors.fechaCierre = "La fecha cierre debe ser mayor fecha que inicio";
+    }
+  }
     if (!form.precio || Number(form.precio) <= 0)
       newErrors.precio = "Precio debe ser mayor a 0";
 
