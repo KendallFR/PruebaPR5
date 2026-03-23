@@ -66,20 +66,24 @@ export default function CreateCarta() {
   const handleBlur = (field, value) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
     let msg = "";
-    if (field === "nombre"      && !(value ?? "").trim()) msg = "Nombre requerido";
-    if (field === "idCondicion" && !value)                msg = "Selecciona una condición";
-    if (field === "descripcion" && !(value ?? "").trim()) msg = "Agrega una descripción";
+    if (field === "nombre"      && !(value ?? "").trim())        msg = "Nombre requerido";
+    if (field === "idCondicion" && !value)                       msg = "Selecciona una condición";
+    if (field === "descripcion" && !(value ?? "").trim())        msg = "Agrega una descripción";
+    if (field === "descripcion" && (value ?? "").trim().length > 0 && (value ?? "").trim().length < 20)
+                                                                 msg = "La descripción debe tener al menos 20 caracteres";
     setErrors((prev) => ({ ...prev, [field]: msg }));
   };
 
-  // Al escribir, limpiar error si ya tiene contenido
+  // Al escribir, validar en tiempo real si ya fue tocado
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (touched[field]) {
       let msg = "";
-      if (field === "nombre"      && !(value ?? "").trim()) msg = "Nombre requerido";
-      if (field === "idCondicion" && !value)                msg = "Selecciona una condición";
-      if (field === "descripcion" && !(value ?? "").trim()) msg = "Agrega una descripción";
+      if (field === "nombre"      && !(value ?? "").trim())        msg = "Nombre requerido";
+      if (field === "idCondicion" && !value)                       msg = "Selecciona una condición";
+      if (field === "descripcion" && !(value ?? "").trim())        msg = "Agrega una descripción";
+      if (field === "descripcion" && (value ?? "").trim().length > 0 && (value ?? "").trim().length < 20)
+                                                                   msg = "La descripción debe tener al menos 20 caracteres";
       setErrors((prev) => ({ ...prev, [field]: msg }));
     }
   };
@@ -153,10 +157,12 @@ export default function CreateCarta() {
   /* ── Submit ── */
   const handleSubmit = async () => {
     const newErrors = {};
-    if (!form.nombre)                   newErrors.nombre        = "Nombre requerido";
-    if (!form.idCondicion)              newErrors.idCondicion   = "Selecciona condición";
-    if (form.categorias.length === 0)   newErrors.categorias    = "Selecciona al menos una categoría";
-    if (files.length === 0)             newErrors.imagenes      = "Agrega al menos una imagen";
+    if (!form.nombre)                                          newErrors.nombre      = "Nombre requerido";
+    if (!form.idCondicion)                                     newErrors.idCondicion = "Selecciona condición";
+    if (!form.descripcion?.trim())                             newErrors.descripcion = "Agrega una descripción";
+    else if (form.descripcion.trim().length < 20)              newErrors.descripcion = "La descripción debe tener al menos 20 caracteres";
+    if (form.categorias.length === 0)                          newErrors.categorias  = "Selecciona al menos una categoría";
+    if (files.length === 0)                                    newErrors.imagenes    = "Agrega al menos una imagen";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;

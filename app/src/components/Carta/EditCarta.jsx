@@ -103,6 +103,8 @@ export default function EditCarta() {
   const [loadingData, setLoadingData] = useState(true);
   const [saving,      setSaving]      = useState(false);
   const [error,       setError]       = useState(null);
+  const [errors,      setErrors]      = useState({});
+  const [touched,     setTouched]     = useState({});
 
   /* ── Datos del backend — igual que CreateCarta ── */
   const [categorias,  setCategorias]  = useState([]);
@@ -110,8 +112,9 @@ export default function EditCarta() {
   const [estados,     setEstados]     = useState([]);
 
   /* ── Imágenes nuevas ── */
-  const [filesNuevos,   setFilesNuevos]   = useState([]);
-  const [previewNuevos, setPreviewNuevos] = useState([]);
+  const [filesNuevos,       setFilesNuevos]       = useState([]);
+  const [previewNuevos,     setPreviewNuevos]     = useState([]);
+  const [imagenesAEliminar, setImagenesAEliminar] = useState([]); // ids a borrar al guardar
 
   const [form, setForm] = useState({
     nombre:             "",
@@ -166,52 +169,89 @@ export default function EditCarta() {
   const glowClass = firstCat ? (categoriaGlow[firstCat.descripcion] ?? "border-white/[0.07]") : "border-white/[0.07]";
 
   /* ── Handlers ── */
-  const handleChange = (field, value) =>
+  const validateField = (field, value) => {
+    let msg = "";
+    if (field === "nombre"      && !(value ?? "").trim())       msg = "Nombre requerido";
+    if (field === "idCondicion" && !value)                      msg = "Selecciona una condición";
+    if (field === "idEstadoCarta" && !value)                    msg = "Selecciona un estado";
+    if (field === "descripcion" && !(value ?? "").trim())       msg = "Agrega una descripción";
+    if (field === "descripcion" && (value ?? "").trim().length > 0 && (value ?? "").trim().length < 20)
+                                                                msg = "La descripción debe tener al menos 20 caracteres";
+    return msg;
+  };
+
+  const handleBlur = (field, value) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }));
+  };
+
+  const handleChange = (field, value) => {
     setForm((p) => ({ ...p, [field]: value }));
+    if (touched[field]) {
+      setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }));
+    }
+  };
 
   const toggleCategoria = (idCategoria) =>
-    setForm((p) => ({
-      ...p,
-      categorias: p.categorias.includes(idCategoria)
+    setForm((p) => {
+      const nuevas = p.categorias.includes(idCategoria)
         ? p.categorias.filter((c) => c !== idCategoria)
-        : [...p.categorias, idCategoria],
-    }));
+        : [...p.categorias, idCategoria];
+      if (nuevas.length === 0) setErrors((e) => ({ ...e, categorias: "Selecciona al menos una categoría" }));
+      else                     setErrors((e) => ({ ...e, categorias: "" }));
+      return { ...p, categorias: nuevas };
+    });
 
   const handleNuevasImagenes = (e) => {
     const files    = Array.from(e.target.files);
     const previews = files.map((f) => URL.createObjectURL(f));
     setFilesNuevos((prev)   => [...prev, ...files]);
     setPreviewNuevos((prev) => [...prev, ...previews]);
+    setErrors((err) => ({ ...err, imagenes: "" }));
   };
 
   const removeNueva = (i) => {
-    setFilesNuevos((prev)   => prev.filter((_, idx) => idx !== i));
+    setFilesNuevos((prev) => {
+      const updated = prev.filter((_, idx) => idx !== i);
+      if (updated.length === 0 && form.imagenesExistentes.length === 0) {
+        setErrors((e) => ({ ...e, imagenes: "Agrega al menos una imagen" }));
+      }
+      return updated;
+    });
     setPreviewNuevos((prev) => prev.filter((_, idx) => idx !== i));
   };
 
-  const removeExistente = async (i) => {
+  const removeExistente = (i) => {
     const img = form.imagenesExistentes[i];
-    try {
-      // El id de la imagen viene del backend como img.id o img.idImagen
-      const idImagen = img.id ?? img.idImagen;
-      await ImageService.deleteImage(idImagen);
-      setForm((p) => ({
-        ...p,
-        imagenesExistentes: p.imagenesExistentes.filter((_, idx) => idx !== i),
-      }));
-      toast.success("Imagen eliminada");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error al eliminar la imagen");
-    }
+    const idImagen = img.id ?? img.idImagen;
+
+    // Solo marca para eliminar — no llama al backend todavía
+    setImagenesAEliminar((prev) => [...prev, idImagen]);
+    setForm((p) => {
+      const updated = p.imagenesExistentes.filter((_, idx) => idx !== i);
+      if (updated.length === 0 && filesNuevos.length === 0) {
+        setErrors((e) => ({ ...e, imagenes: "Agrega al menos una imagen" }));
+      } else {
+        setErrors((e) => ({ ...e, imagenes: "" }));
+      }
+      return { ...p, imagenesExistentes: updated };
+    });
   };
 
   /* ── Submit ── */
   const handleSubmit = async () => {
-    if (!form.nombre || !form.idCondicion || !form.idEstadoCarta) {
-      setError("Nombre, condición y estado son obligatorios.");
-      return;
-    }
+    const newErrors = {};
+    if (!form.nombre?.trim())                                  newErrors.nombre        = "Nombre requerido";
+    if (!form.idCondicion)                                     newErrors.idCondicion   = "Selecciona una condición";
+    if (!form.idEstadoCarta)                                   newErrors.idEstadoCarta = "Selecciona un estado";
+    if (!form.descripcion?.trim())                             newErrors.descripcion   = "Agrega una descripción";
+    else if (form.descripcion.trim().length < 20)              newErrors.descripcion   = "La descripción debe tener al menos 20 caracteres";
+    if (form.categorias.length === 0)                          newErrors.categorias    = "Selecciona al menos una categoría";
+    if (form.imagenesExistentes.length === 0 && filesNuevos.length === 0)
+                                                               newErrors.imagenes      = "Agrega al menos una imagen";
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
     setSaving(true);
     setError(null);
     try {
@@ -231,7 +271,12 @@ export default function EditCarta() {
         categorias:    form.categorias.map(Number),
       });
 
-      // 2. Subir imágenes nuevas si hay
+      // 2. Eliminar imágenes marcadas para borrar
+      for (const idImagen of imagenesAEliminar) {
+        await ImageService.deleteImage(idImagen);
+      }
+
+      // 3. Subir imágenes nuevas si hay
       if (filesNuevos.length > 0) {
         for (const file of filesNuevos) {
           const formData = new FormData();
@@ -338,9 +383,11 @@ export default function EditCarta() {
                 <Input
                   value={form.nombre}
                   onChange={(e) => handleChange("nombre", e.target.value)}
+                  onBlur={(e)   => handleBlur("nombre", e.target.value)}
                   placeholder="Nombre de la carta"
                   className="!bg-white/[0.03] border-white/[0.08] !text-white placeholder:text-white/15 focus:border-yellow-400/40 focus:!ring-0 rounded-2xl h-12 text-sm px-4 transition-all duration-300"
                 />
+                {errors.nombre && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.nombre}</p>}
               </div>
 
               {/* CONDICIÓN + ESTADO — del backend */}
@@ -353,6 +400,7 @@ export default function EditCarta() {
                   <select
                     value={form.idCondicion || ""}
                     onChange={(e) => handleChange("idCondicion", e.target.value ? Number(e.target.value) : "")}
+                    onBlur={(e)   => handleBlur("idCondicion", e.target.value)}
                     className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-blue-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer"
                   >
                     <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
@@ -362,6 +410,7 @@ export default function EditCarta() {
                       </option>
                     ))}
                   </select>
+                  {errors.idCondicion && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.idCondicion}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -372,6 +421,7 @@ export default function EditCarta() {
                   <select
                     value={form.idEstadoCarta || ""}
                     onChange={(e) => handleChange("idEstadoCarta", e.target.value ? Number(e.target.value) : "")}
+                    onBlur={(e)   => handleBlur("idEstadoCarta", e.target.value)}
                     className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-green-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer"
                   >
                     <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
@@ -381,6 +431,7 @@ export default function EditCarta() {
                       </option>
                     ))}
                   </select>
+                  {errors.idEstadoCarta && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.idEstadoCarta}</p>}
                 </div>
               </div>
 
@@ -388,22 +439,24 @@ export default function EditCarta() {
               <div className="space-y-2">
                 <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                   <FileText className="w-3 h-3 text-purple-400" />
-                  Descripción
+                  Descripción <span className="text-red-400">*</span>
                 </Label>
                 <textarea
                   value={form.descripcion}
                   onChange={(e) => handleChange("descripcion", e.target.value)}
+                  onBlur={(e)   => handleBlur("descripcion", e.target.value)}
                   rows={4}
                   placeholder="Describe la carta: habilidades, rareza, historia..."
                   className="w-full bg-white/[0.03] border border-white/[0.08] text-white placeholder:text-white/15 focus:border-purple-400/40 focus:outline-none hover:border-white/15 rounded-2xl resize-none text-sm px-4 py-3 transition-all duration-300"
                 />
+                {errors.descripcion && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.descripcion}</p>}
               </div>
 
               {/* CATEGORÍAS — del backend */}
               <div className="space-y-3">
                 <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                   <Zap className="w-3 h-3 text-yellow-400" />
-                  Categorías
+                  Categorías <span className="text-red-400">*</span>
                 </Label>
                 <div className="flex flex-wrap gap-2">
                   {categorias.map((cat) => {
@@ -429,6 +482,7 @@ export default function EditCarta() {
                     );
                   })}
                 </div>
+                {errors.categorias && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.categorias}</p>}
               </div>
 
               {/* NUEVAS IMÁGENES */}
@@ -477,6 +531,7 @@ export default function EditCarta() {
                 )}
 
                 <input id="nuevasImagenes" type="file" accept="image/*" multiple className="hidden" onChange={handleNuevasImagenes} />
+                {errors.imagenes && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.imagenes}</p>}
               </div>
 
             </div>
