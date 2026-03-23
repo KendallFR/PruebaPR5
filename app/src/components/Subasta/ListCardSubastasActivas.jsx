@@ -16,8 +16,6 @@ import {
   Clock,
   Pencil,
   Trash2,
-  ToggleLeft,
-  ToggleRight,
   X,
   AlertTriangle,
   Gavel,
@@ -45,9 +43,7 @@ function EstadoBadge({ descripcion }) {
     </span>
   );
 }
-EstadoBadge.propTypes = {
-  descripcion: PropTypes.string,
-};
+EstadoBadge.propTypes = { descripcion: PropTypes.string };
 
 /* ══════════════════════════════════════
    MODAL CONFIRMAR CANCELAR
@@ -56,28 +52,25 @@ function DeleteModalSubasta({ item, onClose, onConfirmed }) {
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
-  setLoading(true);
-  try {
-    const subastaEliminar = {
-      idSubasta: item.idSubasta,
-      idEstadoSubasta: 3
-    };
-
-    const response = await SubastaService.delete(subastaEliminar);
-
-    if (response?.data?.success) {
-      toast.success(`Subasta #${item.idSubasta} cancelada correctamente`);
-      onConfirmed();
-    } else {
-      toast.error(response?.data?.message || "No se pudo cancelar la subasta");
+    setLoading(true);
+    try {
+      const response = await SubastaService.delete({
+        idSubasta:       item.idSubasta,
+        idEstadoSubasta: 3,
+      });
+      if (response?.data?.success) {
+        toast.success(`Subasta #${item.idSubasta} cancelada correctamente`);
+        onConfirmed();
+      } else {
+        toast.error(response?.data?.message || "No se pudo cancelar la subasta");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al cancelar la subasta");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-    toast.error("Error al cancelar la subasta");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div
@@ -85,7 +78,6 @@ function DeleteModalSubasta({ item, onClose, onConfirmed }) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="w-full max-w-sm bg-[#0d1424]/95 border border-red-500/20 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/8">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-red-400" />
@@ -95,16 +87,14 @@ function DeleteModalSubasta({ item, onClose, onConfirmed }) {
             <X className="w-4 h-4" />
           </button>
         </div>
-
         <div className="px-6 py-5">
           <p className="text-white/60 text-sm leading-relaxed">
             ¿Deseas cancelar la <span className="text-white font-semibold">Subasta #{item.idSubasta}</span>?
           </p>
           <p className="text-white/35 text-xs mt-2">
-            El estado cambiará a <span className="text-red-300 font-semibold">Cancelada</span>. Podrás reactivarla con el toggle.
+            El estado cambiará a <span className="text-red-300 font-semibold">Cancelada</span>.
           </p>
         </div>
-
         <div className="flex gap-3 px-6 pb-6">
           <Button type="button" onClick={onClose}
             className="flex-1 rounded-xl border border-white/10 bg-transparent text-white/50 hover:text-white hover:bg-white/5 text-sm">
@@ -124,9 +114,7 @@ function DeleteModalSubasta({ item, onClose, onConfirmed }) {
   );
 }
 DeleteModalSubasta.propTypes = {
-  item: PropTypes.shape({
-    idSubasta: PropTypes.number,
-  }),
+  item:        PropTypes.shape({ idSubasta: PropTypes.number }),
   onClose:     PropTypes.func,
   onConfirmed: PropTypes.func,
 };
@@ -151,10 +139,7 @@ function CartaImageTCG({ carta, BASE_URL }) {
   );
 }
 CartaImageTCG.propTypes = {
-  carta: PropTypes.shape({
-    nombre:   PropTypes.string,
-    imagenes: PropTypes.arrayOf(PropTypes.shape({ imagen: PropTypes.string })),
-  }),
+  carta:    PropTypes.shape({ nombre: PropTypes.string, imagenes: PropTypes.array }),
   BASE_URL: PropTypes.string,
 };
 
@@ -163,7 +148,7 @@ CartaImageTCG.propTypes = {
 ══════════════════════════════════════ */
 export function ListCardSubastasActivas({ data, onRefresh }) {
   const BASE_URL = import.meta.env.VITE_BASE_URL + "uploads";
-  const navigate = useNavigate(); // ✅ para navegar a la página de editar
+  const navigate = useNavigate();
 
   const [deleteItem, setDeleteItem] = useState(null);
 
@@ -171,6 +156,7 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
     const desc = item.estadoSubasta?.descripcion?.toLowerCase();
     return desc === "cancelada" || desc === "finalizada";
   };
+
   const handleDeleteConfirmed = () => {
     setDeleteItem(null);
     onRefresh?.();
@@ -191,7 +177,8 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
         {/* GRID */}
         <div className="grid gap-8 p-6 sm:grid-cols-2 lg:grid-cols-3">
           {data && data.map((item) => {
-            const inactive = isInactive(item);
+            const inactive   = isInactive(item);
+            const tienePujas = Number(item.cantidadPujas) > 0;
 
             return (
               <Card
@@ -200,15 +187,13 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                   group relative overflow-hidden
                   border border-white/10 bg-white/10
                   backdrop-blur-xl shadow-xl
-                  transition-all duration-300 hover:-translate-y-2
-                  rounded-2xl
+                  transition-all duration-300 hover:-translate-y-2 rounded-2xl
                   ${inactive
                     ? "opacity-60 grayscale-[30%]"
                     : "hover:shadow-yellow-400/40 hover:border-yellow-400/40"
                   }
                 `}
               >
-                {/* Glow hover */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-br from-yellow-400/15 via-yellow-300/5 to-transparent pointer-events-none" />
                 <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none ring-2 ring-yellow-400/30 blur-[2px]" />
 
@@ -230,19 +215,9 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                   </CardTitle>
                 </CardHeader>
 
-                {/* IMAGEN — estilo borde TCG */}
+                {/* IMAGEN */}
                 <div className="flex justify-center px-4 py-3">
-                  <div className="
-                    relative w-44 h-64
-                    rounded-[14px] overflow-hidden
-                    border-[3px] border-white/30
-                    shadow-[0_10px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.18)]
-                    ring-1 ring-black/50
-                    bg-[#0a0f1e]
-                    transition-all duration-300
-                    group-hover:border-white/50
-                    group-hover:shadow-[0_16px_50px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.25)]
-                  ">
+                  <div className="relative w-44 h-64 rounded-[14px] overflow-hidden border-[3px] border-white/30 shadow-[0_10px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-black/50 bg-[#0a0f1e] transition-all duration-300 group-hover:border-white/50 group-hover:shadow-[0_16px_50px_rgba(0,0,0,0.85)]">
                     <CartaImageTCG carta={item.carta} BASE_URL={BASE_URL} />
                     <div className="absolute top-0 left-0 right-0 h-[25%] bg-gradient-to-b from-white/12 to-transparent pointer-events-none" />
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-white/10 via-transparent to-white/5 transition-opacity duration-300 pointer-events-none" />
@@ -252,7 +227,6 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                 {/* CONTENT */}
                 <CardContent className="space-y-3 pt-2 pb-4 text-white relative z-10 px-5">
 
-                  {/* Precio + Incremento */}
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-white/[0.04] rounded-xl px-3 py-2 border border-white/8">
                       <p className="text-white/40 text-[10px] uppercase tracking-widest">Precio base</p>
@@ -264,7 +238,6 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                     </div>
                   </div>
 
-                  {/* Pujas */}
                   <div className="bg-white/[0.04] rounded-xl px-3 py-2 border border-white/8 flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-blue-400 shrink-0" />
                     <div>
@@ -273,7 +246,6 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                     </div>
                   </div>
 
-                  {/* Fechas */}
                   <div className="space-y-1">
                     <p className="flex items-center gap-2 text-xs text-white/50">
                       <Clock className="w-3.5 h-3.5 text-purple-400 shrink-0" />
@@ -285,13 +257,11 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                     </p>
                   </div>
 
-                  {/* Creador */}
                   <div className="flex items-center gap-2 text-xs text-white/50">
                     <User className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                     Creador: <span className="text-white/70 font-semibold">{item.creador?.nombre ?? "—"}</span>
                   </div>
 
-                  {/* Categorías */}
                   {item.carta?.categorias?.length > 0 && (
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <Zap className="w-3.5 h-3.5 text-yellow-400 shrink-0" />
@@ -302,48 +272,51 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                       ))}
                     </div>
                   )}
-
                 </CardContent>
 
                 {/* BOTONES */}
                 <div className="flex justify-between items-center border-t border-white/10 p-3 relative z-10 bg-white/5 backdrop-blur-md">
-
                   <div className="flex gap-2">
                     <TooltipProvider>
 
-                      {/*  Editar — navega a página separada /subasta/edit/:id */}
+                      {/* EDITAR — bloqueado si inactiva o tiene pujas */}
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
+                          <Button size="icon"
                             onClick={() => navigate(`/subasta/edit/${item.idSubasta}`)}
-                            disabled={inactive}
-                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                          >
+                            disabled={inactive || tienePujas}
+                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-white/10">
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>{inactive ? "Reactiva para editar" : "Editar"}</TooltipContent>
+                        <TooltipContent>
+                          {inactive ? "Reactiva para editar"
+                            : tienePujas ? "No se puede editar con pujas activas"
+                            : "Editar"}
+                        </TooltipContent>
                       </Tooltip>
 
-                      {/* Cancelar lógico — abre modal de confirmación */}
+                      {/* CANCELAR — bloqueado si inactiva o tiene pujas */}
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
+                          <Button size="icon"
                             onClick={() => setDeleteItem(item)}
-                            disabled={inactive}
-                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-red-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                          >
+                            disabled={inactive || tienePujas}
+                            className="w-8 h-8 rounded-full bg-white/10 hover:bg-red-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-white/10">
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>{inactive ? "Ya está cancelada" : "Cancelar subasta"}</TooltipContent>
+                        <TooltipContent>
+                          {inactive ? "Ya está cancelada"
+                            : tienePujas ? "No se puede cancelar con pujas activas"
+                            : "Cancelar subasta"}
+                        </TooltipContent>
                       </Tooltip>
+
                     </TooltipProvider>
                   </div>
 
-                  {/* Detalle — siempre activo */}
+                  {/* DETALLE — siempre activo */}
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -356,7 +329,6 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                       <TooltipContent>Ver detalle</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-
                 </div>
               </Card>
             );

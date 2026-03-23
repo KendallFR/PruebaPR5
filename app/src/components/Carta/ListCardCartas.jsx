@@ -456,13 +456,16 @@ export function ListCardCartas({ data, onRefresh }) {
                         <TooltipTrigger asChild>
                           <Button size="icon"
                             onClick={() => navigate(`/carta/editar/${item.idCarta}`)}
-                            disabled={inactivo || eliminado}
+                            disabled={inactivo || eliminado || tieneSubastaActiva}
                             className="w-8 h-8 rounded-full bg-white/10 hover:bg-blue-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-white/10">
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          {eliminado ? "Carta eliminada" : inactivo ? "Activa la carta para editar" : "Editar"}
+                          {eliminado ? "Carta eliminada" 
+                          : inactivo ? "Activa la carta para editar" 
+                         : tieneSubastaActiva ? "No se puede editar con subasta activa"
+                           : "Editar"}
                         </TooltipContent>
                       </Tooltip>
 
