@@ -38,7 +38,7 @@ export function ListCartas() {
             {data && (
                 <ListCardCartas 
                     data={data.data}
-                    onRefresh={fetchData}  // ← esto es lo que faltaba
+                    onRefresh={fetchData}  
                 />
             )}
         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -108,40 +108,171 @@ function DeleteModal({ item, estadoEliminado, onClose, onConfirmed }) {
   );
 }
 
+/* ── Colores de acento por categoría ── */
+const ACCENT_COLORS = {
+  electrico:  [139, 92,  246],
+  fuego:      [239, 68,  68 ],
+  agua:       [56,  189, 248],
+  planta:     [74,  222, 128],
+  pokemon:    [168, 85,  247],
+  entrenador: [251, 146, 60 ],
+  objeto:     [148, 163, 184],
+};
+
+function getAccent(categorias) {
+  const tipo = categorias?.[0]?.descripcion?.toLowerCase() ?? "";
+  return ACCENT_COLORS[tipo] ?? [148, 163, 184];
+}
+
 /* ══════════════════════════════════════
    CARRUSEL TCG
 ══════════════════════════════════════ */
-function CardImageCarousel({ imagenes, nombre, BASE_URL }) {
-  const [current, setCurrent] = useState(0);
+function CardImageCarousel({ imagenes, nombre, BASE_URL, categorias }) {
+  const [current,  setCurrent]  = useState(0);
+  const [busy,     setBusy]     = useState(false);
+  const canvasRef  = useRef(null);
+  const changedRef = useRef(false);
   const total = imagenes?.length ?? 0;
-  const prev = (e) => { e.stopPropagation(); setCurrent((c) => (c - 1 + total) % total); };
-  const next = (e) => { e.stopPropagation(); setCurrent((c) => (c + 1) % total); };
+
+  const easeInOut = (t) => t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+  const easeIn    = (t) => t*t*t;
+  const easeOut   = (t) => 1 - Math.pow(1-t, 3);
+
+  const animate = (nextIndex) => {
+    if (busy || nextIndex === current || total <= 1) return;
+    setBusy(true);
+    changedRef.current = false;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx   = canvas.getContext("2d");
+    const W     = canvas.width;
+    const H     = canvas.height;
+    const [r,g,b] = getAccent(categorias);
+    const STRIPS  = 12;
+    const stripW  = W / STRIPS;
+    const TOTAL   = 700;
+    const start   = performance.now();
+
+    const frame = (now) => {
+      const t = Math.min((now - start) / TOTAL, 1);
+      ctx.clearRect(0, 0, W, H);
+
+      if (t < 0.5) {
+        // Entrada: strips diagonales bajan con stagger
+        const p = easeInOut(t / 0.5);
+        for (let i = 0; i < STRIPS; i++) {
+          const delay  = (i / STRIPS) * 0.35;
+          const localT = Math.max(0, Math.min(1, (p - delay) / (1 - delay)));
+          const h      = H * easeOut(localT);
+          const x      = i * stripW;
+          const alpha  = localT * 0.82;
+
+          ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.fillRect(x, 0, stripW + 1, h);
+
+          // Línea luminosa en el frente
+          if (localT > 0 && localT < 1) {
+            const grad = ctx.createLinearGradient(x, h - 10, x, h);
+            grad.addColorStop(0, `rgba(255,255,255,0)`);
+            grad.addColorStop(1, `rgba(255,255,255,0.55)`);
+            ctx.fillStyle = grad;
+            ctx.fillRect(x, h - 10, stripW + 1, 10);
+          }
+        }
+        // Cambia imagen cuando el 60% está cubierto
+        if (p > 0.6 && !changedRef.current) {
+          changedRef.current = true;
+          setCurrent(nextIndex);
+        }
+
+      } else {
+        // Salida: strips se retiran en orden inverso
+        if (!changedRef.current) {
+          changedRef.current = true;
+          setCurrent(nextIndex);
+        }
+        const p = easeInOut((t - 0.5) / 0.5);
+        for (let i = 0; i < STRIPS; i++) {
+          const delay  = ((STRIPS - 1 - i) / STRIPS) * 0.35;
+          const localT = Math.max(0, Math.min(1, (p - delay) / (1 - delay)));
+          const h      = H * (1 - easeIn(localT));
+          const x      = i * stripW;
+          const alpha  = (1 - localT) * 0.82;
+
+          ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+          ctx.fillRect(x, 0, stripW + 1, h);
+
+          if (localT > 0 && localT < 1) {
+            const grad = ctx.createLinearGradient(x, h - 10, x, h);
+            grad.addColorStop(0, `rgba(255,255,255,0)`);
+            grad.addColorStop(1, `rgba(255,255,255,0.35)`);
+            ctx.fillStyle = grad;
+            ctx.fillRect(x, h - 10, stripW + 1, 10);
+          }
+        }
+      }
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        ctx.clearRect(0, 0, W, H);
+        setBusy(false);
+      }
+    };
+
+    requestAnimationFrame(frame);
+  };
+
+  const prev = (e) => {
+    e.stopPropagation();
+    animate((current - 1 + total) % total);
+  };
+  const next = (e) => {
+    e.stopPropagation();
+    animate((current + 1) % total);
+  };
+  const goToIndex = (e, i) => {
+    e.stopPropagation();
+    animate(i);
+  };
 
   return (
     <div className="flex justify-center px-4 py-4">
       <div className="relative w-56 h-80 rounded-[14px] overflow-hidden border-[3px] border-white/30 shadow-[0_10px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-black/50 bg-[#0a0f1e] transition-all duration-300 group-hover:border-white/50 group-hover:shadow-[0_16px_50px_rgba(0,0,0,0.85)]">
         {total > 0 ? (
           <>
-            <img src={`${BASE_URL}/${imagenes[current].imagen}`} alt={`${nombre}-${current}`} className="w-full h-full object-cover" />
+            <img
+              src={`${BASE_URL}/${imagenes[current].imagen}`}
+              alt={`${nombre}-${current}`}
+              className="w-full h-full object-cover"
+            />
+
+            {/* Canvas animación */}
+            <canvas
+              ref={canvasRef}
+              width={224}
+              height={320}
+              className="absolute inset-0 w-full h-full pointer-events-none z-10"
+            />
+
             <div className="absolute top-0 left-0 right-0 h-[25%] bg-gradient-to-b from-white/12 to-transparent pointer-events-none" />
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-white/10 via-transparent to-white/5 transition-opacity duration-300 pointer-events-none" />
             <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+
             {total > 1 && (
               <>
-                <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white border border-white/15 transition-all z-10 opacity-0 group-hover:opacity-100">
+                <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white border border-white/15 transition-all z-20 opacity-0 group-hover:opacity-100">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white border border-white/15 transition-all z-10 opacity-0 group-hover:opacity-100">
+                <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white border border-white/15 transition-all z-20 opacity-0 group-hover:opacity-100">
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10">
+                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-20">
                   {imagenes.map((_, i) => (
-                    <button key={i} onClick={(e) => { e.stopPropagation(); setCurrent(i); }}
+                    <button key={i} onClick={(e) => goToIndex(e, i)}
                       className={`rounded-full transition-all duration-200 ${i === current ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"}`} />
                   ))}
-                </div>
-                <div className="absolute top-2 right-2 bg-black/60 text-white/70 text-[9px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-sm z-10">
-                  {current + 1}/{total}
                 </div>
               </>
             )}
@@ -174,24 +305,24 @@ export function ListCardCartas({ data, onRefresh }) {
       .catch(console.error);
   }, []);
 
-  // Busca el id del estado por descripción (case-insensitive)
- const getEstadoId = (descripcion) =>
-  estados.find((e) => e.descripcion.toLowerCase() === descripcion.toLowerCase())?.idEstadoCarta;
+  // Busca el id del estado por descripción — comparación exacta
+  const getEstadoId = (descripcion) =>
+    estados.find((e) => e.descripcion === descripcion)?.idEstadoCarta;
 
-  // Lógica de estados
-  const isDisponible  = (item) => item.estadoCarta?.descripcion?.toLowerCase().includes("disponible") && !item.estadoCarta?.descripcion?.toLowerCase().includes("no");
-  const isInactivo    = (item) => item.estadoCarta?.descripcion?.toLowerCase().includes("no disponible");
- const isEliminado = (item) => {
-  const desc = item.estadoCarta?.descripcion?.toLowerCase();
-  return desc?.includes("agotada");
-};
+  // id del estado "Agotada" — viene del backend, sin hardcodear
+  const idEliminado = getEstadoId("Agotada");
 
-  // Toggle temporal: disponible ↔ no disponible
+  // Lógica de estados — usa === para comparación exacta
+  const isDisponible = (item) => item.estadoCarta?.descripcion === "Disponible";
+  const isInactivo   = (item) => item.estadoCarta?.descripcion === "No Disponible";
+  const isEliminado  = (item) => item.estadoCarta?.descripcion === "Agotada";
+
+  // Toggle temporal: Disponible ↔ No Disponible
   const handleToggle = async (item) => {
-    const activo      = isDisponible(item);
-  const idDestino = activo
-  ? getEstadoId("No disponible")
-  : getEstadoId("Disponible");
+    const activo    = isDisponible(item);
+    const idDestino = activo
+      ? getEstadoId("No Disponible")
+      : getEstadoId("Disponible");
 
     if (!idDestino) { toast.error("Estado no encontrado"); return; }
 
@@ -273,7 +404,7 @@ export function ListCardCartas({ data, onRefresh }) {
                 </CardHeader>
 
                 {/* CARRUSEL */}
-                <CardImageCarousel imagenes={item.imagenes} nombre={item.nombre} BASE_URL={BASE_URL} />
+                <CardImageCarousel imagenes={item.imagenes} nombre={item.nombre} BASE_URL={BASE_URL} categorias={item.categorias} />
 
                 {/* CONTENT */}
                 <CardContent className="space-y-4 pt-4 text-white relative z-10">
@@ -334,12 +465,12 @@ export function ListCardCartas({ data, onRefresh }) {
                         </TooltipContent>
                       </Tooltip>
 
-                      {/* ELIMINAR (basura) — permanente, solo si no está eliminada */}
+                      {/* ELIMINAR (basura) — permanente, solo si no está eliminada y hay estado disponible */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button size="icon"
                             onClick={() => setDeleteItem(item)}
-                            disabled={eliminado}
+                            disabled={eliminado || !idEliminado}
                             className="w-8 h-8 rounded-full bg-white/10 hover:bg-red-500/80 border border-white/20 text-white/70 hover:text-white shadow hover:scale-110 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-white/10">
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
@@ -414,11 +545,11 @@ export function ListCardCartas({ data, onRefresh }) {
         </div>
       </div>
 
-      {/* MODAL ELIMINAR */}
-      {deleteItem && (
+      {/* MODAL ELIMINAR — solo si hay idEliminado del backend */}
+      {deleteItem && idEliminado && (
         <DeleteModal
           item={deleteItem}
-          estadoEliminado={getEstadoId("Agotada") ?? 3}
+          estadoEliminado={idEliminado}
           onClose={() => setDeleteItem(null)}
           onConfirmed={handleDeleteConfirmed}
         />
