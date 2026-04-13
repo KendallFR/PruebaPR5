@@ -18,51 +18,41 @@ import { UpdateUsuario } from './components/Usuario/UpdateUsuario'
 import { DeleteUsuario } from './components/Usuario/DeleteUsuario'
 import { CartaSubastas } from './components/Carta/CartaSubastas'
 import { CreateSubasta } from './components/Subasta/CreateSubasta'
-import  CartaCRUD  from './components/Carta/CrearCarta'
+import CartaCRUD from './components/Carta/CrearCarta'
 import { EditSubasta } from './components/Subasta/EditSubasta'
 import { CustomToaster } from './components/ui/CustomToaster'
 import EditCarta from './components/Carta/EditCarta'
 
-
-
-
-
-
-
 const rutas = createBrowserRouter([
   {
-    element: <Layout/>,
+    element: <Layout />,
     children: [
-      // Ruta principal
       { index: true, element: <Home /> },
-
-      // Ruta comodín (404)
       { path: "*", element: <PageNotFound /> },
-       //Rutas componentes
-      {path:"usuario/table", element: <TableUsuarios/>},
-      {path:"usuario/detail/:id", element: <DetailUsuario/>},
-      {path:"carta", element: <ListCartas/>},
-      {path:"carta/detail/:id", element: <DetailCarta/>},
-      {path:"subasta/SubastasActivas", element: <ListSubastasActivas/>},
-      {path:"subasta/SubastasFinalizadas", element: <ListSubastasFinalizadas/>},
-      {path:"subasta/detail/:id", element: <DetailSubasta/>},
-      {path:"puja/table/:id", element: <TablePujas/>},
-      {path:"usuario/create", element: <CreateUsuario/>},
-      {path:"usuario/edit/:id", element: <UpdateUsuario/>},
-      {path: "usuario/delete/:id", element: <DeleteUsuario />},
-      {path: "carta/:id/subastas", element: <CartaSubastas />},
-      {path: "subasta/create", element: <CreateSubasta/>},
-      {path: "carta/crear", element: <CartaCRUD/>},
-      { path: "subasta/edit/:id", element: <EditSubasta /> },
-      { path: "carta/editar/:id", element: <EditCarta /> }
-
-
-    ]
-  }
+      { path: "usuario/table",          element: <TableUsuarios /> },
+      { path: "usuario/detail/:id",     element: <DetailUsuario /> },
+      { path: "carta",                  element: <ListCartas /> },
+      { path: "carta/detail/:id",       element: <DetailCarta /> },
+      { path: "subasta/SubastasActivas",    element: <ListSubastasActivas /> },
+      { path: "subasta/SubastasFinalizadas", element: <ListSubastasFinalizadas /> },
+      { path: "subasta/detail/:id",     element: <DetailSubasta /> },
+      { path: "puja/table/:id",         element: <TablePujas /> },
+      { path: "usuario/create",         element: <CreateUsuario /> },
+      { path: "usuario/edit/:id",       element: <UpdateUsuario /> },
+      { path: "usuario/delete/:id",     element: <DeleteUsuario /> },
+      { path: "carta/:id/subastas",     element: <CartaSubastas /> },
+      { path: "subasta/create",         element: <CreateSubasta /> },
+      { path: "carta/crear",            element: <CartaCRUD /> },
+      { path: "subasta/edit/:id",       element: <EditSubasta /> },
+      { path: "carta/editar/:id",       element: <EditCarta /> },
+    ],
+  },
 ])
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <RouterProvider router={rutas} />
+    {/* CustomToaster reemplaza al Toaster default de react-hot-toast */}
     <CustomToaster />
   </StrictMode>
 )

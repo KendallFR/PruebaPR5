@@ -9,5 +9,14 @@ class PujaService {
   getPujasbySubasta(SubastaId){
     return axios.get(BASE_URL+'/getPujasbySubasta/'+SubastaId);
   }
+
+
+  createPuja(puja) {
+    return axios.post(BASE_URL, JSON.stringify(puja), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+
 }
 export default new PujaService();

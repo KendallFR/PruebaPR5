@@ -9,17 +9,56 @@ class PujaModel
 
     public function getPujasbySubasta($idSubasta)
     {
-        try{
+        try {
             $usuarioM = new UsuarioModel();
-            $vSql = "SELECT * FROM puja where idSubasta=$idSubasta order by idPuja ASC;";
+            $vSql = "SELECT * FROM puja WHERE idSubasta=$idSubasta ORDER BY montoOfertado DESC";
             $vResultado = $this->enlace->ExecuteSQL($vSql);
             if (!empty($vResultado) && is_array($vResultado)) {
                 for ($i = 0; $i < count($vResultado); $i++) {
-                    //usuario
                     $vResultado[$i]->usuario = $usuarioM->get($vResultado[$i]->idUsuario);
                 }
-		    }
+            }
             return $vResultado;
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    public function getPujaMaxima($idSubasta)
+    {
+        try {
+            $vSql = "SELECT * FROM puja WHERE idSubasta=$idSubasta ORDER BY montoOfertado DESC LIMIT 1";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            if (!empty($vResultado)) {
+                return $vResultado[0];
+            }
+            return null;
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    public function create($objeto)
+    {
+        try {
+            $sql = "INSERT INTO puja (montoOfertado, fechaPuja, idUsuario, idSubasta)
+                    VALUES (
+                        $objeto->montoOfertado,
+                        NOW(),
+                        $objeto->idUsuario,
+                        $objeto->idSubasta
+                    )";
+            $idPuja = $this->enlace->executeSQL_DML_last($sql);
+
+            // Retornar la puja con usuario
+            $usuarioM = new UsuarioModel();
+            $vSql = "SELECT * FROM puja WHERE idPuja=$idPuja";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            if (!empty($vResultado)) {
+                $puja = $vResultado[0];
+                $puja->usuario = $usuarioM->get($puja->idUsuario);
+                return $puja;
+            }
         } catch (Exception $e) {
             handleException($e);
         }
