@@ -14,27 +14,7 @@ import CondicionService from "../../services/CondicionService";
 import EstadoCartaService from "@/services/EstadoCartaService";
 import ImageService from "../../services/ImageService";
 import toast from "react-hot-toast";
-
-/* ── Colores por categoría — igual que CreateCarta ── */
-const categoriaStyles = {
-  Pokemon:    "bg-purple-400/20 border-purple-400 text-purple-300 shadow-purple-400/20",
-  Objeto:     "bg-slate-400/20 border-slate-400 text-white shadow-slate-300/20",
-  Entrenador: "bg-orange-400/20 border-orange-400 text-orange-300 shadow-orange-400/20",
-  Electrico:  "bg-yellow-400/20 border-yellow-400 text-yellow-300 shadow-yellow-400/20",
-  Fuego:      "bg-red-500/20 border-red-500 text-red-300 shadow-red-500/20",
-  Agua:       "bg-blue-500/20 border-blue-500 text-blue-300 shadow-blue-500/20",
-  Planta:     "bg-green-500/20 border-green-500 text-green-300 shadow-green-500/20",
-};
-
-const categoriaGlow = {
-  Pokemon:    "shadow-purple-400/30 border-purple-400/30",
-  Objeto:     "shadow-slate-300/20 border-slate-300/20",
-  Entrenador: "shadow-orange-400/30 border-orange-400/30",
-  Electrico:  "shadow-yellow-400/30 border-yellow-400/30",
-  Fuego:      "shadow-red-500/30 border-red-500/30",
-  Agua:       "shadow-blue-500/30 border-blue-500/30",
-  Planta:     "shadow-green-500/30 border-green-500/30",
-};
+import { categoriaStyles, categoriaGlow } from "../../utils/categoriaColors";
 
 /* ══════════════════════════
    CARRUSEL IMÁGENES EXISTENTES
@@ -55,17 +35,14 @@ function ExistingImagesCarousel({ imagenes, BASE_URL, onRemove }) {
           <img src={`${BASE_URL}/${imagenes[cur].imagen}`} alt={`img-${cur}`} className="w-full h-full object-cover" />
           <div className="absolute top-0 left-0 right-0 h-1/4 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
           <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 opacity-0 group-hover/car:opacity-100 bg-gradient-to-br from-white/8 via-transparent to-white/4 transition-opacity duration-300 pointer-events-none" />
 
           <div className="absolute top-2 left-2 bg-black/60 text-white/60 text-[9px] font-bold px-1.5 py-0.5 rounded-full backdrop-blur-sm z-10">
             {cur + 1}/{total}
           </div>
 
-          <button
-            type="button"
+          <button type="button"
             onClick={() => { onRemove(cur); setCur((c) => Math.max(0, c - 1)); }}
-            className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center shadow-lg transition-all duration-150 opacity-0 group-hover/car:opacity-100"
-          >
+            className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center shadow-lg transition-all duration-150 opacity-0 group-hover/car:opacity-100">
             <X className="w-3 h-3 text-white" />
           </button>
 
@@ -80,8 +57,7 @@ function ExistingImagesCarousel({ imagenes, BASE_URL, onRemove }) {
               <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10">
                 {imagenes.map((_, i) => (
                   <button key={i} onClick={() => setCur(i)}
-                    className={`rounded-full transition-all duration-200 ${i === cur ? "w-3.5 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/35 hover:bg-white/60"}`}
-                  />
+                    className={`rounded-full transition-all duration-200 ${i === cur ? "w-3.5 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/35 hover:bg-white/60"}`} />
                 ))}
               </div>
             </>
@@ -106,15 +82,13 @@ export default function EditCarta() {
   const [errors,      setErrors]      = useState({});
   const [touched,     setTouched]     = useState({});
 
-  /* ── Datos del backend — igual que CreateCarta ── */
   const [categorias,  setCategorias]  = useState([]);
   const [condiciones, setCondiciones] = useState([]);
   const [estados,     setEstados]     = useState([]);
 
-  /* ── Imágenes nuevas ── */
   const [filesNuevos,       setFilesNuevos]       = useState([]);
   const [previewNuevos,     setPreviewNuevos]     = useState([]);
-  const [imagenesAEliminar, setImagenesAEliminar] = useState([]); // ids a borrar al guardar
+  const [imagenesAEliminar, setImagenesAEliminar] = useState([]);
 
   const [form, setForm] = useState({
     nombre:             "",
@@ -127,7 +101,7 @@ export default function EditCarta() {
     fechaRegistro:      "",
   });
 
-  /* ── Cargar todo del backend ── */
+  /* ── Cargar todo ── */
   useEffect(() => {
     const fetchAll = async () => {
       try {
@@ -164,19 +138,20 @@ export default function EditCarta() {
     fetchAll();
   }, [id]);
 
-  /* ── Glow dinámico — igual que CreateCarta ── */
+  /* ── Glow dinámico ── */
   const firstCat  = categorias.find((c) => form.categorias.includes(c.idCategoria));
-  const glowClass = firstCat ? (categoriaGlow[firstCat.descripcion] ?? "border-white/[0.07]") : "border-white/[0.07]";
+  const glowData  = firstCat ? (categoriaGlow[firstCat.descripcion] ?? null) : null;
+  const glowClass = glowData ? glowData.border : "border-white/[0.07]";
 
-  /* ── Handlers ── */
+  /* ── Validación ── */
   const validateField = (field, value) => {
     let msg = "";
-    if (field === "nombre"      && !(value ?? "").trim())       msg = "Nombre requerido";
-    if (field === "idCondicion" && !value)                      msg = "Selecciona una condición";
-    if (field === "idEstadoCarta" && !value)                    msg = "Selecciona un estado";
-    if (field === "descripcion" && !(value ?? "").trim())       msg = "Agrega una descripción";
-    if (field === "descripcion" && (value ?? "").trim().length > 0 && (value ?? "").trim().length < 20)
-                                                                msg = "La descripción debe tener al menos 20 caracteres";
+    if (field === "nombre"        && !(value ?? "").trim())       msg = "Nombre requerido";
+    if (field === "idCondicion"   && !value)                      msg = "Selecciona una condición";
+    if (field === "idEstadoCarta" && !value)                      msg = "Selecciona un estado";
+    if (field === "descripcion"   && !(value ?? "").trim())       msg = "Agrega una descripción";
+    if (field === "descripcion"   && (value ?? "").trim().length > 0 && (value ?? "").trim().length < 20)
+                                                                  msg = "La descripción debe tener al menos 20 caracteres";
     return msg;
   };
 
@@ -187,9 +162,7 @@ export default function EditCarta() {
 
   const handleChange = (field, value) => {
     setForm((p) => ({ ...p, [field]: value }));
-    if (touched[field]) {
-      setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }));
-    }
+    if (touched[field]) setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }));
   };
 
   const toggleCategoria = (idCategoria) =>
@@ -197,8 +170,7 @@ export default function EditCarta() {
       const nuevas = p.categorias.includes(idCategoria)
         ? p.categorias.filter((c) => c !== idCategoria)
         : [...p.categorias, idCategoria];
-      if (nuevas.length === 0) setErrors((e) => ({ ...e, categorias: "Selecciona al menos una categoría" }));
-      else                     setErrors((e) => ({ ...e, categorias: "" }));
+      setErrors((e) => ({ ...e, categorias: nuevas.length === 0 ? "Selecciona al menos una categoría" : "" }));
       return { ...p, categorias: nuevas };
     });
 
@@ -213,27 +185,23 @@ export default function EditCarta() {
   const removeNueva = (i) => {
     setFilesNuevos((prev) => {
       const updated = prev.filter((_, idx) => idx !== i);
-      if (updated.length === 0 && form.imagenesExistentes.length === 0) {
+      if (updated.length === 0 && form.imagenesExistentes.length === 0)
         setErrors((e) => ({ ...e, imagenes: "Agrega al menos una imagen" }));
-      }
       return updated;
     });
     setPreviewNuevos((prev) => prev.filter((_, idx) => idx !== i));
   };
 
   const removeExistente = (i) => {
-    const img = form.imagenesExistentes[i];
+    const img      = form.imagenesExistentes[i];
     const idImagen = img.id ?? img.idImagen;
-
-    // Solo marca para eliminar — no llama al backend todavía
     setImagenesAEliminar((prev) => [...prev, idImagen]);
     setForm((p) => {
       const updated = p.imagenesExistentes.filter((_, idx) => idx !== i);
-      if (updated.length === 0 && filesNuevos.length === 0) {
+      if (updated.length === 0 && filesNuevos.length === 0)
         setErrors((e) => ({ ...e, imagenes: "Agrega al menos una imagen" }));
-      } else {
+      else
         setErrors((e) => ({ ...e, imagenes: "" }));
-      }
       return { ...p, imagenesExistentes: updated };
     });
   };
@@ -241,17 +209,17 @@ export default function EditCarta() {
   /* ── Submit ── */
   const handleSubmit = async () => {
     const newErrors = {};
-    if (!form.nombre?.trim())                                  newErrors.nombre        = "Nombre requerido";
-    if (!form.idCondicion)                                     newErrors.idCondicion   = "Selecciona una condición";
-    if (!form.idEstadoCarta)                                   newErrors.idEstadoCarta = "Selecciona un estado";
-    if (!form.descripcion?.trim())                             newErrors.descripcion   = "Agrega una descripción";
-    else if (form.descripcion.trim().length < 20)              newErrors.descripcion   = "La descripción debe tener al menos 20 caracteres";
-    if (form.categorias.length === 0)                          newErrors.categorias    = "Selecciona al menos una categoría";
+    if (!form.nombre?.trim())                             newErrors.nombre        = "Nombre requerido";
+    if (!form.idCondicion)                                newErrors.idCondicion   = "Selecciona una condición";
+    if (!form.idEstadoCarta)                              newErrors.idEstadoCarta = "Selecciona un estado";
+    if (!form.descripcion?.trim())                        newErrors.descripcion   = "Agrega una descripción";
+    else if (form.descripcion.trim().length < 20)         newErrors.descripcion   = "La descripción debe tener al menos 20 caracteres";
+    if (form.categorias.length === 0)                     newErrors.categorias    = "Selecciona al menos una categoría";
     if (form.imagenesExistentes.length === 0 && filesNuevos.length === 0)
-                                                               newErrors.imagenes      = "Agrega al menos una imagen";
-
+                                                          newErrors.imagenes      = "Agrega al menos una imagen";
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
+
     setSaving(true);
     setError(null);
     try {
@@ -259,7 +227,6 @@ export default function EditCarta() {
         ? form.fechaRegistro.slice(0, 19).replace("T", " ")
         : new Date().toISOString().slice(0, 19).replace("T", " ");
 
-      // 1. Actualizar datos de la carta
       await CartaService.updateCarta({
         idCarta:       Number(id),
         nombre:        form.nombre,
@@ -271,12 +238,10 @@ export default function EditCarta() {
         categorias:    form.categorias.map(Number),
       });
 
-      // 2. Eliminar imágenes marcadas para borrar
       for (const idImagen of imagenesAEliminar) {
         await ImageService.deleteImage(idImagen);
       }
 
-      // 3. Subir imágenes nuevas si hay
       if (filesNuevos.length > 0) {
         for (const file of filesNuevos) {
           const formData = new FormData();
@@ -286,7 +251,7 @@ export default function EditCarta() {
         }
       }
 
-      toast.success("Carta actualizada correctamente ✨");
+      toast.success("Carta actualizada correctamente");
       navigate("/carta");
     } catch (err) {
       console.error(err);
@@ -317,7 +282,6 @@ export default function EditCarta() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0a0f1e] to-[#020617] flex flex-col items-center py-10 px-4">
 
-      {/* Partículas fondo */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-20 left-10 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
@@ -333,23 +297,13 @@ export default function EditCarta() {
         </Link>
       </div>
 
-      {/* CARD PRINCIPAL */}
-      <Card className={`
-        w-full max-w-3xl relative overflow-hidden
-        border !bg-[#0d1424]/95 backdrop-blur-xl
-        rounded-3xl transition-all duration-700
-        shadow-2xl ${glowClass}
-      `}>
+      <Card className={`w-full max-w-3xl relative overflow-hidden border !bg-[#0d1424]/95 backdrop-blur-xl rounded-3xl transition-all duration-700 shadow-2xl ${glowClass}`}>
 
-        {/* Barra superior */}
         <div className="absolute top-0 left-0 right-0 h-[2px]">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/60 to-transparent" />
         </div>
-
-        {/* Glow interno */}
         <div className="absolute -top-20 -right-20 w-60 h-60 bg-yellow-400/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* HEADER */}
         <CardHeader className="relative z-10 text-center pb-0 pt-10 !bg-transparent">
           <div className="flex items-center justify-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-2xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center">
@@ -390,7 +344,7 @@ export default function EditCarta() {
                 {errors.nombre && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.nombre}</p>}
               </div>
 
-              {/* CONDICIÓN + ESTADO — del backend */}
+              {/* CONDICIÓN + ESTADO */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
@@ -401,13 +355,10 @@ export default function EditCarta() {
                     value={form.idCondicion || ""}
                     onChange={(e) => handleChange("idCondicion", e.target.value ? Number(e.target.value) : "")}
                     onBlur={(e)   => handleBlur("idCondicion", e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-blue-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer"
-                  >
+                    className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-blue-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer">
                     <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
                     {condiciones.map((c) => (
-                      <option key={c.idCondicion} value={c.idCondicion} className="bg-[#0c1320]">
-                        {c.descripcion}
-                      </option>
+                      <option key={c.idCondicion} value={c.idCondicion} className="bg-[#0c1320]">{c.descripcion}</option>
                     ))}
                   </select>
                   {errors.idCondicion && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.idCondicion}</p>}
@@ -422,13 +373,10 @@ export default function EditCarta() {
                     value={form.idEstadoCarta || ""}
                     onChange={(e) => handleChange("idEstadoCarta", e.target.value ? Number(e.target.value) : "")}
                     onBlur={(e)   => handleBlur("idEstadoCarta", e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-green-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer"
-                  >
+                    className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-2xl h-12 px-4 text-sm focus:outline-none focus:border-green-400/40 hover:border-white/15 transition-all appearance-none cursor-pointer">
                     <option value="" className="bg-[#0c1320] text-white/50">Selecciona...</option>
                     {estados.map((e) => (
-                      <option key={e.idEstadoCarta} value={e.idEstadoCarta} className="bg-[#0c1320]">
-                        {e.descripcion}
-                      </option>
+                      <option key={e.idEstadoCarta} value={e.idEstadoCarta} className="bg-[#0c1320]">{e.descripcion}</option>
                     ))}
                   </select>
                   {errors.idEstadoCarta && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.idEstadoCarta}</p>}
@@ -452,7 +400,7 @@ export default function EditCarta() {
                 {errors.descripcion && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.descripcion}</p>}
               </div>
 
-              {/* CATEGORÍAS — del backend */}
+              {/* CATEGORÍAS — todas las 21 con colores */}
               <div className="space-y-3">
                 <Label className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                   <Zap className="w-3 h-3 text-yellow-400" />
@@ -467,15 +415,11 @@ export default function EditCarta() {
                         key={cat.idCategoria}
                         type="button"
                         onClick={() => toggleCategoria(cat.idCategoria)}
-                        className={`
-                          px-4 py-2 rounded-full border-2 text-xs font-bold
-                          transition-all duration-200
-                          ${selected
+                        className={`px-4 py-2 rounded-full border-2 text-xs font-bold transition-all duration-200 ${
+                          selected
                             ? `${style} shadow-lg scale-105`
                             : "bg-white/[0.03] text-white/40 border-white/10 hover:border-white/20 hover:text-white/60 hover:bg-white/[0.06]"
-                          }
-                        `}
-                      >
+                        }`}>
                         {cat.descripcion}
                         {selected && <span className="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-current animate-pulse" />}
                       </button>
@@ -499,19 +443,14 @@ export default function EditCarta() {
                         <div className="w-20 h-28 rounded-xl overflow-hidden border-2 border-white/20 shadow-lg bg-[#0a0f1e] group-hover/np:border-white/40 transition-all">
                           <img src={src} alt="" className="w-full h-full object-cover" />
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeNueva(i)}
-                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/np:opacity-100 transition-all shadow z-10"
-                        >
+                        <button type="button" onClick={() => removeNueva(i)}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/np:opacity-100 transition-all shadow z-10">
                           <X className="w-2.5 h-2.5 text-white" />
                         </button>
                       </div>
                     ))}
-                    <div
-                      className="w-20 h-28 rounded-xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-pink-400/30 hover:bg-pink-400/[0.03] transition-all"
-                      onClick={() => document.getElementById("nuevasImagenes").click()}
-                    >
+                    <div className="w-20 h-28 rounded-xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-pink-400/30 hover:bg-pink-400/[0.03] transition-all"
+                      onClick={() => document.getElementById("nuevasImagenes").click()}>
                       <ImagePlus className="w-4 h-4 text-white/20" />
                       <span className="text-[9px] text-white/20">Agregar</span>
                     </div>
@@ -519,10 +458,8 @@ export default function EditCarta() {
                 )}
 
                 {previewNuevos.length === 0 && (
-                  <div
-                    className="flex flex-col items-center justify-center gap-2 w-full h-24 border-2 border-dashed border-white/[0.08] rounded-2xl cursor-pointer hover:border-pink-400/30 hover:bg-pink-400/[0.03] transition-all group/upload"
-                    onClick={() => document.getElementById("nuevasImagenes").click()}
-                  >
+                  <div className="flex flex-col items-center justify-center gap-2 w-full h-24 border-2 border-dashed border-white/[0.08] rounded-2xl cursor-pointer hover:border-pink-400/30 hover:bg-pink-400/[0.03] transition-all group/upload"
+                    onClick={() => document.getElementById("nuevasImagenes").click()}>
                     <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center group-hover/upload:bg-pink-400/10 group-hover/upload:border-pink-400/20 transition-all">
                       <ImagePlus className="w-4 h-4 text-white/20 group-hover/upload:text-pink-400/60 transition-colors" />
                     </div>
@@ -533,16 +470,11 @@ export default function EditCarta() {
                 <input id="nuevasImagenes" type="file" accept="image/*" multiple className="hidden" onChange={handleNuevasImagenes} />
                 {errors.imagenes && <p className="text-red-400/80 text-[11px] flex items-center gap-1.5 pl-1"><span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />{errors.imagenes}</p>}
               </div>
-
             </div>
 
             {/* ── COLUMNA DERECHA: imagen actual ── */}
             <div className="flex flex-col items-center gap-4">
-              <ExistingImagesCarousel
-                imagenes={form.imagenesExistentes}
-                BASE_URL={BASE_URL}
-                onRemove={removeExistente}
-              />
+              <ExistingImagesCarousel imagenes={form.imagenesExistentes} BASE_URL={BASE_URL} onRemove={removeExistente} />
 
               {form.imagenesExistentes.length === 0 && previewNuevos.length === 0 && (
                 <div className="w-44 h-60 rounded-[12px] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-2 text-white/15 bg-white/[0.01]">
@@ -551,23 +483,19 @@ export default function EditCarta() {
                 </div>
               )}
 
-              {/* Stats */}
               <div className="w-full space-y-1.5 mt-1">
-                <div className="flex items-center justify-between text-[10px] px-1">
-                  <span className="text-white/30 uppercase tracking-widest">ID Carta</span>
-                  <span className="text-white/50 font-mono">#{id}</span>
-                </div>
-                <div className="flex items-center justify-between text-[10px] px-1">
-                  <span className="text-white/30 uppercase tracking-widest">Imágenes</span>
-                  <span className="text-white/50">{form.imagenesExistentes.length + filesNuevos.length}</span>
-                </div>
-                <div className="flex items-center justify-between text-[10px] px-1">
-                  <span className="text-white/30 uppercase tracking-widest">Categorías</span>
-                  <span className="text-white/50">{form.categorias.length}</span>
-                </div>
+                {[
+                  { label: "ID Carta",   value: `#${id}` },
+                  { label: "Imágenes",   value: form.imagenesExistentes.length + filesNuevos.length },
+                  { label: "Categorías", value: form.categorias.length },
+                ].map((s, i) => (
+                  <div key={i} className="flex items-center justify-between text-[10px] px-1">
+                    <span className="text-white/30 uppercase tracking-widest">{s.label}</span>
+                    <span className="text-white/50 font-mono">{s.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
-
           </div>
 
           {/* Separador */}
@@ -577,7 +505,6 @@ export default function EditCarta() {
             <div className="flex-1 h-px bg-gradient-to-l from-transparent to-white/[0.06]" />
           </div>
 
-          {/* ERROR */}
           {error && (
             <div className="flex items-center gap-2 text-red-300 text-sm bg-red-500/8 border border-red-500/15 rounded-xl px-4 py-3 mb-4">
               <X className="w-4 h-4 shrink-0 text-red-400" />
@@ -592,17 +519,12 @@ export default function EditCarta() {
                 Cancelar
               </Button>
             </Link>
-            <Button
-              type="button"
-              disabled={saving}
-              onClick={handleSubmit}
-              className="flex-1 rounded-2xl h-12 bg-gradient-to-r from-yellow-400 to-yellow-300 hover:from-yellow-300 hover:to-yellow-200 text-black font-bold text-sm shadow-lg shadow-yellow-400/25 hover:shadow-yellow-400/40 hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 disabled:scale-100"
-            >
+            <Button type="button" disabled={saving} onClick={handleSubmit}
+              className="flex-1 rounded-2xl h-12 bg-gradient-to-r from-yellow-400 to-yellow-300 hover:from-yellow-300 hover:to-yellow-200 text-black font-bold text-sm shadow-lg shadow-yellow-400/25 hover:shadow-yellow-400/40 hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 disabled:scale-100">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {saving ? "Guardando..." : "Guardar Cambios"}
             </Button>
           </div>
-
         </CardContent>
       </Card>
     </div>

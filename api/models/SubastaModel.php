@@ -192,38 +192,48 @@ class SubastaModel
         }
     }
 
-    public function verificarYCerrar($idSubasta)
-    {
-        try {
-            $vSql       = "SELECT * FROM subasta WHERE idSubasta = $idSubasta";
-            $vResultado = $this->enlace->ExecuteSQL($vSql);
-            if (empty($vResultado)) return null;
+public function verificarYCerrar($idSubasta)
+{
+    try {
+        $vSql = "SELECT *, (fechaCierre <= NOW()) as vencida FROM subasta WHERE idSubasta = $idSubasta";
+        $vResultado = $this->enlace->ExecuteSQL($vSql);
+        if (empty($vResultado)) return null;
 
-            $subasta = $vResultado[0];
+        $subasta = $vResultado[0];
 
-            // Si ya está finalizada o cancelada no hacer nada
-            if ($subasta->idEstadoSubasta != 1) {
-                return $this->get($idSubasta);
-            }
-
-            $ahora  = new DateTime();
-            $cierre = new DateTime($subasta->fechaCierre);
-
-            if ($ahora >= $cierre) {
-                $this->cerrarSubasta($idSubasta);
-
-                $pujaM      = new PujaModel();
-                $pujaMaxima = $pujaM->getPujaMaxima($idSubasta);
-
-                if ($pujaMaxima) {
-                    $facturacionM = new FacturacionModel();
-                    $facturacionM->crearDesdeSubasta($idSubasta, $pujaMaxima->idUsuario, $pujaMaxima->montoOfertado);
-                }
-            }
-
+        if ($subasta->idEstadoSubasta != 1) {
             return $this->get($idSubasta);
-        } catch (Exception $e) {
-            handleException($e);
         }
+
+        if ($subasta->vencida) {
+            $this->cerrarSubasta($idSubasta);
+
+            $pujaM      = new PujaModel();
+            $pujaMaxima = $pujaM->getPujaMaxima($idSubasta);
+
+            $ganador = null;
+            if ($pujaMaxima) {
+                $facturacionM = new FacturacionModel();
+                $facturacionM->crearDesdeSubasta($idSubasta, $pujaMaxima->idUsuario, $pujaMaxima->montoOfertado);
+                $usuarioM = new UsuarioModel();
+                $ganador  = $usuarioM->get($pujaMaxima->idUsuario);
+            }
+
+            $pusher = new Pusher\Pusher(
+                '28284af3704b6e0c7492',
+                '6398f3b078cff8d75b8d',
+                '2138339',
+                ['cluster' => 'us2', 'useTLS' => true]
+            );
+            $pusher->trigger('subasta-' . $idSubasta, 'subasta-cerrada', [
+                'idSubasta' => $idSubasta,
+                'ganador'   => $ganador
+            ]);
+        }
+
+        return $this->get($idSubasta);
+    } catch (Exception $e) {
+        handleException($e);
     }
+}
 }

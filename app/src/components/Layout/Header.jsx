@@ -14,7 +14,8 @@ import {
   X,
   ChevronDown,
   User,
-  ShoppingBasket
+  ShoppingBasket,
+  CreditCard
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -36,13 +37,14 @@ export default function Header() {
     { title: "Filtrar por carta", href: "/movie/filter", icon: <Filter className="h-4 w-4" /> },
   ];
 
-  const mantItems = [
-    { title: "Subastas Activas", href: "/subasta/SubastasActivas", icon: <Wrench className="h-4 w-4" /> },
-    { title: "Subastas Finalizadas", href: "/subasta/SubastasFinalizadas", icon: <Wrench className="h-4 w-4" /> },
-    { title: "Cartas", href: "/carta", icon: <ShoppingBasket className="h-4 w-4" /> },
-    { title: "Usuarios", href: "/usuario/table", icon: <ChartArea className="h-4 w-4" /> },
-    { title: "Pujas", href: "/puja/table/1", icon: <ChartArea className="h-4 w-4" /> }
-  ];
+ const mantItems = [
+  { title: "Subastas Activas",    href: "/subasta/SubastasActivas",    icon: <Wrench className="h-4 w-4" /> },
+  { title: "Subastas Finalizadas", href: "/subasta/SubastasFinalizadas", icon: <Wrench className="h-4 w-4" /> },
+  { title: "Cartas",              href: "/carta",                      icon: <ShoppingBasket className="h-4 w-4" /> },
+  { title: "Usuarios",            href: "/usuario/table",              icon: <ChartArea className="h-4 w-4" /> },
+  { title: "Pujas",               href: "/puja/table/1",               icon: <ChartArea className="h-4 w-4" /> },
+  { title: "Pagos",               href: "/facturacion",                icon: <CreditCard className="h-4 w-4" /> },
+];
 
   const userItems = [
     { title: "Login", href: "/user/login", icon: <LogIn className="h-4 w-4" /> },

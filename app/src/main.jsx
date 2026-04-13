@@ -22,6 +22,7 @@ import CartaCRUD from './components/Carta/CrearCarta'
 import { EditSubasta } from './components/Subasta/EditSubasta'
 import { CustomToaster } from './components/ui/CustomToaster'
 import EditCarta from './components/Carta/EditCarta'
+import { ListFacturacion } from './components/Facturacion/ListFacturacion'
 
 const rutas = createBrowserRouter([
   {
@@ -45,6 +46,7 @@ const rutas = createBrowserRouter([
       { path: "carta/crear",            element: <CartaCRUD /> },
       { path: "subasta/edit/:id",       element: <EditSubasta /> },
       { path: "carta/editar/:id",       element: <EditCarta /> },
+      { path: "facturacion",            element: <ListFacturacion /> },
     ],
   },
 ])
