@@ -40,25 +40,29 @@ class FacturacionModel
             handleException($e);
         }
     }
+public function crearDesdeSubasta($idSubasta, $idUsuario, $monto)
+{
+    try {
+        // Verificar que no exista ya un pago para esta subasta
+        $existe = $this->getBySubasta($idSubasta);
+        if ($existe) return $existe;
 
-    public function crearDesdeSubasta($idSubasta, $idUsuario, $monto)
-    {
-        try {
-            // Verificar que no exista ya un pago para esta subasta
-            $existe = $this->getBySubasta($idSubasta);
-            if ($existe) return $existe;
+        $sql = "INSERT INTO facturacion (idEstadoFacturacion, idUsuario, fechaFactura, resultado, monto, idSubasta)
+                VALUES (1, $idUsuario, NOW(), 'Pendiente', $monto, $idSubasta)";
 
-            $sql = "INSERT INTO facturacion (idEstadoFacturacion, idUsuario, fechaFactura, resultado, monto, idSubasta)
-                    VALUES (1, $idUsuario, NOW(), 'Pendiente', $monto, $idSubasta)";
-            $id = $this->enlace->executeSQL_DML_last($sql);
+        $id = $this->enlace->executeSQL_DML_last($sql);
 
-            $vSql = "SELECT * FROM facturacion WHERE idFacturacion = $id";
-            $vResultado = $this->enlace->ExecuteSQL($vSql);
-            if (!empty($vResultado)) return $vResultado[0];
-        } catch (Exception $e) {
-            handleException($e);
-        }
+        if (!$id) return null;
+
+        $vSql      = "SELECT * FROM facturacion WHERE idFacturacion = $id";
+        $vResultado = $this->enlace->ExecuteSQL($vSql);
+        if (!empty($vResultado)) return $vResultado[0];
+        return null;
+    } catch (Exception $e) {
+        handleException($e);
+        return null;
     }
+}
 
     public function confirmarPago($idFacturacion)
     {

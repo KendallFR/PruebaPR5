@@ -3,26 +3,26 @@ import { useNavigate, useParams } from "react-router-dom";
 import Pusher from "pusher-js";
 import SubastaService from "@/services/SubastaService";
 import PujaService from "@/services/PujaService";
-import UsuarioService from "@/services/UsuarioService";
 import toast from "react-hot-toast";
 import {
   Clock, Gavel, ArrowLeft, TrendingUp, User,
   FilmIcon, Crown, Trophy, AlertCircle, Zap,
-  ChevronUp, Shield, Calendar, ChevronDown
+  ChevronUp, Shield, Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { categoriaGlow, categoriaStyles } from "@/utils/categoriaColors";
 
+// ── Compradores fijos (solo estos 2) ──────────────────────────────────────
+const COMPRADORES = [
+  { idUsuario: 4, nombre: "Carlos Méndez" },
+  { idUsuario: 5, nombre: "Laura Jiménez" },
+];
 
+// ── parseFechaCR ──────────────────────────────────────────────────────────
 function parseFechaCR(fechaStr) {
   if (!fechaStr) return null;
-  const [fecha, hora] = fechaStr.split(" ");
-  const [y, m, d] = fecha.split("-");
-  const [h, min, s] = hora.split(":");
-  const date = new Date(Number(y), Number(m) - 1, Number(d), Number(h), Number(min), Number(s));
-  // MySQL corre en UTC, restar 6h para convertir a CR
-  date.setHours(date.getHours() - 6);
-  return date;
+  const clean = String(fechaStr).replace(" ", "T") + "Z";
+  return new Date(clean);
 }
 
 function formatContador(diff) {
@@ -33,7 +33,6 @@ function formatContador(diff) {
   const mins    = Math.floor((total_s % 3600) / 60);
   const segs    = total_s % 60;
 
-  // Mostrar solo las unidades relevantes — máximo 2
   if (dias >= 30) {
     const meses = Math.floor(dias / 30);
     const diasR = dias % 30;
@@ -94,8 +93,8 @@ function Contador({ fechaCierre, onExpirado }) {
 
   useEffect(() => {
     const calcular = () => {
-  const cierre = parseFechaCR(fechaCierre);
-  const diff = cierre.getTime() - Date.now();
+      const cierre = parseFechaCR(fechaCierre);
+      const diff   = cierre.getTime() - Date.now();
       if (diff <= 0) {
         setExpirado(true);
         setData(null);
@@ -184,55 +183,25 @@ function PujaRow({ puja, index, isNew }) {
   );
 }
 
-// ── Selector de usuario para pruebas ──
-function UserSwitcher({ usuarios, usuarioActual, onChange }) {
-  const [open, setOpen] = useState(false);
-  const u = usuarios.find(u => u.idUsuario == usuarioActual);
+// ── UserSwitcher — solo alterna entre los 2 compradores fijos ─────────────
+function UserSwitcher({ usuarioActual, onChange }) {
+  const u    = COMPRADORES.find(c => c.idUsuario === usuarioActual);
+  const otro = COMPRADORES.find(c => c.idUsuario !== usuarioActual);
 
   return (
-    <div className="relative">
-      <button onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.07] transition-all text-sm">
-        <div className="w-5 h-5 rounded-full bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center">
-          <User className="w-3 h-3 text-yellow-400" />
-        </div>
-        <span className="text-white/60 text-xs">
-          <span className="text-white/30">Probando como: </span>
-          <span className="text-white/80 font-semibold">{u?.nombre ?? "—"}</span>
-        </span>
-        <ChevronDown className={`w-3 h-3 text-white/30 transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      {open && (
-        <div className="absolute top-full mt-1 left-0 z-50 w-56 rounded-2xl border border-white/10 bg-[#0d1424]/98 backdrop-blur-xl shadow-2xl overflow-hidden">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-white/20 px-3 pt-3 pb-1">Cambiar usuario</p>
-          {usuarios.map(u => (
-            <button key={u.idUsuario}
-              onClick={() => { onChange(u.idUsuario); setOpen(false); }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/[0.05] transition-colors text-left ${
-                u.idUsuario == usuarioActual ? "bg-yellow-400/5" : ""
-              }`}>
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border ${
-                u.idUsuario == usuarioActual
-                  ? "bg-yellow-400/20 border-yellow-400/40 text-yellow-400"
-                  : "bg-white/[0.04] border-white/10 text-white/40"
-              }`}>
-                {u.nombre?.charAt(0)}
-              </div>
-              <div>
-                <p className={`text-xs font-semibold ${u.idUsuario == usuarioActual ? "text-yellow-400" : "text-white/60"}`}>
-                  {u.nombre}
-                </p>
-                <p className="text-[9px] text-white/20">{u.rol?.descripcion ?? "—"}</p>
-              </div>
-              {u.idUsuario == usuarioActual && (
-                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-yellow-400" />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    <button
+      onClick={() => onChange(otro.idUsuario)}
+      className="flex items-center gap-2.5 px-4 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all group"
+    >
+      <div className="w-6 h-6 rounded-full bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center text-[11px] font-black text-yellow-400">
+        {u?.nombre?.charAt(0) ?? "?"}
+      </div>
+      <div className="text-left">
+        <p className="text-white/25 text-[9px] uppercase tracking-widest leading-none mb-0.5">Probando como</p>
+        <p className="text-white/80 font-semibold text-xs leading-none">{u?.nombre ?? "—"}</p>
+      </div>
+      <span className="text-white/20 group-hover:text-white/50 transition-colors text-[10px] ml-1">▶</span>
+    </button>
   );
 }
 
@@ -249,42 +218,34 @@ export function DetailSubasta() {
   const { id }   = useParams();
   const BASE_URL = import.meta.env.VITE_BASE_URL + "uploads";
 
-  const [subasta,      setSubasta]      = useState(null);
-  const [pujas,        setPujas]        = useState([]);
-  const [usuarios,     setUsuarios]     = useState([]);
-  const [usuarioActual, setUsuarioActual] = useState(7);
-  const [loading,      setLoading]      = useState(true);
-  const [monto,        setMonto]        = useState("");
-  const [montoError,   setMontoError]   = useState("");
-  const [pujaSuper,    setPujaSuper]    = useState(false);
-  const [cerrada,      setCerrada]      = useState(false);
-  const [enviando,     setEnviando]     = useState(false);
-  const [nuevasPujas,  setNuevasPujas]  = useState(new Set());
-  const [mounted,      setMounted]      = useState(false);
+  const [subasta,       setSubasta]       = useState(null);
+  const [pujas,         setPujas]         = useState([]);
+  const [usuarioActual, setUsuarioActual] = useState(4); // Carlos Méndez por defecto
+  const [loading,       setLoading]       = useState(true);
+  const [monto,         setMonto]         = useState("");
+  const [montoError,    setMontoError]    = useState("");
+  const [pujaSuper,     setPujaSuper]     = useState(false);
+  const [cerrada,       setCerrada]       = useState(false);
+  const [enviando,      setEnviando]      = useState(false);
+  const [nuevasPujas,   setNuevasPujas]   = useState(new Set());
+  const [mounted,       setMounted]       = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50);
     return () => clearTimeout(t);
   }, []);
 
-  // Carga inicial
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [resSub, resUsuarios] = await Promise.all([
-          SubastaService.getSubastaById(id),
-          UsuarioService.getUsuarios()
-        ]);
-
+        // Solo carga la subasta — usuarios ya son fijos, no hay fetch
+        const resSub      = await SubastaService.getSubastaById(id);
         const subastaData = resSub.data?.data ?? resSub.data;
         setSubasta(subastaData);
         if (subastaData?.idEstadoSubasta != 1) setCerrada(true);
 
-        const usuariosData = resUsuarios.data?.data ?? resUsuarios.data ?? [];
-        setUsuarios(Array.isArray(usuariosData) ? usuariosData : []);
-
         try {
-          const resPujas = await PujaService.getPujasbySubasta(id);
+          const resPujas  = await PujaService.getPujasbySubasta(id);
           const pujasData = resPujas.data?.data ?? resPujas.data;
           if (pujasData && Array.isArray(pujasData)) {
             setPujas([...pujasData].sort((a, b) => Number(b.montoOfertado) - Number(a.montoOfertado)));
@@ -297,17 +258,14 @@ export function DetailSubasta() {
     fetchData();
   }, [id]);
 
-  // Pusher
   useEffect(() => {
-    const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, { cluster: import.meta.env.VITE_PUSHER_CLUSTER });
+    const pusher  = new Pusher(import.meta.env.VITE_PUSHER_KEY, { cluster: import.meta.env.VITE_PUSHER_CLUSTER });
     const channel = pusher.subscribe("subasta-" + id);
 
     channel.bind("nueva-puja", (data) => {
       setPujas((prev) => {
         const liderAnterior = prev[0];
         const nuevas = [data.puja, ...prev].sort((a, b) => Number(b.montoOfertado) - Number(a.montoOfertado));
-
-        // Notificar si el usuario actual perdió el liderazgo
         setUsuarioActual(currentUser => {
           if (
             liderAnterior &&
@@ -319,11 +277,8 @@ export function DetailSubasta() {
           }
           return currentUser;
         });
-
         return nuevas;
       });
-
-      // Marcar como nueva para animación
       setNuevasPujas(prev => {
         const s = new Set(prev);
         s.add(data.puja.idPuja);
@@ -343,7 +298,7 @@ export function DetailSubasta() {
 
   const handleExpirado = async () => {
     try {
-      const res = await SubastaService.getSubastaById(id);
+      const res  = await SubastaService.getSubastaById(id);
       const data = res.data?.data ?? res.data;
       setSubasta(data);
       setCerrada(true);
@@ -366,8 +321,8 @@ export function DetailSubasta() {
     setEnviando(true);
     try {
       const res = await PujaService.createPuja({
-        idUsuario:    usuarioActual,
-        idSubasta:    Number(id),
+        idUsuario:     usuarioActual,
+        idSubasta:     Number(id),
         montoOfertado: montoNum,
       });
       if (res.data?.success === false) {
@@ -436,7 +391,6 @@ export function DetailSubasta() {
         .glow-bg { animation: glowPulse 4s ease-in-out infinite; }
       `}</style>
 
-      {/* Notif puja superada */}
       {pujaSuper && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3 px-5 py-4 rounded-2xl border border-red-500/40 bg-[#0d1424]/98 backdrop-blur-xl shadow-2xl"
           style={{ animation: "slideIn 0.5s cubic-bezier(0.34,1.56,0.64,1)" }}>
@@ -453,7 +407,6 @@ export function DetailSubasta() {
 
       <div className="min-h-screen bg-[#020617] px-4 py-8 relative overflow-hidden">
 
-        {/* Fondo */}
         <div className="fixed inset-0 pointer-events-none">
           <div className="glow-bg absolute top-0 left-1/4 w-[700px] h-[500px] rounded-full blur-[140px]"
             style={{ background: glow.hex }} />
@@ -465,17 +418,15 @@ export function DetailSubasta() {
 
         <div className={`relative z-10 max-w-6xl mx-auto space-y-5 transition-opacity duration-500 ${mounted ? "opacity-100" : "opacity-0"}`}>
 
-          {/* Top bar */}
           <div className="flex items-center justify-between">
             <button onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors text-sm group">
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
               Regresar
             </button>
-            <UserSwitcher usuarios={usuarios} usuarioActual={usuarioActual} onChange={setUsuarioActual} />
+            <UserSwitcher usuarioActual={usuarioActual} onChange={setUsuarioActual} />
           </div>
 
-          {/* HEADER CARD */}
           <div className="anim-1 relative overflow-hidden rounded-3xl border bg-gradient-to-b from-[#0d1424] to-[#080d18]"
             style={{ borderColor: `rgba(${glow.rgb},0.18)` }}>
             <div className="absolute top-0 left-0 right-0 h-px"
@@ -521,7 +472,6 @@ export function DetailSubasta() {
               </div>
             </div>
 
-            {/* Stats */}
             <div className="border-t border-white/[0.05] grid grid-cols-3 divide-x divide-white/[0.05]">
               {[
                 { label: "Precio base",     value: `$${Number(data.precio).toLocaleString()}`,        color: "text-yellow-400" },
@@ -536,13 +486,10 @@ export function DetailSubasta() {
             </div>
           </div>
 
-          {/* BODY */}
           <div className="grid lg:grid-cols-[1fr_390px] gap-5">
 
-            {/* IZQUIERDA */}
             <div className="space-y-5">
 
-              {/* Carta */}
               <div className="anim-2 rounded-3xl border border-white/[0.06] bg-[#0a0f1e]/80 p-6 flex gap-6">
                 <div className="flex-shrink-0">
                   {data.carta?.imagenes?.length > 0 ? (
@@ -585,7 +532,6 @@ export function DetailSubasta() {
                 </div>
               </div>
 
-              {/* Puja líder */}
               <div className="anim-3 rounded-3xl border p-6 relative overflow-hidden"
                 style={{ borderColor: `rgba(${glow.rgb},0.2)`, background: `linear-gradient(135deg,rgba(${glow.rgb},0.05) 0%,transparent 60%)` }}>
                 <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl pointer-events-none"
@@ -620,7 +566,6 @@ export function DetailSubasta() {
                 )}
               </div>
 
-              {/* Vendedor */}
               <div className="anim-4 flex items-center gap-3 p-4 rounded-2xl border border-white/[0.05] bg-white/[0.02]">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                   <User className="w-4 h-4 text-blue-400" />
@@ -632,10 +577,8 @@ export function DetailSubasta() {
               </div>
             </div>
 
-            {/* DERECHA */}
             <div className="space-y-5">
 
-              {/* Formulario */}
               {isActive && !esVendedor && (
                 <div className="rounded-3xl border border-white/[0.08] bg-[#0a0f1e]/80 p-5 space-y-4"
                   style={{ boxShadow: `0 0 50px rgba(${glow.rgb},0.05)` }}>
@@ -696,7 +639,6 @@ export function DetailSubasta() {
                 </div>
               )}
 
-              {/* Historial */}
               <div className="rounded-3xl border border-white/[0.06] bg-[#0a0f1e]/60 overflow-hidden">
                 <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between">
                   <div className="flex items-center gap-2">

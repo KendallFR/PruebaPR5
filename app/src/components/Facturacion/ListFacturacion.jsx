@@ -1,227 +1,478 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Pusher from "pusher-js";
 import FacturacionService from "@/services/FacturacionService";
 import toast from "react-hot-toast";
 import {
   CreditCard, CheckCircle, Clock, Trophy,
-  User, Gavel, DollarSign, Calendar, RefreshCw
+  User, Gavel, DollarSign, Calendar, RefreshCw,
+  Sparkles, TrendingUp, Zap,
 } from "lucide-react";
 
+/* ─────────────────────────────────────────────
+   Keyframes inyectados una sola vez
+───────────────────────────────────────────── */
+const CSS = `
+  @keyframes fsu   { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes rowIn { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes shimmer {
+    0%  { background-position:-700px 0 }
+    100%{ background-position: 700px 0 }
+  }
+  @keyframes spin     { to{transform:rotate(360deg)} }
+  @keyframes ping     { 75%,100%{transform:scale(2);opacity:0} }
+  @keyframes glow     { 0%,100%{opacity:.6} 50%{opacity:1} }
+  @keyframes sweepIn  {
+    from{background-position:-100% 0}
+    to  {background-position: 200% 0}
+  }
+  @keyframes borderPulse {
+    0%,100%{border-color:rgba(52,211,153,.25)}
+    50%    {border-color:rgba(52,211,153,.65)}
+  }
+  @keyframes countUp { from{opacity:0;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+  @keyframes halo {
+    0%  {box-shadow:0 0 0 0 rgba(250,204,21,.35)}
+    70% {box-shadow:0 0 0 10px rgba(250,204,21,0)}
+    100%{box-shadow:0 0 0 0 rgba(250,204,21,0)}
+  }
+
+  .fsu  { animation: fsu   .5s cubic-bezier(.22,1,.36,1) both }
+  .d1   { animation-delay:.06s }
+  .d2   { animation-delay:.12s }
+  .d3   { animation-delay:.18s }
+
+  .row-enter { animation: rowIn .32s cubic-bezier(.22,1,.36,1) both }
+
+  .shimmer-bg {
+    background: linear-gradient(90deg,
+      rgba(255,255,255,.03) 25%,
+      rgba(255,255,255,.08) 50%,
+      rgba(255,255,255,.03) 75%);
+    background-size: 700px 100%;
+    animation: shimmer 1.5s infinite linear;
+  }
+
+  .confirmed-sweep { position:relative; overflow:hidden; }
+  .confirmed-sweep::after {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(90deg,transparent,rgba(52,211,153,.12),transparent);
+    background-size:200% 100%;
+    animation: sweepIn .9s ease-out forwards;
+  }
+
+  .btn-confirm { animation: borderPulse 2s ease-in-out infinite; }
+  .btn-confirm:hover { animation:none; border-color:rgba(52,211,153,.7) !important; }
+
+  .stat-number { animation: countUp .4s cubic-bezier(.34,1.56,.64,1) both }
+
+  .pending-halo { animation: halo 2.2s ease-in-out infinite }
+
+  .spin      { animation: spin .75s linear infinite }
+  .ping-dot  { animation: ping 1.2s cubic-bezier(0,0,.2,1) infinite }
+  .glow-dot  { animation: glow 2.5s ease-in-out infinite }
+
+  .table-row-hover { transition: background .18s, transform .18s }
+  .table-row-hover:hover {
+    background: rgba(255,255,255,.028) !important;
+    transform: translateX(2px);
+  }
+
+  .stat-card-wrap {
+    position:relative;
+    transition: transform .25s, box-shadow .25s;
+  }
+  .stat-card-wrap:hover { transform:translateY(-3px); }
+`;
+
+function injectCSS() {
+  if (document.getElementById("lf-css")) return;
+  const s = document.createElement("style");
+  s.id = "lf-css";
+  s.textContent = CSS;
+  document.head.appendChild(s);
+}
+
+/* ─── EstadoBadge ─── */
 function EstadoBadge({ estado }) {
-  const isPendiente = estado?.toLowerCase().includes("pendiente") || estado === "1";
+  const ok = !estado?.toLowerCase().includes("pendiente") && estado !== "1";
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border ${
-      isPendiente
-        ? "bg-yellow-400/10 border-yellow-400/25 text-yellow-400"
-        : "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black border tracking-wide ${
+      ok
+        ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+        : "bg-yellow-400/10 border-yellow-400/25 text-yellow-400"
     }`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${isPendiente ? "bg-yellow-400 animate-pulse" : "bg-emerald-400"}`} />
-      {isPendiente ? "Pendiente" : "Confirmado"}
+      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ok ? "bg-emerald-400" : "bg-yellow-400 ping-dot"}`} />
+      {ok ? "Confirmado" : "Pendiente"}
     </span>
   );
 }
 
-export function ListFacturacion() {
-  const [facturas,  setFacturas]  = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [confirmando, setConfirmando] = useState(null); // id en proceso
+/* ─── SkeletonRow ─── */
+function SkeletonRow({ delay = 0 }) {
+  return (
+    <div
+      className="grid items-center px-6 py-5 border-b border-white/[0.04]"
+      style={{ gridTemplateColumns:"56px 1fr 1fr 130px 110px 150px", gap:16, animationDelay:`${delay}s`, animation:`fsu .35s ease ${delay}s both` }}
+    >
+      {[40,160,140,80,90,110].map((w,i) => (
+        <div key={i} className="shimmer-bg rounded-md" style={{ height:13, width:w, maxWidth:"100%" }} />
+      ))}
+    </div>
+  );
+}
 
-  const fetchData = async () => {
+/* ─── StatCard ─── */
+function StatCard({ label, value, icon: Icon, color, borderC, bgC, iconBg, glowC, delay }) {
+  return (
+    <div
+      className={`stat-card-wrap fsu ${delay} flex items-center gap-4 p-5 rounded-2xl backdrop-blur-sm`}
+      style={{ border:`1px solid ${borderC}`, background:bgC, boxShadow:"none" }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 16px 40px ${glowC}`; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; }}
+    >
+      <div className="flex-shrink-0 w-12 h-12 rounded-[14px] flex items-center justify-center"
+        style={{ background:iconBg, border:`1px solid ${borderC}` }}>
+        <Icon style={{ width:20, height:20, color }} />
+      </div>
+      <div>
+        <p className="m-0 text-[10px] font-black uppercase tracking-[.2em] mb-1"
+          style={{ color:"rgba(255,255,255,.3)" }}>
+          {label}
+        </p>
+        <p className="m-0 text-3xl font-black leading-none stat-number" style={{ color }}>
+          {value}
+        </p>
+      </div>
+      <div className="absolute bottom-0 left-4 right-4 h-px rounded-full opacity-30"
+        style={{ background:`linear-gradient(90deg,transparent,${color},transparent)` }} />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Componente principal
+───────────────────────────────────────────── */
+export function ListFacturacion() {
+  const [facturas,   setFacturas]   = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [confirmando,setConfirmando]= useState(null);
+  const [newlyDone,  setNewlyDone]  = useState(new Set());
+  const localRef = useRef(new Set());
+
+  useEffect(() => { injectCSS(); }, []);
+
+  const fetchData = async (isRefresh = false) => {
+    isRefresh ? setRefreshing(true) : setLoading(true);
     try {
-      const res = await FacturacionService.getAll();
+      const res  = await FacturacionService.getAll();
       const data = res.data?.data ?? res.data;
       setFacturas(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Error al cargar pagos");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
-
   useEffect(() => { fetchData(); }, []);
 
-  // Pusher — escuchar confirmaciones en tiempo real
   useEffect(() => {
-    const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
-      cluster: import.meta.env.VITE_PUSHER_CLUSTER,
-    });
+    const pusher  = new Pusher(import.meta.env.VITE_PUSHER_KEY, { cluster: import.meta.env.VITE_PUSHER_CLUSTER });
     const channel = pusher.subscribe("pagos");
     channel.bind("pago-confirmado", (data) => {
-      setFacturas(prev => prev.map(f =>
-        String(f.idFacturacion) === String(data.facturacion?.idFacturacion)
-          ? { ...f, idEstadoFacturacion: 2, resultado: "Confirmado", estadoDescripcion: "Confirmado" }
+      const fid = String(data.facturacion?.idFacturacion);
+      setFacturas(p => p.map(f =>
+        String(f.idFacturacion) === fid
+          ? { ...f, idEstadoFacturacion:2, resultado:"Confirmado", estadoDescripcion:"Confirmado" }
           : f
       ));
-      toast.success("Pago confirmado en tiempo real");
+      if (!localRef.current.has(fid)) toast.success("Pago confirmado en tiempo real");
+      markDone(fid);
     });
     return () => { channel.unbind_all(); pusher.unsubscribe("pagos"); pusher.disconnect(); };
   }, []);
 
-  const handleConfirmar = async (idFacturacion) => {
-    setConfirmando(idFacturacion);
+  const markDone = (fid) => {
+    setNewlyDone(p => new Set([...p, fid]));
+    setTimeout(() => setNewlyDone(p => { const n = new Set(p); n.delete(fid); return n; }), 2000);
+  };
+
+  const handleConfirmar = async (id) => {
+    const fid = String(id);
+    setConfirmando(id);
+    localRef.current.add(fid);
     try {
-      await FacturacionService.confirmarPago(idFacturacion);
-      // Pusher actualiza la UI, pero también actualizamos localmente por si acaso
-      setFacturas(prev => prev.map(f =>
-        String(f.idFacturacion) === String(idFacturacion)
-          ? { ...f, idEstadoFacturacion: 2, resultado: "Confirmado", estadoDescripcion: "Confirmado" }
+      await FacturacionService.confirmarPago(id);
+      setFacturas(p => p.map(f =>
+        String(f.idFacturacion) === fid
+          ? { ...f, idEstadoFacturacion:2, resultado:"Confirmado", estadoDescripcion:"Confirmado" }
           : f
       ));
+      markDone(fid);
       toast.success("Pago confirmado correctamente");
     } catch {
       toast.error("Error al confirmar el pago");
+      localRef.current.delete(fid);
     } finally {
       setConfirmando(null);
+      setTimeout(() => localRef.current.delete(fid), 2000);
     }
   };
 
-  const pendientes   = facturas.filter(f => String(f.idEstadoFacturacion) === "1" || f.resultado === "Pendiente");
-  const confirmados  = facturas.filter(f => String(f.idEstadoFacturacion) === "2" || f.resultado === "Confirmado");
+  const pendientes  = facturas.filter(f => String(f.idEstadoFacturacion) === "1" || f.resultado === "Pendiente");
+  const confirmados = facturas.filter(f => String(f.idEstadoFacturacion) === "2" || f.resultado === "Confirmado");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0a0f1e] to-[#020617] px-4 py-10">
+    <div className="min-h-screen px-4 py-10 relative overflow-hidden"
+      style={{ background:"linear-gradient(135deg,#020617 0%,#080d1a 50%,#020617 100%)" }}>
 
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-10 right-10 w-96 h-96 bg-yellow-400/3 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-10 w-80 h-80 bg-emerald-500/3 rounded-full blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.012]"
-          style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+      {/* ── Fondo decorativo ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-[650px] h-[650px] rounded-full"
+          style={{ background:"radial-gradient(circle,rgba(250,204,21,.08) 0%,transparent 65%)", transform:"translate(30%,-30%)" }} />
+        <div className="absolute bottom-0 left-0 w-[550px] h-[550px] rounded-full"
+          style={{ background:"radial-gradient(circle,rgba(52,211,153,.06) 0%,transparent 65%)", transform:"translate(-30%,30%)" }} />
+        <div className="absolute inset-0" style={{
+          backgroundImage:"linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px)",
+          backgroundSize:"72px 72px",
+          maskImage:"radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%)",
+          WebkitMaskImage:"radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%)",
+        }} />
+        {/* partículas flotantes */}
+        {[
+          { top:"15%", left:"8%",  s:3, c:"#facc15", op:.28, d:"0s"   },
+          { top:"72%", left:"5%",  s:2, c:"#34d399", op:.22, d:".5s"  },
+          { top:"35%", right:"6%", s:4, c:"#818cf8", op:.18, d:"1s"   },
+          { top:"58%", right:"12%",s:2, c:"#facc15", op:.22, d:"1.5s" },
+          { top:"88%", left:"20%", s:3, c:"#34d399", op:.14, d:".8s"  },
+          { top:"22%", left:"55%", s:2, c:"#f472b6", op:.15, d:"1.2s" },
+        ].map((p,i) => (
+          <div key={i} className="absolute rounded-full glow-dot"
+            style={{ top:p.top, left:p.left, right:p.right, width:p.s, height:p.s,
+              background:p.c, opacity:p.op, animationDelay:p.d }} />
+        ))}
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto space-y-8">
+      <div className="relative z-10 max-w-[1120px] mx-auto space-y-8">
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
+        {/* ── Header ── */}
+        <div className="fsu flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center">
-              <CreditCard className="w-6 h-6 text-yellow-400" />
+            <div className="relative">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center pending-halo"
+                style={{ background:"rgba(250,204,21,.1)", border:"1px solid rgba(250,204,21,.25)" }}>
+                <CreditCard className="w-7 h-7" style={{ color:"#facc15" }} />
+              </div>
+              {/* punto live */}
+              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full flex items-center justify-center"
+                style={{ background:"#facc15", boxShadow:"0 0 8px #facc15" }}>
+                <div className="w-3 h-3 rounded-full ping-dot absolute" style={{ background:"#facc15" }} />
+              </div>
             </div>
             <div>
-              <p className="text-white/30 text-[10px] uppercase tracking-[0.25em] font-semibold">Sistema de pagos</p>
-              <h1 className="text-2xl font-black text-white tracking-tight">Registro de Pagos</h1>
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Sparkles className="w-3 h-3" style={{ color:"rgba(250,204,21,.55)" }} />
+                <p className="m-0 text-[10px] font-black uppercase tracking-[.25em]"
+                  style={{ color:"rgba(255,255,255,.28)" }}>
+                  Sistema de pagos
+                </p>
+              </div>
+              <h1 className="m-0 text-[28px] font-black tracking-tight leading-none" style={{ color:"#fff" }}>
+                Registro de Pagos
+              </h1>
             </div>
           </div>
-          <button onClick={fetchData}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/[0.08] bg-white/[0.03] text-white/40 hover:text-white/70 hover:border-white/15 transition-all text-sm">
-            <RefreshCw className="w-3.5 h-3.5" />
-            Actualizar
+
+          <button
+            onClick={() => fetchData(true)}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold"
+            style={{
+              border:"1px solid rgba(255,255,255,.1)",
+              background: refreshing ? "rgba(255,255,255,.07)" : "rgba(255,255,255,.04)",
+              color: refreshing ? "rgba(255,255,255,.7)" : "rgba(255,255,255,.42)",
+              cursor: refreshing ? "not-allowed" : "pointer",
+              transition:"background .2s, color .2s, border-color .2s",
+            }}
+            onMouseEnter={e => { if (!refreshing) { e.currentTarget.style.background="rgba(255,255,255,.09)"; e.currentTarget.style.color="rgba(255,255,255,.8)"; e.currentTarget.style.borderColor="rgba(255,255,255,.22)"; }}}
+            onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,.04)"; e.currentTarget.style.color="rgba(255,255,255,.42)"; e.currentTarget.style.borderColor="rgba(255,255,255,.1)"; }}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "spin" : ""}`} style={{ flexShrink:0 }} />
+            {refreshing ? "Actualizando…" : "Actualizar"}
           </button>
         </div>
 
-        {/* Stats */}
+        {/* ── Stats ── */}
         <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: "Total pagos",   value: facturas.length,    color: "text-white/70",    border: "border-white/[0.06]",    bg: "bg-white/[0.02]",    icon: <DollarSign className="w-4 h-4 text-white/30" /> },
-            { label: "Pendientes",    value: pendientes.length,  color: "text-yellow-400",  border: "border-yellow-400/20",   bg: "bg-yellow-400/5",    icon: <Clock className="w-4 h-4 text-yellow-400" /> },
-            { label: "Confirmados",   value: confirmados.length, color: "text-emerald-400", border: "border-emerald-500/20",  bg: "bg-emerald-500/5",   icon: <CheckCircle className="w-4 h-4 text-emerald-400" /> },
-          ].map((s, i) => (
-            <div key={i} className={`rounded-2xl border ${s.border} ${s.bg} p-5 flex items-center gap-4`}>
-              <div className={`w-10 h-10 rounded-xl border ${s.border} flex items-center justify-center`}>{s.icon}</div>
-              <div>
-                <p className="text-white/30 text-[10px] uppercase tracking-widest font-semibold">{s.label}</p>
-                <p className={`text-2xl font-black ${s.color}`}>{s.value}</p>
-              </div>
-            </div>
-          ))}
+          <StatCard
+            label="Total pagos"  value={facturas.length}    icon={DollarSign}  delay=""
+            color="rgba(255,255,255,.82)" borderC="rgba(255,255,255,.1)"  bgC="rgba(255,255,255,.04)"
+            iconBg="rgba(255,255,255,.07)" glowC="rgba(255,255,255,.06)"
+          />
+          <StatCard
+            label="Pendientes"   value={pendientes.length}  icon={Clock}       delay="d1"
+            color="#facc15"               borderC="rgba(250,204,21,.25)"  bgC="rgba(250,204,21,.07)"
+            iconBg="rgba(250,204,21,.12)" glowC="rgba(250,204,21,.18)"
+          />
+          <StatCard
+            label="Confirmados"  value={confirmados.length} icon={TrendingUp}  delay="d2"
+            color="#34d399"               borderC="rgba(52,211,153,.25)"  bgC="rgba(52,211,153,.07)"
+            iconBg="rgba(52,211,153,.12)" glowC="rgba(52,211,153,.18)"
+          />
         </div>
 
-        {/* Tabla */}
+        {/* ── Tabla ── */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <span className="w-8 h-8 border-2 border-yellow-400/20 border-t-yellow-400 rounded-full animate-spin" />
-            <p className="text-white/25 text-sm">Cargando pagos...</p>
-          </div>
-        ) : facturas.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-4">
-              <CreditCard className="w-7 h-7 text-white/15" />
+          <div className="fsu rounded-3xl overflow-hidden"
+            style={{ border:"1px solid rgba(255,255,255,.07)", background:"rgba(8,13,26,.7)" }}>
+            <div className="grid px-6 py-3.5 border-b border-white/[0.05] bg-white/[0.02]"
+              style={{ gridTemplateColumns:"56px 1fr 1fr 130px 110px 150px", gap:16 }}>
+              {["#","Comprador","Subasta","Monto","Fecha","Estado"].map((h,i) => (
+                <p key={i} className="m-0 text-[10px] font-black uppercase tracking-[.15em]"
+                  style={{ color:"rgba(255,255,255,.2)" }}>{h}</p>
+              ))}
             </div>
-            <p className="text-white/30 text-sm">No hay pagos registrados</p>
-            <p className="text-white/15 text-xs mt-1">Los pagos se generan automáticamente al cerrar una subasta</p>
+            {[0,.07,.14,.21].map((d,i) => <SkeletonRow key={i} delay={d} />)}
           </div>
-        ) : (
-          <div className="rounded-3xl border border-white/[0.06] bg-[#0a0f1e]/60 overflow-hidden">
 
-            {/* Header tabla */}
-            <div className="grid grid-cols-[60px_1fr_1fr_140px_120px_140px] gap-4 px-6 py-3 border-b border-white/[0.05] bg-white/[0.02]">
-              {["#", "Comprador", "Subasta", "Monto", "Fecha", "Estado / Acción"].map((h, i) => (
-                <p key={i} className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/25">{h}</p>
+        ) : facturas.length === 0 ? (
+          <div className="fsu text-center py-24">
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5"
+              style={{ background:"rgba(255,255,255,.04)", border:"1px solid rgba(255,255,255,.08)" }}>
+              <CreditCard className="w-9 h-9" style={{ color:"rgba(255,255,255,.15)" }} />
+            </div>
+            <p className="m-0 text-sm font-semibold mb-2" style={{ color:"rgba(255,255,255,.3)" }}>
+              No hay pagos registrados
+            </p>
+            <p className="m-0 text-xs" style={{ color:"rgba(255,255,255,.15)" }}>
+              Los pagos se generan automáticamente al cerrar una subasta
+            </p>
+          </div>
+
+        ) : (
+          <div className="fsu d1 rounded-3xl overflow-hidden"
+            style={{ border:"1px solid rgba(255,255,255,.07)", background:"rgba(8,13,26,.75)", backdropFilter:"blur(20px)" }}>
+
+            {/* cabecera */}
+            <div className="grid px-6 py-3.5 border-b border-white/[0.05] bg-white/[0.02]"
+              style={{ gridTemplateColumns:"56px 1fr 1fr 130px 110px 150px", gap:16 }}>
+              {["#","Comprador","Subasta","Monto","Fecha","Estado / Acción"].map((h,i) => (
+                <p key={i} className="m-0 text-[10px] font-black uppercase tracking-[.15em]"
+                  style={{ color:"rgba(255,255,255,.22)" }}>{h}</p>
               ))}
             </div>
 
-            {/* Filas */}
-            <div className="divide-y divide-white/[0.04]">
-              {facturas.map((f) => {
+            {/* filas */}
+            <div>
+              {facturas.map((f, idx) => {
+                const fid         = String(f.idFacturacion);
                 const isPendiente = String(f.idEstadoFacturacion) === "1" || f.resultado === "Pendiente";
-                const isConfirmando = confirmando === f.idFacturacion || confirmando === String(f.idFacturacion);
-                const monto = Number(f.monto);
-                const fecha = f.fechaFactura ? String(f.fechaFactura).slice(0, 16).replace("T", " ") : "—";
+                const isConf      = confirmando === f.idFacturacion || confirmando === fid;
+                const justDone    = newlyDone.has(fid);
+                const monto       = Number(f.monto);
+                const fecha       = f.fechaFactura ? String(f.fechaFactura).slice(0,16).replace("T"," ") : "—";
 
                 return (
-                  <div key={f.idFacturacion}
-                    className={`grid grid-cols-[60px_1fr_1fr_140px_120px_140px] gap-4 px-6 py-4 items-center transition-colors hover:bg-white/[0.02] ${
-                      !isPendiente ? "opacity-70" : ""
-                    }`}>
+                  <div
+                    key={fid}
+                    className={`row-enter table-row-hover grid items-center px-6 border-b border-white/[0.04] ${justDone ? "confirmed-sweep" : ""}`}
+                    style={{
+                      gridTemplateColumns:"56px 1fr 1fr 130px 110px 150px",
+                      gap:16, paddingTop:18, paddingBottom:18,
+                      opacity: !isPendiente && !justDone ? .55 : 1,
+                      transition:"opacity .4s",
+                      animationDelay:`${idx * .038}s`,
+                    }}
+                  >
+                    {/* id */}
+                    <span className="text-xs font-mono font-bold" style={{ color:"rgba(255,255,255,.2)" }}>
+                      #{fid}
+                    </span>
 
-                    {/* ID */}
-                    <span className="text-white/25 text-xs font-mono">#{f.idFacturacion}</span>
-
-                    {/* Comprador */}
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/15 flex items-center justify-center flex-shrink-0">
-                        <User className="w-3 h-3 text-blue-400" />
+                    {/* comprador */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-[10px] flex-shrink-0 flex items-center justify-center"
+                        style={{ background:"rgba(99,102,241,.14)", border:"1px solid rgba(99,102,241,.22)" }}>
+                        <User style={{ width:13, height:13, color:"#818cf8" }} />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-white/70 text-sm font-semibold truncate">{f.usuario?.nombre ?? "—"}</p>
-                        <p className="text-white/25 text-[10px] truncate">{f.usuario?.email ?? ""}</p>
+                        <p className="m-0 text-[13px] font-bold truncate" style={{ color:"rgba(255,255,255,.82)" }}>
+                          {f.usuario?.nombre ?? "—"}
+                        </p>
+                        <p className="m-0 text-[11px] truncate" style={{ color:"rgba(255,255,255,.25)" }}>
+                          {f.usuario?.email ?? ""}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Subasta / Carta */}
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/15 flex items-center justify-center flex-shrink-0">
-                        <Gavel className="w-3 h-3 text-purple-400" />
+                    {/* subasta */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-[10px] flex-shrink-0 flex items-center justify-center"
+                        style={{ background:"rgba(139,92,246,.14)", border:"1px solid rgba(139,92,246,.22)" }}>
+                        <Gavel style={{ width:13, height:13, color:"#a78bfa" }} />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-white/70 text-sm font-semibold truncate">
+                        <p className="m-0 text-[13px] font-bold truncate" style={{ color:"rgba(255,255,255,.82)" }}>
                           {f.subasta?.carta?.nombre ?? `Subasta #${f.idSubasta}`}
                         </p>
-                        <p className="text-white/25 text-[10px]">Subasta #{f.idSubasta}</p>
+                        <p className="m-0 text-[11px]" style={{ color:"rgba(255,255,255,.25)" }}>
+                          Subasta #{f.idSubasta}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Monto */}
+                    {/* monto */}
                     <div className="flex items-center gap-1.5">
-                      <Trophy className="w-3.5 h-3.5 text-yellow-400/60" />
-                      <span className="text-yellow-400 font-black text-base">
+                      <Trophy style={{ width:14, height:14, color:"rgba(250,204,21,.55)", flexShrink:0 }} />
+                      <span className="font-black text-[17px] leading-none"
+                        style={{ color:"#facc15", textShadow:"0 0 20px rgba(250,204,21,.4)" }}>
                         ${isNaN(monto) ? "—" : monto.toLocaleString()}
                       </span>
                     </div>
 
-                    {/* Fecha */}
+                    {/* fecha */}
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3 h-3 text-white/20" />
-                      <span className="text-white/35 text-xs">{fecha}</span>
+                      <Calendar style={{ width:11, height:11, color:"rgba(255,255,255,.2)", flexShrink:0 }} />
+                      <span className="text-[11px]" style={{ color:"rgba(255,255,255,.3)" }}>{fecha}</span>
                     </div>
 
-                    {/* Estado / Acción */}
-                    <div className="flex items-center">
+                    {/* estado / acción */}
+                    <div>
                       {isPendiente ? (
                         <button
+                          className="btn-confirm flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-black border"
+                          style={{
+                            background: isConf ? "rgba(52,211,153,.08)" : "rgba(52,211,153,.12)",
+                            color:"#34d399",
+                            cursor: isConf ? "not-allowed" : "pointer",
+                            opacity: isConf ? .7 : 1,
+                            whiteSpace:"nowrap",
+                            transition:"background .2s, transform .15s",
+                          }}
+                          disabled={isConf}
                           onClick={() => handleConfirmar(f.idFacturacion)}
-                          disabled={isConfirmando}
-                          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-bold hover:bg-emerald-500/20 hover:border-emerald-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                          {isConfirmando
-                            ? <><span className="w-3 h-3 border border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" />Confirmando...</>
-                            : <><CheckCircle className="w-3.5 h-3.5" />Confirmar</>
-                          }
+                          onMouseEnter={e => { if (!isConf) { e.currentTarget.style.background="rgba(52,211,153,.22)"; e.currentTarget.style.transform="scale(1.04)"; }}}
+                          onMouseLeave={e => { e.currentTarget.style.background="rgba(52,211,153,.12)"; e.currentTarget.style.transform="scale(1)"; }}
+                        >
+                          {isConf ? (
+                            <>
+                              <span className="spin flex-shrink-0"
+                                style={{ width:12, height:12, borderRadius:"50%", display:"inline-block",
+                                  border:"2px solid rgba(52,211,153,.3)", borderTopColor:"#34d399" }} />
+                              Confirmando…
+                            </>
+                          ) : (
+                            <>
+                              <Zap style={{ width:12, height:12, flexShrink:0 }} />
+                              Confirmar
+                            </>
+                          )}
                         </button>
                       ) : (
                         <EstadoBadge estado={f.resultado ?? f.estadoDescripcion} />
                       )}
                     </div>
-
                   </div>
                 );
               })}
