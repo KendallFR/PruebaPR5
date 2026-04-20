@@ -14,7 +14,7 @@ class SubastaModel
             $estadoSubastaM = new EstadoSubastaModel();
             $usuarioM       = new UsuarioModel();
 
-            // Cerrar subastas vencidas que siguen en estado activo
+            // Cerrar subastas vencidas antes de listar
             $vencidas = $this->enlace->ExecuteSQL(
                 "SELECT idSubasta FROM subasta WHERE idEstadoSubasta = 1 AND fechaCierre <= NOW()"
             );
@@ -24,20 +24,12 @@ class SubastaModel
                 }
             }
 
-            // Solo traer las que siguen activas (estado 1 Y fecha no vencida)
             $vSql = "SELECT
-                        u.idSubasta,
-                        u.fechaInicio,
-                        u.fechaCierre,
-                        u.precio,
-                        u.incrementoMin,
-                        u.idEstadoSubasta,
-                        u.idUsuario,
-                        u.idCarta,
+                        u.idSubasta, u.fechaInicio, u.fechaCierre, u.precio,
+                        u.incrementoMin, u.idEstadoSubasta, u.idUsuario, u.idCarta,
                         (SELECT COUNT(*) FROM puja s WHERE s.idSubasta = u.idSubasta) AS cantidadPujas
                      FROM subasta u
-                     WHERE u.idEstadoSubasta = 1
-                       AND u.fechaCierre > NOW()
+                     WHERE u.idEstadoSubasta = 1 AND u.fechaCierre > NOW()
                      ORDER BY idSubasta DESC";
 
             $vResultado = $this->enlace->ExecuteSQL($vSql);
@@ -61,14 +53,8 @@ class SubastaModel
             $estadoSubastaM = new EstadoSubastaModel();
             $usuarioM       = new UsuarioModel();
             $vSql = "SELECT
-                        u.idSubasta,
-                        u.fechaInicio,
-                        u.fechaCierre,
-                        u.precio,
-                        u.incrementoMin,
-                        u.idEstadoSubasta,
-                        u.idUsuario,
-                        u.idCarta,
+                        u.idSubasta, u.fechaInicio, u.fechaCierre, u.precio,
+                        u.incrementoMin, u.idEstadoSubasta, u.idUsuario, u.idCarta,
                         (SELECT COUNT(*) FROM puja s WHERE s.idSubasta = u.idSubasta) AS cantidadPujas
                      FROM subasta u
                      WHERE u.idEstadoSubasta = 2 OR u.idEstadoSubasta = 3
@@ -95,14 +81,8 @@ class SubastaModel
             $usuarioM       = new UsuarioModel();
 
             $vSql = "SELECT
-                        u.idSubasta,
-                        u.fechaInicio,
-                        u.fechaCierre,
-                        u.precio,
-                        u.incrementoMin,
-                        u.idEstadoSubasta,
-                        u.idUsuario,
-                        u.idCarta,
+                        u.idSubasta, u.fechaInicio, u.fechaCierre, u.precio,
+                        u.incrementoMin, u.idEstadoSubasta, u.idUsuario, u.idCarta,
                         (SELECT COUNT(*) FROM puja s WHERE s.idSubasta = u.idSubasta) AS cantidadPujas
                      FROM subasta u
                      WHERE u.idSubasta = $id
@@ -112,7 +92,7 @@ class SubastaModel
             if (!empty($vResultado)) {
                 $vResultado = $vResultado[0];
 
-                // FIX: auto-cerrar si está activa y ya venció
+                // Auto-cerrar si está activa y ya venció
                 if ($vResultado->idEstadoSubasta == 1) {
                     $ahora  = new DateTime('now', new DateTimeZone('UTC'));
                     $cierre = new DateTime($vResultado->fechaCierre, new DateTimeZone('UTC'));
@@ -120,7 +100,6 @@ class SubastaModel
                         $this->cerrarSubasta($id);
                         $vResultado->idEstadoSubasta = 2;
 
-                        // Crear facturación si hay puja ganadora
                         $pujaM      = new PujaModel();
                         $pujaMaxima = $pujaM->getPujaMaxima($id);
                         if ($pujaMaxima) {
@@ -128,11 +107,11 @@ class SubastaModel
                             $facturacionM->crearDesdeSubasta($id, $pujaMaxima->idUsuario, $pujaMaxima->montoOfertado);
                         }
 
-                        // Emitir evento Pusher
                         $ganador = null;
                         if ($pujaMaxima) {
                             $ganador = $usuarioM->get($pujaMaxima->idUsuario);
                         }
+
                         $pusher = new Pusher\Pusher(
                             '28284af3704b6e0c7492',
                             '6398f3b078cff8d75b8d',
@@ -143,6 +122,16 @@ class SubastaModel
                             'idSubasta' => $id,
                             'ganador'   => $ganador
                         ]);
+
+                        // Emitir también en canal pagos si hay factura
+                        if ($pujaMaxima) {
+                            $factura = $facturacionM->getBySubasta($id);
+                            if ($factura) {
+                                $pusher->trigger('pagos', 'nuevo-pago', [
+                                    'facturacion' => $factura
+                                ]);
+                            }
+                        }
                     }
                 }
 
@@ -172,16 +161,11 @@ class SubastaModel
         try {
             $sql = "INSERT INTO subasta
                         (fechaInicio, fechaCierre, precio, incrementoMin, idUsuario, idEstadoSubasta, idCarta)
-                    VALUES
-                        (
-                            '$objeto->fechaInicio',
-                            '$objeto->fechaCierre',
-                            $objeto->precio,
-                            $objeto->incrementoMin,
-                            $objeto->idUsuario,
-                            1,
-                            $objeto->idCarta
-                        )";
+                    VALUES (
+                        '$objeto->fechaInicio', '$objeto->fechaCierre',
+                        $objeto->precio, $objeto->incrementoMin,
+                        $objeto->idUsuario, 1, $objeto->idCarta
+                    )";
             $idSubasta = $this->enlace->executeSQL_DML_last($sql);
             return $this->get($idSubasta);
         } catch (Exception $e) {
@@ -208,8 +192,7 @@ class SubastaModel
     public function delete($objeto)
     {
         try {
-            $sql = "UPDATE subasta
-                    SET idEstadoSubasta = $objeto->idEstadoSubasta
+            $sql = "UPDATE subasta SET idEstadoSubasta = $objeto->idEstadoSubasta
                     WHERE idSubasta = $objeto->idSubasta";
             $this->enlace->executeSQL_DML($sql);
             return $this->get($objeto->idSubasta);
@@ -236,10 +219,7 @@ class SubastaModel
             if (empty($vResultado)) return null;
 
             $subasta = $vResultado[0];
-
-            if ($subasta->idEstadoSubasta != 1) {
-                return $this->get($idSubasta);
-            }
+            if ($subasta->idEstadoSubasta != 1) return $this->get($idSubasta);
 
             if ($subasta->vencida) {
                 $this->cerrarSubasta($idSubasta);
@@ -265,6 +245,13 @@ class SubastaModel
                     'idSubasta' => $idSubasta,
                     'ganador'   => $ganador
                 ]);
+
+                if ($pujaMaxima) {
+                    $factura = (new FacturacionModel())->getBySubasta($idSubasta);
+                    if ($factura) {
+                        $pusher->trigger('pagos', 'nuevo-pago', ['facturacion' => $factura]);
+                    }
+                }
             }
 
             return $this->get($idSubasta);

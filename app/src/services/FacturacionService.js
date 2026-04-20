@@ -7,14 +7,14 @@ class FacturacionService {
     return axios.get(BASE_URL);
   }
 
-  confirmarPago(idFacturacion) {
-    return axios({
-      method: 'put',
-      url: BASE_URL + '/confirmarPago',
-      data: JSON.stringify({ idFacturacion }),
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
+ confirmarPago(idFacturacion) {
+  return axios({
+    method: 'put',
+    url: BASE_URL + '/confirmarpago',  // ← minúsculas
+    data: JSON.stringify({ idFacturacion }),
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
 }
 
 export default new FacturacionService();

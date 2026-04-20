@@ -15,23 +15,23 @@ class facturacion
     public function index()
     {
         try {
-            $response     = new Response();
-            $facturacion  = new FacturacionModel();
-            $result       = $facturacion->getAll();
+            $response    = new Response();
+            $facturacion = new FacturacionModel();
+            $result      = $facturacion->getAll();
             $response->toJSON($result);
         } catch (Exception $e) {
             handleException($e);
         }
     }
 
-    public function confirmarPago()
+ public function confirmarpago()
     {
         try {
-            $request      = new Request();
-            $response     = new Response();
-            $inputJSON    = $request->getJSON();
-            $facturacion  = new FacturacionModel();
-            $result       = $facturacion->confirmarPago($inputJSON->idFacturacion);
+            $request     = new Request();
+            $response    = new Response();
+            $inputJSON   = $request->getJSON();
+            $facturacion = new FacturacionModel();
+            $result      = $facturacion->confirmarPago($inputJSON->idFacturacion);
 
             // Emitir evento Pusher
             $pusher = $this->getPusher();

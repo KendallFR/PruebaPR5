@@ -4,13 +4,11 @@ import FacturacionService from "@/services/FacturacionService";
 import toast from "react-hot-toast";
 import {
   CreditCard, CheckCircle, Clock, Trophy,
-  User, Gavel, DollarSign, Calendar, RefreshCw,
+  User, Gavel, DollarSign, Calendar,
   Sparkles, TrendingUp, Zap,
 } from "lucide-react";
 
-/* ─────────────────────────────────────────────
-   Keyframes inyectados una sola vez
-───────────────────────────────────────────── */
+/* ─── Keyframes ─────────────────────────────────────────────────────────── */
 const CSS = `
   @keyframes fsu   { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   @keyframes rowIn { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
@@ -18,10 +16,10 @@ const CSS = `
     0%  { background-position:-700px 0 }
     100%{ background-position: 700px 0 }
   }
-  @keyframes spin     { to{transform:rotate(360deg)} }
-  @keyframes ping     { 75%,100%{transform:scale(2);opacity:0} }
-  @keyframes glow     { 0%,100%{opacity:.6} 50%{opacity:1} }
-  @keyframes sweepIn  {
+  @keyframes spin  { to{transform:rotate(360deg)} }
+  @keyframes ping  { 75%,100%{transform:scale(2);opacity:0} }
+  @keyframes glow  { 0%,100%{opacity:.6} 50%{opacity:1} }
+  @keyframes sweepIn {
     from{background-position:-100% 0}
     to  {background-position: 200% 0}
   }
@@ -36,10 +34,10 @@ const CSS = `
     100%{box-shadow:0 0 0 0 rgba(250,204,21,0)}
   }
 
-  .fsu  { animation: fsu   .5s cubic-bezier(.22,1,.36,1) both }
-  .d1   { animation-delay:.06s }
-  .d2   { animation-delay:.12s }
-  .d3   { animation-delay:.18s }
+  .fsu { animation: fsu .5s cubic-bezier(.22,1,.36,1) both }
+  .d1  { animation-delay:.06s }
+  .d2  { animation-delay:.12s }
+  .d3  { animation-delay:.18s }
 
   .row-enter { animation: rowIn .32s cubic-bezier(.22,1,.36,1) both }
 
@@ -64,23 +62,17 @@ const CSS = `
   .btn-confirm:hover { animation:none; border-color:rgba(52,211,153,.7) !important; }
 
   .stat-number { animation: countUp .4s cubic-bezier(.34,1.56,.64,1) both }
-
   .pending-halo { animation: halo 2.2s ease-in-out infinite }
-
-  .spin      { animation: spin .75s linear infinite }
-  .ping-dot  { animation: ping 1.2s cubic-bezier(0,0,.2,1) infinite }
-  .glow-dot  { animation: glow 2.5s ease-in-out infinite }
+  .spin     { animation: spin .75s linear infinite }
+  .ping-dot { animation: ping 1.2s cubic-bezier(0,0,.2,1) infinite }
+  .glow-dot { animation: glow 2.5s ease-in-out infinite }
 
   .table-row-hover { transition: background .18s, transform .18s }
   .table-row-hover:hover {
     background: rgba(255,255,255,.028) !important;
     transform: translateX(2px);
   }
-
-  .stat-card-wrap {
-    position:relative;
-    transition: transform .25s, box-shadow .25s;
-  }
+  .stat-card-wrap { position:relative; transition: transform .25s, box-shadow .25s; }
   .stat-card-wrap:hover { transform:translateY(-3px); }
 `;
 
@@ -92,7 +84,7 @@ function injectCSS() {
   document.head.appendChild(s);
 }
 
-/* ─── EstadoBadge ─── */
+/* ─── EstadoBadge ─────────────────────────────────────────────────────────── */
 function EstadoBadge({ estado }) {
   const ok = !estado?.toLowerCase().includes("pendiente") && estado !== "1";
   return (
@@ -107,13 +99,11 @@ function EstadoBadge({ estado }) {
   );
 }
 
-/* ─── SkeletonRow ─── */
+/* ─── SkeletonRow ─────────────────────────────────────────────────────────── */
 function SkeletonRow({ delay = 0 }) {
   return (
-    <div
-      className="grid items-center px-6 py-5 border-b border-white/[0.04]"
-      style={{ gridTemplateColumns:"56px 1fr 1fr 130px 110px 150px", gap:16, animationDelay:`${delay}s`, animation:`fsu .35s ease ${delay}s both` }}
-    >
+    <div className="grid items-center px-6 py-5 border-b border-white/[0.04]"
+      style={{ gridTemplateColumns:"56px 1fr 1fr 130px 110px 150px", gap:16, animation:`fsu .35s ease ${delay}s both` }}>
       {[40,160,140,80,90,110].map((w,i) => (
         <div key={i} className="shimmer-bg rounded-md" style={{ height:13, width:w, maxWidth:"100%" }} />
       ))}
@@ -121,11 +111,10 @@ function SkeletonRow({ delay = 0 }) {
   );
 }
 
-/* ─── StatCard ─── */
+/* ─── StatCard ────────────────────────────────────────────────────────────── */
 function StatCard({ label, value, icon: Icon, color, borderC, bgC, iconBg, glowC, delay }) {
   return (
-    <div
-      className={`stat-card-wrap fsu ${delay} flex items-center gap-4 p-5 rounded-2xl backdrop-blur-sm`}
+    <div className={`stat-card-wrap fsu ${delay} flex items-center gap-4 p-5 rounded-2xl backdrop-blur-sm`}
       style={{ border:`1px solid ${borderC}`, background:bgC, boxShadow:"none" }}
       onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 16px 40px ${glowC}`; }}
       onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; }}
@@ -135,8 +124,7 @@ function StatCard({ label, value, icon: Icon, color, borderC, bgC, iconBg, glowC
         <Icon style={{ width:20, height:20, color }} />
       </div>
       <div>
-        <p className="m-0 text-[10px] font-black uppercase tracking-[.2em] mb-1"
-          style={{ color:"rgba(255,255,255,.3)" }}>
+        <p className="m-0 text-[10px] font-black uppercase tracking-[.2em] mb-1" style={{ color:"rgba(255,255,255,.3)" }}>
           {label}
         </p>
         <p className="m-0 text-3xl font-black leading-none stat-number" style={{ color }}>
@@ -149,37 +137,51 @@ function StatCard({ label, value, icon: Icon, color, borderC, bgC, iconBg, glowC
   );
 }
 
-/* ─────────────────────────────────────────────
-   Componente principal
-───────────────────────────────────────────── */
+/* ─── Componente principal ────────────────────────────────────────────────── */
 export function ListFacturacion() {
-  const [facturas,   setFacturas]   = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [confirmando,setConfirmando]= useState(null);
-  const [newlyDone,  setNewlyDone]  = useState(new Set());
+  const [facturas,    setFacturas]    = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [confirmando, setConfirmando] = useState(null);
+  const [newlyDone,   setNewlyDone]   = useState(new Set());
   const localRef = useRef(new Set());
 
   useEffect(() => { injectCSS(); }, []);
 
-  const fetchData = async (isRefresh = false) => {
-    isRefresh ? setRefreshing(true) : setLoading(true);
-    try {
-      const res  = await FacturacionService.getAll();
-      const data = res.data?.data ?? res.data;
-      setFacturas(Array.isArray(data) ? data : []);
-    } catch {
-      toast.error("Error al cargar pagos");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-  useEffect(() => { fetchData(); }, []);
+  /* Carga inicial — única vez */
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res  = await FacturacionService.getAll();
+        const data = res.data?.data ?? res.data;
+        setFacturas(Array.isArray(data) ? data : []);
+      } catch {
+        toast.error("Error al cargar pagos");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
+  /* Pusher — toda actualización posterior llega por acá */
   useEffect(() => {
     const pusher  = new Pusher(import.meta.env.VITE_PUSHER_KEY, { cluster: import.meta.env.VITE_PUSHER_CLUSTER });
     const channel = pusher.subscribe("pagos");
+
+    /* Nuevo pago generado al cerrar una subasta */
+    channel.bind("nuevo-pago", (data) => {
+      if (data.facturacion) {
+        setFacturas(prev => {
+          // Evitar duplicados si ya existe
+          const existe = prev.some(f => String(f.idFacturacion) === String(data.facturacion.idFacturacion));
+          if (existe) return prev;
+          return [data.facturacion, ...prev];
+        });
+        toast("Nueva factura generada", { icon: "🧾" });
+      }
+    });
+
+    /* Pago confirmado */
     channel.bind("pago-confirmado", (data) => {
       const fid = String(data.facturacion?.idFacturacion);
       setFacturas(p => p.map(f =>
@@ -190,6 +192,7 @@ export function ListFacturacion() {
       if (!localRef.current.has(fid)) toast.success("Pago confirmado en tiempo real");
       markDone(fid);
     });
+
     return () => { channel.unbind_all(); pusher.unsubscribe("pagos"); pusher.disconnect(); };
   }, []);
 
@@ -227,7 +230,7 @@ export function ListFacturacion() {
     <div className="min-h-screen px-4 py-10 relative overflow-hidden"
       style={{ background:"linear-gradient(135deg,#020617 0%,#080d1a 50%,#020617 100%)" }}>
 
-      {/* ── Fondo decorativo ── */}
+      {/* Fondo */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-[650px] h-[650px] rounded-full"
           style={{ background:"radial-gradient(circle,rgba(250,204,21,.08) 0%,transparent 65%)", transform:"translate(30%,-30%)" }} />
@@ -239,7 +242,6 @@ export function ListFacturacion() {
           maskImage:"radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%)",
           WebkitMaskImage:"radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%)",
         }} />
-        {/* partículas flotantes */}
         {[
           { top:"15%", left:"8%",  s:3, c:"#facc15", op:.28, d:"0s"   },
           { top:"72%", left:"5%",  s:2, c:"#34d399", op:.22, d:".5s"  },
@@ -249,77 +251,54 @@ export function ListFacturacion() {
           { top:"22%", left:"55%", s:2, c:"#f472b6", op:.15, d:"1.2s" },
         ].map((p,i) => (
           <div key={i} className="absolute rounded-full glow-dot"
-            style={{ top:p.top, left:p.left, right:p.right, width:p.s, height:p.s,
-              background:p.c, opacity:p.op, animationDelay:p.d }} />
+            style={{ top:p.top, left:p.left, right:p.right, width:p.s, height:p.s, background:p.c, opacity:p.op, animationDelay:p.d }} />
         ))}
       </div>
 
       <div className="relative z-10 max-w-[1120px] mx-auto space-y-8">
 
-        {/* ── Header ── */}
-        <div className="fsu flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center pending-halo"
-                style={{ background:"rgba(250,204,21,.1)", border:"1px solid rgba(250,204,21,.25)" }}>
-                <CreditCard className="w-7 h-7" style={{ color:"#facc15" }} />
-              </div>
-              {/* punto live */}
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full flex items-center justify-center"
-                style={{ background:"#facc15", boxShadow:"0 0 8px #facc15" }}>
-                <div className="w-3 h-3 rounded-full ping-dot absolute" style={{ background:"#facc15" }} />
-              </div>
+        {/* ── Header — SIN botón Actualizar ── */}
+        <div className="fsu flex items-center gap-4">
+          <div className="relative">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center pending-halo"
+              style={{ background:"rgba(250,204,21,.1)", border:"1px solid rgba(250,204,21,.25)" }}>
+              <CreditCard className="w-7 h-7" style={{ color:"#facc15" }} />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <Sparkles className="w-3 h-3" style={{ color:"rgba(250,204,21,.55)" }} />
-                <p className="m-0 text-[10px] font-black uppercase tracking-[.25em]"
-                  style={{ color:"rgba(255,255,255,.28)" }}>
-                  Sistema de pagos
-                </p>
-              </div>
-              <h1 className="m-0 text-[28px] font-black tracking-tight leading-none" style={{ color:"#fff" }}>
-                Registro de Pagos
-              </h1>
+            <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full flex items-center justify-center"
+              style={{ background:"#facc15", boxShadow:"0 0 8px #facc15" }}>
+              <div className="w-3 h-3 rounded-full ping-dot absolute" style={{ background:"#facc15" }} />
             </div>
           </div>
-
-          <button
-            onClick={() => fetchData(true)}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold"
-            style={{
-              border:"1px solid rgba(255,255,255,.1)",
-              background: refreshing ? "rgba(255,255,255,.07)" : "rgba(255,255,255,.04)",
-              color: refreshing ? "rgba(255,255,255,.7)" : "rgba(255,255,255,.42)",
-              cursor: refreshing ? "not-allowed" : "pointer",
-              transition:"background .2s, color .2s, border-color .2s",
-            }}
-            onMouseEnter={e => { if (!refreshing) { e.currentTarget.style.background="rgba(255,255,255,.09)"; e.currentTarget.style.color="rgba(255,255,255,.8)"; e.currentTarget.style.borderColor="rgba(255,255,255,.22)"; }}}
-            onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,.04)"; e.currentTarget.style.color="rgba(255,255,255,.42)"; e.currentTarget.style.borderColor="rgba(255,255,255,.1)"; }}
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "spin" : ""}`} style={{ flexShrink:0 }} />
-            {refreshing ? "Actualizando…" : "Actualizar"}
-          </button>
+          <div>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <Sparkles className="w-3 h-3" style={{ color:"rgba(250,204,21,.55)" }} />
+              <p className="m-0 text-[10px] font-black uppercase tracking-[.25em]" style={{ color:"rgba(255,255,255,.28)" }}>
+                Sistema de pagos
+              </p>
+            </div>
+            <h1 className="m-0 text-[28px] font-black tracking-tight leading-none" style={{ color:"#fff" }}>
+              Registro de Pagos
+            </h1>
+          </div>
+          {/* Indicador tiempo real — informativo, sin acción */}
+          <div className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl"
+            style={{ border:"1px solid rgba(52,211,153,.2)", background:"rgba(52,211,153,.06)" }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ping-dot flex-shrink-0" />
+            <span className="text-[11px] font-bold" style={{ color:"#34d399" }}>En vivo</span>
+          </div>
         </div>
 
         {/* ── Stats ── */}
         <div className="grid grid-cols-3 gap-4">
-          <StatCard
-            label="Total pagos"  value={facturas.length}    icon={DollarSign}  delay=""
+          <StatCard label="Total pagos"  value={facturas.length}    icon={DollarSign}  delay=""
             color="rgba(255,255,255,.82)" borderC="rgba(255,255,255,.1)"  bgC="rgba(255,255,255,.04)"
-            iconBg="rgba(255,255,255,.07)" glowC="rgba(255,255,255,.06)"
-          />
-          <StatCard
-            label="Pendientes"   value={pendientes.length}  icon={Clock}       delay="d1"
+            iconBg="rgba(255,255,255,.07)" glowC="rgba(255,255,255,.06)" />
+          <StatCard label="Pendientes"   value={pendientes.length}  icon={Clock}       delay="d1"
             color="#facc15"               borderC="rgba(250,204,21,.25)"  bgC="rgba(250,204,21,.07)"
-            iconBg="rgba(250,204,21,.12)" glowC="rgba(250,204,21,.18)"
-          />
-          <StatCard
-            label="Confirmados"  value={confirmados.length} icon={TrendingUp}  delay="d2"
+            iconBg="rgba(250,204,21,.12)" glowC="rgba(250,204,21,.18)" />
+          <StatCard label="Confirmados"  value={confirmados.length} icon={TrendingUp}  delay="d2"
             color="#34d399"               borderC="rgba(52,211,153,.25)"  bgC="rgba(52,211,153,.07)"
-            iconBg="rgba(52,211,153,.12)" glowC="rgba(52,211,153,.18)"
-          />
+            iconBg="rgba(52,211,153,.12)" glowC="rgba(52,211,153,.18)" />
         </div>
 
         {/* ── Tabla ── */}
@@ -354,7 +333,6 @@ export function ListFacturacion() {
           <div className="fsu d1 rounded-3xl overflow-hidden"
             style={{ border:"1px solid rgba(255,255,255,.07)", background:"rgba(8,13,26,.75)", backdropFilter:"blur(20px)" }}>
 
-            {/* cabecera */}
             <div className="grid px-6 py-3.5 border-b border-white/[0.05] bg-white/[0.02]"
               style={{ gridTemplateColumns:"56px 1fr 1fr 130px 110px 150px", gap:16 }}>
               {["#","Comprador","Subasta","Monto","Fecha","Estado / Acción"].map((h,i) => (
@@ -363,7 +341,6 @@ export function ListFacturacion() {
               ))}
             </div>
 
-            {/* filas */}
             <div>
               {facturas.map((f, idx) => {
                 const fid         = String(f.idFacturacion);
@@ -374,8 +351,7 @@ export function ListFacturacion() {
                 const fecha       = f.fechaFactura ? String(f.fechaFactura).slice(0,16).replace("T"," ") : "—";
 
                 return (
-                  <div
-                    key={fid}
+                  <div key={fid}
                     className={`row-enter table-row-hover grid items-center px-6 border-b border-white/[0.04] ${justDone ? "confirmed-sweep" : ""}`}
                     style={{
                       gridTemplateColumns:"56px 1fr 1fr 130px 110px 150px",
@@ -385,28 +361,19 @@ export function ListFacturacion() {
                       animationDelay:`${idx * .038}s`,
                     }}
                   >
-                    {/* id */}
-                    <span className="text-xs font-mono font-bold" style={{ color:"rgba(255,255,255,.2)" }}>
-                      #{fid}
-                    </span>
+                    <span className="text-xs font-mono font-bold" style={{ color:"rgba(255,255,255,.2)" }}>#{fid}</span>
 
-                    {/* comprador */}
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-8 h-8 rounded-[10px] flex-shrink-0 flex items-center justify-center"
                         style={{ background:"rgba(99,102,241,.14)", border:"1px solid rgba(99,102,241,.22)" }}>
                         <User style={{ width:13, height:13, color:"#818cf8" }} />
                       </div>
                       <div className="min-w-0">
-                        <p className="m-0 text-[13px] font-bold truncate" style={{ color:"rgba(255,255,255,.82)" }}>
-                          {f.usuario?.nombre ?? "—"}
-                        </p>
-                        <p className="m-0 text-[11px] truncate" style={{ color:"rgba(255,255,255,.25)" }}>
-                          {f.usuario?.email ?? ""}
-                        </p>
+                        <p className="m-0 text-[13px] font-bold truncate" style={{ color:"rgba(255,255,255,.82)" }}>{f.usuario?.nombre ?? "—"}</p>
+                        <p className="m-0 text-[11px] truncate" style={{ color:"rgba(255,255,255,.25)" }}>{f.usuario?.email ?? ""}</p>
                       </div>
                     </div>
 
-                    {/* subasta */}
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-8 h-8 rounded-[10px] flex-shrink-0 flex items-center justify-center"
                         style={{ background:"rgba(139,92,246,.14)", border:"1px solid rgba(139,92,246,.22)" }}>
@@ -416,13 +383,10 @@ export function ListFacturacion() {
                         <p className="m-0 text-[13px] font-bold truncate" style={{ color:"rgba(255,255,255,.82)" }}>
                           {f.subasta?.carta?.nombre ?? `Subasta #${f.idSubasta}`}
                         </p>
-                        <p className="m-0 text-[11px]" style={{ color:"rgba(255,255,255,.25)" }}>
-                          Subasta #{f.idSubasta}
-                        </p>
+                        <p className="m-0 text-[11px]" style={{ color:"rgba(255,255,255,.25)" }}>Subasta #{f.idSubasta}</p>
                       </div>
                     </div>
 
-                    {/* monto */}
                     <div className="flex items-center gap-1.5">
                       <Trophy style={{ width:14, height:14, color:"rgba(250,204,21,.55)", flexShrink:0 }} />
                       <span className="font-black text-[17px] leading-none"
@@ -431,23 +395,19 @@ export function ListFacturacion() {
                       </span>
                     </div>
 
-                    {/* fecha */}
                     <div className="flex items-center gap-1.5">
                       <Calendar style={{ width:11, height:11, color:"rgba(255,255,255,.2)", flexShrink:0 }} />
                       <span className="text-[11px]" style={{ color:"rgba(255,255,255,.3)" }}>{fecha}</span>
                     </div>
 
-                    {/* estado / acción */}
                     <div>
                       {isPendiente ? (
                         <button
                           className="btn-confirm flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-black border"
                           style={{
                             background: isConf ? "rgba(52,211,153,.08)" : "rgba(52,211,153,.12)",
-                            color:"#34d399",
-                            cursor: isConf ? "not-allowed" : "pointer",
-                            opacity: isConf ? .7 : 1,
-                            whiteSpace:"nowrap",
+                            color:"#34d399", cursor: isConf ? "not-allowed" : "pointer",
+                            opacity: isConf ? .7 : 1, whiteSpace:"nowrap",
                             transition:"background .2s, transform .15s",
                           }}
                           disabled={isConf}

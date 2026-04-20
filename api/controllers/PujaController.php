@@ -12,12 +12,12 @@ class puja
         return $pusher;
     }
 
-    public function getPujasbySubasta($idSubasta)
+    public function getpujasbysubasta($idSubasta)
     {
         try {
             $response = new Response();
-            $puja = new PujaModel();
-            $result = $puja->getPujasbySubasta($idSubasta);
+            $puja     = new PujaModel();
+            $result   = $puja->getPujasbySubasta($idSubasta);
             $response->toJSON($result);
         } catch (Exception $e) {
             handleException($e);
@@ -27,14 +27,23 @@ class puja
     public function create()
     {
         try {
-            $request   = new Request();
-            $response  = new Response();
-            $inputJSON = $request->getJSON();
+            $request       = new Request();
+            $response      = new Response();
+            $inputJSON     = $request->getJSON();
 
-            // USUARIO_ACTUAL viene del frontend como idUsuario
-            $idUsuario    = $inputJSON->idUsuario;
-            $idSubasta    = $inputJSON->idSubasta;
+            $idUsuario     = $inputJSON->idUsuario;
+            $idSubasta     = $inputJSON->idSubasta;
             $montoOfertado = $inputJSON->montoOfertado;
+
+            // VALIDACIÓN: usuario con factura pendiente no puede pujar
+            $facturacionM = new FacturacionModel();
+            if ($facturacionM->usuarioTienePendiente($idUsuario)) {
+                $response->toJSON([
+                    'success' => false,
+                    'message' => 'Tienes un pago pendiente. Debes pagar antes de volver a pujar.'
+                ]);
+                return;
+            }
 
             $subastaM = new SubastaModel();
             $subasta  = $subastaM->verificarYCerrar($idSubasta);
@@ -58,8 +67,8 @@ class puja
             }
 
             // Obtener puja máxima actual
-            $pujaM      = new PujaModel();
-            $pujaActual = $pujaM->getPujaMaxima($idSubasta);
+            $pujaM       = new PujaModel();
+            $pujaActual  = $pujaM->getPujaMaxima($idSubasta);
             $montoActual = $pujaActual ? $pujaActual->montoOfertado : $subasta->precio;
 
             // Validar monto mayor que puja actual

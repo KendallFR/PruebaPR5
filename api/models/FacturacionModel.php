@@ -40,13 +40,27 @@ class FacturacionModel
             handleException($e);
         }
     }
-public function crearDesdeSubasta($idSubasta, $idUsuario, $monto)
-{
-    try {
+
+    // NUEVO: verificar si un usuario tiene factura pendiente
+    public function usuarioTienePendiente($idUsuario)
+    {
+        try {
+            $vSql = "SELECT * FROM facturacion 
+                     WHERE idUsuario = $idUsuario AND idEstadoFacturacion = 1 LIMIT 1";
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return !empty($vResultado);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public function crearDesdeSubasta($idSubasta, $idUsuario, $monto)
+    {
         // Verificar que no exista ya un pago para esta subasta
         $existe = $this->getBySubasta($idSubasta);
         if ($existe) return $existe;
 
+        // INSERT directo sin try/catch interno para que el error suba
         $sql = "INSERT INTO facturacion (idEstadoFacturacion, idUsuario, fechaFactura, resultado, monto, idSubasta)
                 VALUES (1, $idUsuario, NOW(), 'Pendiente', $monto, $idSubasta)";
 
@@ -58,11 +72,7 @@ public function crearDesdeSubasta($idSubasta, $idUsuario, $monto)
         $vResultado = $this->enlace->ExecuteSQL($vSql);
         if (!empty($vResultado)) return $vResultado[0];
         return null;
-    } catch (Exception $e) {
-        handleException($e);
-        return null;
     }
-}
 
     public function confirmarPago($idFacturacion)
     {

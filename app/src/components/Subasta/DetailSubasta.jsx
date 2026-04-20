@@ -3,22 +3,22 @@ import { useNavigate, useParams } from "react-router-dom";
 import Pusher from "pusher-js";
 import SubastaService from "@/services/SubastaService";
 import PujaService from "@/services/PujaService";
+import FacturacionService from "@/services/FacturacionService";
 import toast from "react-hot-toast";
 import {
   Clock, Gavel, ArrowLeft, TrendingUp, User,
   FilmIcon, Crown, Trophy, AlertCircle, Zap,
-  ChevronUp, Shield, Calendar
+  ChevronUp, Shield, Calendar, CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { categoriaGlow, categoriaStyles } from "@/utils/categoriaColors";
 
-// ── Compradores fijos (solo estos 2) ──────────────────────────────────────
+// ── Compradores fijos para pruebas ──
 const COMPRADORES = [
   { idUsuario: 4, nombre: "Carlos Méndez" },
   { idUsuario: 5, nombre: "Laura Jiménez" },
 ];
 
-// ── parseFechaCR ──────────────────────────────────────────────────────────
 function parseFechaCR(fechaStr) {
   if (!fechaStr) return null;
   const clean = String(fechaStr).replace(" ", "T") + "Z";
@@ -94,7 +94,8 @@ function Contador({ fechaCierre, onExpirado }) {
   useEffect(() => {
     const calcular = () => {
       const cierre = parseFechaCR(fechaCierre);
-      const diff   = cierre.getTime() - Date.now();
+      if (!cierre) return;
+      const diff = cierre.getTime() - Date.now();
       if (diff <= 0) {
         setExpirado(true);
         setData(null);
@@ -183,16 +184,14 @@ function PujaRow({ puja, index, isNew }) {
   );
 }
 
-// ── UserSwitcher — solo alterna entre los 2 compradores fijos ─────────────
+// ── UserSwitcher — alterna entre los 2 compradores fijos ──
 function UserSwitcher({ usuarioActual, onChange }) {
   const u    = COMPRADORES.find(c => c.idUsuario === usuarioActual);
   const otro = COMPRADORES.find(c => c.idUsuario !== usuarioActual);
 
   return (
-    <button
-      onClick={() => onChange(otro.idUsuario)}
-      className="flex items-center gap-2.5 px-4 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all group"
-    >
+    <button onClick={() => onChange(otro.idUsuario)}
+      className="flex items-center gap-2.5 px-4 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all group">
       <div className="w-6 h-6 rounded-full bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center text-[11px] font-black text-yellow-400">
         {u?.nombre?.charAt(0) ?? "?"}
       </div>
@@ -218,30 +217,48 @@ export function DetailSubasta() {
   const { id }   = useParams();
   const BASE_URL = import.meta.env.VITE_BASE_URL + "uploads";
 
-  const [subasta,       setSubasta]       = useState(null);
-  const [pujas,         setPujas]         = useState([]);
-  const [usuarioActual, setUsuarioActual] = useState(4); // Carlos Méndez por defecto
-  const [loading,       setLoading]       = useState(true);
-  const [monto,         setMonto]         = useState("");
-  const [montoError,    setMontoError]    = useState("");
-  const [pujaSuper,     setPujaSuper]     = useState(false);
-  const [cerrada,       setCerrada]       = useState(false);
-  const [enviando,      setEnviando]      = useState(false);
-  const [nuevasPujas,   setNuevasPujas]   = useState(new Set());
-  const [mounted,       setMounted]       = useState(false);
+  const [subasta,         setSubasta]         = useState(null);
+  const [pujas,           setPujas]           = useState([]);
+  const [usuarioActual,   setUsuarioActual]   = useState(4);
+  const [loading,         setLoading]         = useState(true);
+  const [monto,           setMonto]           = useState("");
+  const [montoError,      setMontoError]      = useState("");
+  const [pujaSuper,       setPujaSuper]       = useState(false);
+  const [cerrada,         setCerrada]         = useState(false);
+  const [enviando,        setEnviando]        = useState(false);
+  const [nuevasPujas,     setNuevasPujas]     = useState(new Set());
+  const [mounted,         setMounted]         = useState(false);
+  const [tienePendiente,  setTienePendiente]  = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50);
     return () => clearTimeout(t);
   }, []);
 
+  // Verificar si el usuario actual tiene factura pendiente
+  const verificarPendiente = async (idUsuario) => {
+    try {
+      const res  = await FacturacionService.getAll();
+      const data = res.data?.data ?? res.data ?? [];
+      const facturas = Array.isArray(data) ? data : [];
+      const pendiente = facturas.some(f =>
+        String(f.idUsuario) === String(idUsuario) &&
+        (String(f.idEstadoFacturacion) === "1" || f.resultado === "Pendiente")
+      );
+      setTienePendiente(pendiente);
+    } catch {
+      setTienePendiente(false);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Solo carga la subasta — usuarios ya son fijos, no hay fetch
         const resSub      = await SubastaService.getSubastaById(id);
         const subastaData = resSub.data?.data ?? resSub.data;
         setSubasta(subastaData);
+
+        // FIX: si la subasta ya viene cerrada desde el backend, marcarla cerrada
         if (subastaData?.idEstadoSubasta != 1) setCerrada(true);
 
         try {
@@ -257,6 +274,11 @@ export function DetailSubasta() {
     };
     fetchData();
   }, [id]);
+
+  // Verificar pendiente cuando cambia el usuario
+  useEffect(() => {
+    verificarPendiente(usuarioActual);
+  }, [usuarioActual]);
 
   useEffect(() => {
     const pusher  = new Pusher(import.meta.env.VITE_PUSHER_KEY, { cluster: import.meta.env.VITE_PUSHER_CLUSTER });
@@ -288,19 +310,44 @@ export function DetailSubasta() {
     });
 
     channel.bind("subasta-cerrada", (data) => {
+      // FIX: actualizar AMBOS — el objeto subasta Y el flag cerrada
       setCerrada(true);
-      setSubasta(prev => prev ? { ...prev, idEstadoSubasta: 2 } : prev);
+      setSubasta(prev => prev ? { ...prev, idEstadoSubasta: 2, estadoSubasta: { idEstadoSubasta: 2, descripcion: "Finalizada" } } : prev);
       toast.success("🏁 Subasta finalizada — Ganador: " + (data.ganador?.nombre ?? "Sin ganador"));
     });
 
     return () => { channel.unbind_all(); pusher.unsubscribe("subasta-" + id); pusher.disconnect(); };
   }, [id]);
 
+  // Pusher para pagos — cuando se confirma un pago, re-verificar pendiente
+  useEffect(() => {
+    const pusher  = new Pusher(import.meta.env.VITE_PUSHER_KEY, { cluster: import.meta.env.VITE_PUSHER_CLUSTER });
+    const channel = pusher.subscribe("pagos");
+
+    channel.bind("pago-confirmado", () => {
+      // Re-verificar si el usuario ya no tiene pendiente
+      setUsuarioActual(current => {
+        verificarPendiente(current);
+        return current;
+      });
+    });
+
+    channel.bind("nuevo-pago", () => {
+      setUsuarioActual(current => {
+        verificarPendiente(current);
+        return current;
+      });
+    });
+
+    return () => { channel.unbind_all(); pusher.unsubscribe("pagos"); pusher.disconnect(); };
+  }, []);
+
   const handleExpirado = async () => {
     try {
       const res  = await SubastaService.getSubastaById(id);
       const data = res.data?.data ?? res.data;
       setSubasta(data);
+      // FIX: marcar cerrada independientemente del Pusher
       setCerrada(true);
     } catch (e) { console.error(e); }
   };
@@ -311,6 +358,12 @@ export function DetailSubasta() {
     const num = Number(val);
     if (isNaN(num) || num <= 0) { setMontoError("Ingresa un número válido"); return; }
     if (num < montoMinimo) { setMontoError(`Mínimo requerido: $${montoMinimo.toLocaleString()}`); return; }
+    setMontoError("");
+  };
+
+  const handleCambioUsuario = (nuevoId) => {
+    setUsuarioActual(nuevoId);
+    setMonto("");
     setMontoError("");
   };
 
@@ -327,6 +380,10 @@ export function DetailSubasta() {
       });
       if (res.data?.success === false) {
         setMontoError(res.data.message);
+        // Si el error es de pago pendiente, actualizar el flag
+        if (res.data.message?.includes("pago pendiente")) {
+          setTienePendiente(true);
+        }
       } else {
         setMonto("");
         setMontoError("");
@@ -361,6 +418,7 @@ export function DetailSubasta() {
 
   const data        = subasta;
   const glow        = getGlow(data?.carta?.categorias);
+  // FIX: isActive depende de idEstadoSubasta del objeto Y del flag cerrada
   const isActive    = String(data?.idEstadoSubasta) === "1" && !cerrada;
   const pujaLider   = pujas[0] ?? null;
   const esVendedor  = String(data?.idUsuario) === String(usuarioActual);
@@ -368,6 +426,14 @@ export function DetailSubasta() {
     ? Number(pujaLider.montoOfertado) + Number(data?.incrementoMin)
     : Number(data?.precio) + Number(data?.incrementoMin);
   const categorias  = data?.carta?.categorias ?? [];
+
+  // Razón por la que no puede pujar
+  const razonesBloqueado = () => {
+    if (esVendedor) return "Eres el vendedor de esta subasta";
+    if (tienePendiente) return "Tienes un pago pendiente — ve a Pagos para confirmar";
+    return null;
+  };
+  const bloqueado = esVendedor || tienePendiente;
 
   return (
     <>
@@ -424,9 +490,10 @@ export function DetailSubasta() {
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
               Regresar
             </button>
-            <UserSwitcher usuarioActual={usuarioActual} onChange={setUsuarioActual} />
+            <UserSwitcher usuarioActual={usuarioActual} onChange={handleCambioUsuario} />
           </div>
 
+          {/* HEADER CARD */}
           <div className="anim-1 relative overflow-hidden rounded-3xl border bg-gradient-to-b from-[#0d1424] to-[#080d18]"
             style={{ borderColor: `rgba(${glow.rgb},0.18)` }}>
             <div className="absolute top-0 left-0 right-0 h-px"
@@ -461,6 +528,7 @@ export function DetailSubasta() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
+                  {/* FIX: el badge usa isActive que ya incluye ambas condiciones */}
                   <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold ${
                     isActive ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400" : "bg-red-500/10 border-red-500/25 text-red-400"
                   }`}>
@@ -486,10 +554,11 @@ export function DetailSubasta() {
             </div>
           </div>
 
+          {/* BODY */}
           <div className="grid lg:grid-cols-[1fr_390px] gap-5">
 
+            {/* IZQUIERDA */}
             <div className="space-y-5">
-
               <div className="anim-2 rounded-3xl border border-white/[0.06] bg-[#0a0f1e]/80 p-6 flex gap-6">
                 <div className="flex-shrink-0">
                   {data.carta?.imagenes?.length > 0 ? (
@@ -577,9 +646,11 @@ export function DetailSubasta() {
               </div>
             </div>
 
+            {/* DERECHA */}
             <div className="space-y-5">
 
-              {isActive && !esVendedor && (
+              {/* Formulario de puja */}
+              {isActive && !bloqueado && (
                 <div className="rounded-3xl border border-white/[0.08] bg-[#0a0f1e]/80 p-5 space-y-4"
                   style={{ boxShadow: `0 0 50px rgba(${glow.rgb},0.05)` }}>
                   <div className="flex items-center gap-2">
@@ -614,13 +685,27 @@ export function DetailSubasta() {
                 </div>
               )}
 
-              {esVendedor && isActive && (
-                <div className="rounded-3xl border border-yellow-400/15 bg-yellow-400/5 p-5 text-center space-y-2">
-                  <div className="w-10 h-10 rounded-2xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center mx-auto">
-                    <Shield className="w-5 h-5 text-yellow-400" />
+              {/* Bloqueado por razón */}
+              {isActive && bloqueado && (
+                <div className={`rounded-3xl border p-5 text-center space-y-2 ${
+                  tienePendiente
+                    ? "border-orange-400/20 bg-orange-400/5"
+                    : "border-yellow-400/15 bg-yellow-400/5"
+                }`}>
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mx-auto border ${
+                    tienePendiente
+                      ? "bg-orange-400/10 border-orange-400/20"
+                      : "bg-yellow-400/10 border-yellow-400/20"
+                  }`}>
+                    {tienePendiente
+                      ? <CreditCard className="w-5 h-5 text-orange-400" />
+                      : <Shield className="w-5 h-5 text-yellow-400" />
+                    }
                   </div>
-                  <p className="text-yellow-400/70 text-sm font-semibold">Eres el vendedor</p>
-                  <p className="text-white/20 text-xs">No puedes pujar en tu propia subasta</p>
+                  <p className={`text-sm font-semibold ${tienePendiente ? "text-orange-400/80" : "text-yellow-400/70"}`}>
+                    {tienePendiente ? "Pago pendiente" : "Eres el vendedor"}
+                  </p>
+                  <p className="text-white/20 text-xs">{razonesBloqueado()}</p>
                 </div>
               )}
 
@@ -639,6 +724,7 @@ export function DetailSubasta() {
                 </div>
               )}
 
+              {/* Historial */}
               <div className="rounded-3xl border border-white/[0.06] bg-[#0a0f1e]/60 overflow-hidden">
                 <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between">
                   <div className="flex items-center gap-2">
