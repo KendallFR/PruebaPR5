@@ -19,6 +19,160 @@ const COMPRADORES = [
   { idUsuario: 5, nombre: "Laura Jiménez" },
 ];
 
+// ── Estilos globales ──────────────────────────────────────────────────────
+const GLOBAL_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&display=swap');
+
+  .ds-root { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+  @keyframes ds-fadeUp   { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes ds-slideIn  { from{opacity:0;transform:translateY(-12px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+  @keyframes ds-glowPulse{ 0%,100%{opacity:.05} 50%{opacity:.13} }
+  @keyframes ds-goldRing { 0%,100%{box-shadow:0 0 0 0 rgba(250,204,21,0),0 0 24px rgba(250,204,21,.05)} 50%{box-shadow:0 0 0 5px rgba(250,204,21,.05),0 0 50px rgba(250,204,21,.1)} }
+  @keyframes ds-borderRun{ 0%{background-position:0% 0} 100%{background-position:200% 0} }
+  @keyframes ds-scanline  { 0%{top:-2%} 100%{top:102%} }
+  @keyframes ds-sweep     { 0%{transform:translateX(-100%);opacity:0} 50%{opacity:1} 100%{transform:translateX(100%);opacity:0} }
+  @keyframes ds-orbFloat  { 0%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-18px) scale(1.08)} 66%{transform:translate(-18px,14px) scale(.93)} 100%{transform:translate(0,0) scale(1)} }
+  @keyframes ds-floatY    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+  @keyframes ds-tick      { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.25;transform:scale(.8)} }
+  @keyframes ds-bidPop    { 0%{opacity:0;transform:translateY(-14px) scale(.92)} 60%{transform:translateY(2px) scale(1.01)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+  @keyframes ds-crownIn   { 0%{transform:rotate(-10deg) scale(.7);opacity:0} 70%{transform:rotate(3deg) scale(1.06)} 100%{transform:rotate(0) scale(1);opacity:1} }
+  @keyframes ds-shimmerBtn{ 0%{left:-100%} 100%{left:150%} }
+  @keyframes ds-spinr     { to{transform:rotate(360deg)} }
+  @keyframes ds-qbFill    { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  @keyframes ds-winnerIn  { 0%{opacity:0;transform:scale(.88) translateY(16px)} 60%{transform:scale(1.02) translateY(-2px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
+
+  .ds-a1 { animation: ds-fadeUp .65s cubic-bezier(.22,1,.36,1) both; }
+  .ds-a2 { animation: ds-fadeUp .65s .08s cubic-bezier(.22,1,.36,1) both; }
+  .ds-a3 { animation: ds-fadeUp .65s .16s cubic-bezier(.22,1,.36,1) both; }
+  .ds-a4 { animation: ds-fadeUp .65s .24s cubic-bezier(.22,1,.36,1) both; }
+  .ds-a5 { animation: ds-fadeUp .65s .32s cubic-bezier(.22,1,.36,1) both; }
+
+  .ds-hero-scanline {
+    position:absolute; left:0; right:0; height:1px;
+    background: linear-gradient(90deg,transparent,rgba(250,204,21,.15),rgba(250,204,21,.5),rgba(250,204,21,.15),transparent);
+    pointer-events:none; z-index:5;
+    animation: ds-scanline 9s linear infinite;
+  }
+  .ds-hero-topline {
+    position:absolute; top:0; left:0; right:0; height:1.5px;
+    background: linear-gradient(90deg,transparent,#facc15 25%,#e8736b 50%,#4a7fc1 75%,transparent);
+    background-size:200%; animation: ds-borderRun 4s linear infinite; z-index:5;
+  }
+  .ds-orb-a {
+    position:absolute; width:480px; height:340px; border-radius:50%;
+    filter:blur(110px); background:radial-gradient(ellipse,rgba(250,204,21,.12) 0%,transparent 70%);
+    top:-110px; right:-70px; animation:ds-orbFloat 16s ease-in-out infinite; pointer-events:none;
+  }
+  .ds-orb-b {
+    position:absolute; width:300px; height:220px; border-radius:50%;
+    filter:blur(90px); background:radial-gradient(ellipse,rgba(74,127,193,.09) 0%,transparent 70%);
+    bottom:-50px; left:-30px; animation:ds-orbFloat 20s 4s ease-in-out infinite; pointer-events:none;
+  }
+  .ds-orb-c {
+    position:absolute; width:220px; height:160px; border-radius:50%;
+    filter:blur(80px); background:radial-gradient(ellipse,rgba(167,139,250,.07) 0%,transparent 70%);
+    top:40%; left:38%; animation:ds-orbFloat 13s 2s ease-in-out infinite; pointer-events:none;
+  }
+  .ds-stat-cell { transition: background .35s; }
+  .ds-stat-cell:hover { background: rgba(250,204,21,.025) !important; }
+  .ds-stat-cell::before {
+    content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+    width:0; height:1.5px; background:linear-gradient(90deg,transparent,#facc15,transparent);
+    transition:width .5s;
+  }
+  .ds-stat-cell:hover::before { width:75%; }
+
+  .ds-card { transition: border-color .4s; }
+  .ds-card:hover { border-color: rgba(250,204,21,.18) !important; }
+
+  .ds-img-wrap { animation: ds-floatY 4s ease-in-out infinite; transition: all .5s; }
+  .ds-img-wrap:hover { transform: scale(1.06) rotate(-1deg) translateY(-4px) !important; }
+
+  .ds-leader-card { transition: all .4s; }
+  .ds-leader-card:hover { border-color: rgba(250,204,21,.42) !important; box-shadow: 0 0 40px rgba(250,204,21,.08); }
+
+  .ds-crown { animation: ds-crownIn .65s cubic-bezier(.22,1,.36,1) both; transition: transform .3s; }
+  .ds-crown:hover { transform: rotate(-8deg) scale(1.15); }
+
+  .ds-bid-panel { transition: border-color .4s; }
+  .ds-bid-panel:hover { border-color: rgba(250,204,21,.32) !important; }
+  .ds-bp-glow-a { animation: ds-orbFloat 12s ease-in-out infinite; }
+  .ds-bp-glow-b { animation: ds-orbFloat 15s 3s ease-in-out infinite; }
+  .ds-bp-topline {
+    position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(250,204,21,.8),transparent);
+    background-size:200%; animation: ds-sweep 5s ease-in-out infinite;
+  }
+
+  .ds-bid-inp { transition: all .35s; }
+  .ds-bid-inp:focus {
+    border-color: rgba(250,204,21,.5) !important;
+    background: rgba(250,204,21,.04) !important;
+    box-shadow: 0 0 0 4px rgba(250,204,21,.07), 0 8px 28px rgba(0,0,0,.3) !important;
+    outline: none;
+  }
+  .ds-bid-inp.err {
+    border-color: rgba(248,113,113,.5) !important;
+    background: rgba(248,113,113,.03) !important;
+    box-shadow: 0 0 0 4px rgba(248,113,113,.07) !important;
+  }
+  .ds-bid-inp.ok {
+    border-color: rgba(74,222,128,.42) !important;
+    background: rgba(74,222,128,.03) !important;
+    box-shadow: 0 0 0 4px rgba(74,222,128,.06) !important;
+  }
+
+  .ds-qb { position:relative; overflow:hidden; transition: all .28s; }
+  .ds-qb::before {
+    content:''; position:absolute; inset:0;
+    background:rgba(250,204,21,.1); transform:translateY(100%); transition:transform .3s;
+  }
+  .ds-qb:hover::before { transform:translateY(0); animation: ds-qbFill .3s ease forwards; }
+  .ds-qb:hover { color: #facc15 !important; border-color: rgba(250,204,21,.5) !important; transform:translateY(-2px); }
+  .ds-qb:active { transform:translateY(0) scale(.97); }
+
+  .ds-bid-btn { position:relative; overflow:hidden; transition:all .3s; }
+  .ds-bid-btn::before {
+    content:''; position:absolute; top:0; left:-100%; width:60%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+    transition: left .6s;
+  }
+  .ds-bid-btn:hover:not(:disabled)::before { left:150%; }
+  .ds-bid-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 12px 32px rgba(250,204,21,.38),0 4px 14px rgba(0,0,0,.3); }
+  .ds-bid-btn:active:not(:disabled) { transform:translateY(0) scale(.98); }
+
+  .ds-bid-row { transition: all .4s; cursor:default; }
+  .ds-bid-row:hover { transform: translateX(3px); }
+  .ds-bid-row.top:hover { border-color: rgba(250,204,21,.38) !important; background: rgba(250,204,21,.09) !important; }
+  .ds-bid-row.reg:hover { background: rgba(255,255,255,.03) !important; }
+  .ds-bid-row.fresh { animation: ds-bidPop .58s cubic-bezier(.22,1,.36,1) both; }
+
+  .ds-winner-card { animation: ds-winnerIn .7s cubic-bezier(.22,1,.36,1) both; }
+
+  .ds-back-btn::before {
+    content:''; position:absolute; left:-100%; top:0; width:100%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(250,204,21,.06),transparent);
+    transition:left .4s;
+  }
+  .ds-back-btn:hover::before { left:100%; }
+  .ds-back-btn:hover { color:#facc15 !important; border-color:rgba(250,204,21,.35) !important; background:rgba(250,204,21,.04) !important; }
+
+  .ds-user-pill::after {
+    content:''; position:absolute; inset:0; border-radius:40px;
+    background:linear-gradient(135deg,rgba(250,204,21,.06),transparent);
+    opacity:0; transition:opacity .3s;
+  }
+  .ds-user-pill:hover::after { opacity:1; }
+  .ds-user-pill:hover { border-color:rgba(250,204,21,.35) !important; transform:translateY(-1px); }
+  .ds-user-pill:hover .ds-u-avatar { transform:rotate(8deg) scale(1.1); }
+  .ds-user-pill:hover .ds-u-arrow { color:#facc15 !important; transform:translateX(3px); }
+
+  .ds-seller-row:hover { background:rgba(255,255,255,.03) !important; border-color:rgba(255,255,255,.12) !important; }
+  .ds-seller-row:hover .ds-s-icon { transform:rotate(10deg); }
+`;
+
+// ── Helpers ───────────────────────────────────────────────────────────────
 function parseFechaCR(fechaStr) {
   if (!fechaStr) return null;
   const clean = String(fechaStr).replace(" ", "T") + "Z";
@@ -34,174 +188,17 @@ function formatContador(diff) {
   const segs    = total_s % 60;
 
   if (dias >= 30) {
-    const meses = Math.floor(dias / 30);
-    const diasR = dias % 30;
-    return {
-      partes: diasR > 0
-        ? [{ val: meses, label: meses === 1 ? "mes" : "meses" }, { val: diasR, label: diasR === 1 ? "día" : "días" }]
-        : [{ val: meses, label: meses === 1 ? "mes" : "meses" }],
-      urgencia: "low"
-    };
+    const meses = Math.floor(dias / 30), diasR = dias % 30;
+    return { partes: diasR > 0 ? [{ val: meses, label: meses === 1 ? "mes" : "meses" }, { val: diasR, label: diasR === 1 ? "día" : "días" }] : [{ val: meses, label: meses === 1 ? "mes" : "meses" }], urgencia: "low" };
   }
   if (dias >= 7) {
-    const semanas = Math.floor(dias / 7);
-    const diasR   = dias % 7;
-    return {
-      partes: diasR > 0
-        ? [{ val: semanas, label: semanas === 1 ? "semana" : "semanas" }, { val: diasR, label: diasR === 1 ? "día" : "días" }]
-        : [{ val: semanas, label: semanas === 1 ? "semana" : "semanas" }],
-      urgencia: "low"
-    };
+    const semanas = Math.floor(dias / 7), diasR = dias % 7;
+    return { partes: diasR > 0 ? [{ val: semanas, label: semanas === 1 ? "semana" : "semanas" }, { val: diasR, label: diasR === 1 ? "día" : "días" }] : [{ val: semanas, label: semanas === 1 ? "semana" : "semanas" }], urgencia: "low" };
   }
-  if (dias >= 1) {
-    return {
-      partes: [
-        { val: dias,  label: dias === 1 ? "día" : "días" },
-        { val: horas, label: horas === 1 ? "hora" : "horas" }
-      ],
-      urgencia: dias >= 3 ? "low" : "medium"
-    };
-  }
-  if (horas >= 1) {
-    return {
-      partes: [
-        { val: horas, label: horas === 1 ? "hora" : "horas" },
-        { val: mins,  label: mins === 1 ? "minuto" : "minutos" }
-      ],
-      urgencia: horas >= 6 ? "medium" : "high"
-    };
-  }
-  if (mins >= 1) {
-    return {
-      partes: [
-        { val: mins, label: mins === 1 ? "minuto" : "minutos" },
-        { val: segs, label: segs === 1 ? "segundo" : "segundos" }
-      ],
-      urgencia: mins >= 5 ? "high" : "critical"
-    };
-  }
-  return {
-    partes: [{ val: segs, label: segs === 1 ? "segundo" : "segundos" }],
-    urgencia: "critical"
-  };
-}
-
-function Contador({ fechaCierre, onExpirado }) {
-  const [data,     setData]     = useState(null);
-  const [expirado, setExpirado] = useState(false);
-  const called = useRef(false);
-
-  useEffect(() => {
-    const calcular = () => {
-      const cierre = parseFechaCR(fechaCierre);
-      if (!cierre) return;
-      const diff = cierre.getTime() - Date.now();
-      if (diff <= 0) {
-        setExpirado(true);
-        setData(null);
-        if (!called.current) { called.current = true; onExpirado?.(); }
-        return;
-      }
-      setData(formatContador(diff));
-    };
-    calcular();
-    const interval = setInterval(calcular, 1000);
-    return () => clearInterval(interval);
-  }, [fechaCierre]);
-
-  const colors = {
-    low:      { text: "text-emerald-400", border: "border-emerald-500/30", bg: "bg-emerald-500/10", dot: "bg-emerald-400" },
-    medium:   { text: "text-yellow-400",  border: "border-yellow-500/30",  bg: "bg-yellow-500/10",  dot: "bg-yellow-400" },
-    high:     { text: "text-orange-400",  border: "border-orange-500/30",  bg: "bg-orange-500/10",  dot: "bg-orange-400 animate-pulse" },
-    critical: { text: "text-red-400",     border: "border-red-500/30",     bg: "bg-red-500/10",     dot: "bg-red-400 animate-ping" },
-  };
-
-  if (expirado) return (
-    <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border bg-red-500/10 border-red-500/30">
-      <Clock className="w-3.5 h-3.5 text-red-400" />
-      <span className="text-red-400 font-bold text-sm">Subasta cerrada</span>
-    </div>
-  );
-
-  if (!data) return null;
-  const c = colors[data.urgencia];
-
-  return (
-    <div className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border ${c.bg} ${c.border}`}>
-      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${c.dot}`} />
-      <Clock className={`w-3.5 h-3.5 ${c.text}`} />
-      <div className="flex items-baseline gap-1.5">
-        {data.partes.map((p, i) => (
-          <span key={i} className="flex items-baseline gap-0.5">
-            <span className={`font-black text-base font-mono ${c.text}`}>{p.val}</span>
-            <span className={`text-[11px] font-medium ${c.text} opacity-70`}>{p.label}</span>
-            {i < data.partes.length - 1 && <span className={`text-[11px] ${c.text} opacity-30 mx-0.5`}>y</span>}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function PujaRow({ puja, index, isNew }) {
-  const [highlight, setHighlight] = useState(isNew);
-  useEffect(() => {
-    if (isNew) { const t = setTimeout(() => setHighlight(false), 2500); return () => clearTimeout(t); }
-  }, [isNew]);
-
-  return (
-    <div className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all duration-700 ${
-      index === 0
-        ? "bg-yellow-400/8 border-yellow-400/25"
-        : highlight
-          ? "bg-emerald-500/8 border-emerald-500/20"
-          : "bg-white/[0.02] border-white/[0.05]"
-    }`}
-    style={{ animation: isNew ? "slideIn 0.5s cubic-bezier(0.34,1.56,0.64,1)" : undefined }}>
-      <div className="flex items-center gap-3">
-        {index === 0
-          ? <div className="w-7 h-7 rounded-xl bg-yellow-400/15 border border-yellow-400/30 flex items-center justify-center">
-              <Crown className="w-3.5 h-3.5 text-yellow-400" />
-            </div>
-          : <div className="w-7 h-7 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
-              <span className="text-[10px] font-bold text-white/30">#{index + 1}</span>
-            </div>
-        }
-        <div>
-          <p className="text-white/80 text-sm font-semibold leading-none">{puja.usuario?.nombre ?? "—"}</p>
-          <p className="text-white/25 text-[10px] mt-0.5">
-            {parseFechaCR(puja.fechaPuja)?.toLocaleString("es-CR") ?? puja.fechaPuja}
-          </p>
-        </div>
-      </div>
-      <div className="flex items-center gap-1.5">
-        {index === 0 && <ChevronUp className="w-3 h-3 text-yellow-400" />}
-        <span className={`font-black text-base ${index === 0 ? "text-yellow-400" : "text-white/50"}`}>
-          ${Number(puja.montoOfertado).toLocaleString()}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ── UserSwitcher — alterna entre los 2 compradores fijos ──
-function UserSwitcher({ usuarioActual, onChange }) {
-  const u    = COMPRADORES.find(c => c.idUsuario === usuarioActual);
-  const otro = COMPRADORES.find(c => c.idUsuario !== usuarioActual);
-
-  return (
-    <button onClick={() => onChange(otro.idUsuario)}
-      className="flex items-center gap-2.5 px-4 py-2 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all group">
-      <div className="w-6 h-6 rounded-full bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center text-[11px] font-black text-yellow-400">
-        {u?.nombre?.charAt(0) ?? "?"}
-      </div>
-      <div className="text-left">
-        <p className="text-white/25 text-[9px] uppercase tracking-widest leading-none mb-0.5">Probando como</p>
-        <p className="text-white/80 font-semibold text-xs leading-none">{u?.nombre ?? "—"}</p>
-      </div>
-      <span className="text-white/20 group-hover:text-white/50 transition-colors text-[10px] ml-1">▶</span>
-    </button>
-  );
+  if (dias >= 1) return { partes: [{ val: dias, label: dias === 1 ? "día" : "días" }, { val: horas, label: horas === 1 ? "hora" : "horas" }], urgencia: dias >= 3 ? "low" : "medium" };
+  if (horas >= 1) return { partes: [{ val: horas, label: horas === 1 ? "hora" : "horas" }, { val: mins, label: mins === 1 ? "minuto" : "minutos" }], urgencia: horas >= 6 ? "medium" : "high" };
+  if (mins >= 1) return { partes: [{ val: mins, label: mins === 1 ? "minuto" : "minutos" }, { val: segs, label: segs === 1 ? "segundo" : "segundos" }], urgencia: mins >= 5 ? "high" : "critical" };
+  return { partes: [{ val: segs, label: segs === 1 ? "segundo" : "segundos" }], urgencia: "critical" };
 }
 
 function getGlow(categorias) {
@@ -212,30 +209,145 @@ function getGlow(categorias) {
   return { hex: "#facc15", rgb: "250,204,21" };
 }
 
+// ── Contador ──────────────────────────────────────────────────────────────
+function Contador({ fechaCierre, onExpirado }) {
+  const [data, setData]         = useState(null);
+  const [expirado, setExpirado] = useState(false);
+  const called = useRef(false);
+
+  useEffect(() => {
+    const calcular = () => {
+      const cierre = parseFechaCR(fechaCierre);
+      if (!cierre) return;
+      const diff = cierre.getTime() - Date.now();
+      if (diff <= 0) {
+        setExpirado(true); setData(null);
+        if (!called.current) { called.current = true; onExpirado?.(); }
+        return;
+      }
+      setData(formatContador(diff));
+    };
+    calcular();
+    const interval = setInterval(calcular, 1000);
+    return () => clearInterval(interval);
+  }, [fechaCierre]);
+
+  const urgColors = {
+    low:      { text: "#4ade80", border: "rgba(74,222,128,.28)",  bg: "rgba(74,222,128,.07)"  },
+    medium:   { text: "#facc15", border: "rgba(250,204,21,.28)",  bg: "rgba(250,204,21,.07)"  },
+    high:     { text: "#fb923c", border: "rgba(251,146,60,.3)",   bg: "rgba(251,146,60,.07)"  },
+    critical: { text: "#f87171", border: "rgba(248,113,113,.35)", bg: "rgba(248,113,113,.08)" },
+  };
+
+  if (expirado) return (
+    <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 16px", borderRadius:40, background:"rgba(248,113,113,.07)", border:".5px solid rgba(248,113,113,.35)", fontFamily:"'DM Mono',monospace", fontSize:12, color:"#f87171" }}>
+      <Clock size={13} /> Subasta cerrada
+    </div>
+  );
+  if (!data) return null;
+  const c = urgColors[data.urgencia];
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:8, padding:"9px 18px", borderRadius:40, background:c.bg, border:`.5px solid ${c.border}`, fontFamily:"'DM Mono',monospace", fontSize:12, fontWeight:500, letterSpacing:".04em", color:c.text, animation: data.urgencia==="critical"?"ds-tick .8s ease-in-out infinite":undefined }}>
+      <Clock size={13} />
+      {data.partes.map((p, i) => (
+        <span key={i} style={{ display:"flex", alignItems:"baseline", gap:3 }}>
+          <span style={{ fontWeight:700, fontSize:14 }}>{p.val}</span>
+          <span style={{ fontSize:10, opacity:.75 }}>{p.label}</span>
+          {i < data.partes.length - 1 && <span style={{ fontSize:10, opacity:.3, margin:"0 2px" }}>y</span>}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ── PujaRow ───────────────────────────────────────────────────────────────
+function PujaRow({ puja, index, isNew }) {
+  const [highlight, setHighlight] = useState(isNew);
+  useEffect(() => {
+    if (isNew) { const t = setTimeout(() => setHighlight(false), 2500); return () => clearTimeout(t); }
+  }, [isNew]);
+
+  const isTop = index === 0;
+  return (
+    <div className={`ds-bid-row ${isTop ? "top" : "reg"} ${isNew ? "fresh" : ""}`}
+      style={{
+        display:"flex", alignItems:"center", justifyContent:"space-between",
+        padding:"12px 14px", borderRadius:14, border:".5px solid",
+        borderColor: isTop ? "rgba(250,204,21,.22)" : highlight ? "rgba(74,222,128,.2)" : "rgba(255,255,255,.06)",
+        background: isTop ? "rgba(250,204,21,.06)" : highlight ? "rgba(74,222,128,.05)" : "rgba(255,255,255,.015)",
+      }}>
+      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+        <div style={{
+          width:30, height:30, borderRadius:10, flexShrink:0,
+          display:"flex", alignItems:"center", justifyContent:"center",
+          background: isTop ? "rgba(250,204,21,.12)" : "rgba(255,255,255,.03)",
+          border: `.5px solid ${isTop ? "rgba(250,204,21,.3)" : "rgba(255,255,255,.07)"}`,
+          fontSize: isTop ? 14 : 10, fontFamily:"'DM Mono',monospace",
+          fontWeight:700, color: isTop ? undefined : "rgba(201,185,154,.25)",
+        }}>
+          {isTop ? <Crown size={13} color="#facc15" /> : `#${index+1}`}
+        </div>
+        <div>
+          <p style={{ margin:0, fontFamily:"'Cormorant Garamond',serif", fontSize:15, fontWeight:600, color:"rgba(245,234,216,.82)", lineHeight:1 }}>
+            {puja.usuario?.nombre ?? "—"}
+          </p>
+          <p style={{ margin:"2px 0 0", fontFamily:"'DM Mono',monospace", fontSize:10, color:"rgba(201,185,154,.28)" }}>
+            {parseFechaCR(puja.fechaPuja)?.toLocaleString("es-CR") ?? puja.fechaPuja}
+          </p>
+        </div>
+      </div>
+      <span style={{ fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize: isTop ? 17 : 14, color: isTop ? "#facc15" : "rgba(201,185,154,.38)" }}>
+        ${Number(puja.montoOfertado).toLocaleString()}
+      </span>
+    </div>
+  );
+}
+
+// ── UserSwitcher ──────────────────────────────────────────────────────────
+function UserSwitcher({ usuarioActual, onChange }) {
+  const u    = COMPRADORES.find(c => c.idUsuario === usuarioActual);
+  const otro = COMPRADORES.find(c => c.idUsuario !== usuarioActual);
+  return (
+    <button onClick={() => onChange(otro.idUsuario)}
+      className="ds-user-pill"
+      style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 16px", borderRadius:40, border:".5px solid rgba(201,185,154,.12)", background:"rgba(255,255,255,.02)", cursor:"pointer", fontFamily:"'DM Mono',monospace", position:"relative", overflow:"hidden" }}>
+      <div className="ds-u-avatar" style={{ width:28, height:28, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:700, color:"#07060f", background:"linear-gradient(135deg,#e8a83c,#e8736b)", transition:"transform .3s" }}>
+        {u?.nombre?.charAt(0) ?? "?"}
+      </div>
+      <div style={{ display:"flex", flexDirection:"column", gap:1 }}>
+        <span style={{ fontSize:9, color:"rgba(201,185,154,.35)", letterSpacing:".18em", textTransform:"uppercase" }}>Probando como</span>
+        <span style={{ fontSize:12, color:"#f5ead8", fontWeight:500 }}>{u?.nombre ?? "—"}</span>
+      </div>
+      <span className="ds-u-arrow" style={{ color:"rgba(201,185,154,.25)", fontSize:11, marginLeft:2, transition:"all .3s" }}>›</span>
+    </button>
+  );
+}
+
+// ── COMPONENTE PRINCIPAL ──────────────────────────────────────────────────
 export function DetailSubasta() {
   const navigate = useNavigate();
   const { id }   = useParams();
   const BASE_URL = import.meta.env.VITE_BASE_URL + "uploads";
 
-  const [subasta,         setSubasta]         = useState(null);
-  const [pujas,           setPujas]           = useState([]);
-  const [usuarioActual,   setUsuarioActual]   = useState(4);
-  const [loading,         setLoading]         = useState(true);
-  const [monto,           setMonto]           = useState("");
-  const [montoError,      setMontoError]      = useState("");
-  const [pujaSuper,       setPujaSuper]       = useState(false);
-  const [cerrada,         setCerrada]         = useState(false);
-  const [enviando,        setEnviando]        = useState(false);
-  const [nuevasPujas,     setNuevasPujas]     = useState(new Set());
-  const [mounted,         setMounted]         = useState(false);
-  const [tienePendiente,  setTienePendiente]  = useState(false);
+  const [subasta,        setSubasta]        = useState(null);
+  const [pujas,          setPujas]          = useState([]);
+  const [usuarioActual,  setUsuarioActual]  = useState(4);
+  const [loading,        setLoading]        = useState(true);
+  const [monto,          setMonto]          = useState("");
+  const [montoError,     setMontoError]     = useState("");
+  const [pujaSuper,      setPujaSuper]      = useState(false);
+  const [cerrada,        setCerrada]        = useState(false);
+  const [enviando,       setEnviando]       = useState(false);
+  const [nuevasPujas,    setNuevasPujas]    = useState(new Set());
+  const [mounted,        setMounted]        = useState(false);
+  const [tienePendiente, setTienePendiente] = useState(false);
+  const bidInpRef = useRef(null);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50);
     return () => clearTimeout(t);
   }, []);
 
-  // Verificar si el usuario actual tiene factura pendiente
   const verificarPendiente = async (idUsuario) => {
     try {
       const res  = await FacturacionService.getAll();
@@ -246,9 +358,7 @@ export function DetailSubasta() {
         (String(f.idEstadoFacturacion) === "1" || f.resultado === "Pendiente")
       );
       setTienePendiente(pendiente);
-    } catch {
-      setTienePendiente(false);
-    }
+    } catch { setTienePendiente(false); }
   };
 
   useEffect(() => {
@@ -257,43 +367,30 @@ export function DetailSubasta() {
         const resSub      = await SubastaService.getSubastaById(id);
         const subastaData = resSub.data?.data ?? resSub.data;
         setSubasta(subastaData);
-
-        // FIX: si la subasta ya viene cerrada desde el backend, marcarla cerrada
         if (subastaData?.idEstadoSubasta != 1) setCerrada(true);
-
         try {
           const resPujas  = await PujaService.getPujasbySubasta(id);
           const pujasData = resPujas.data?.data ?? resPujas.data;
-          if (pujasData && Array.isArray(pujasData)) {
+          if (pujasData && Array.isArray(pujasData))
             setPujas([...pujasData].sort((a, b) => Number(b.montoOfertado) - Number(a.montoOfertado)));
-          }
         } catch { setPujas([]); }
-
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     };
     fetchData();
   }, [id]);
 
-  // Verificar pendiente cuando cambia el usuario
-  useEffect(() => {
-    verificarPendiente(usuarioActual);
-  }, [usuarioActual]);
+  useEffect(() => { verificarPendiente(usuarioActual); }, [usuarioActual]);
 
   useEffect(() => {
     const pusher  = new Pusher(import.meta.env.VITE_PUSHER_KEY, { cluster: import.meta.env.VITE_PUSHER_CLUSTER });
     const channel = pusher.subscribe("subasta-" + id);
-
     channel.bind("nueva-puja", (data) => {
       setPujas((prev) => {
         const liderAnterior = prev[0];
         const nuevas = [data.puja, ...prev].sort((a, b) => Number(b.montoOfertado) - Number(a.montoOfertado));
         setUsuarioActual(currentUser => {
-          if (
-            liderAnterior &&
-            String(liderAnterior.idUsuario) === String(currentUser) &&
-            String(data.puja.idUsuario) !== String(currentUser)
-          ) {
+          if (liderAnterior && String(liderAnterior.idUsuario) === String(currentUser) && String(data.puja.idUsuario) !== String(currentUser)) {
             setPujaSuper(true);
             setTimeout(() => setPujaSuper(false), 6000);
           }
@@ -308,37 +405,19 @@ export function DetailSubasta() {
         return s;
       });
     });
-
     channel.bind("subasta-cerrada", (data) => {
-      // FIX: actualizar AMBOS — el objeto subasta Y el flag cerrada
       setCerrada(true);
       setSubasta(prev => prev ? { ...prev, idEstadoSubasta: 2, estadoSubasta: { idEstadoSubasta: 2, descripcion: "Finalizada" } } : prev);
       toast.success("🏁 Subasta finalizada — Ganador: " + (data.ganador?.nombre ?? "Sin ganador"));
     });
-
     return () => { channel.unbind_all(); pusher.unsubscribe("subasta-" + id); pusher.disconnect(); };
   }, [id]);
 
-  // Pusher para pagos — cuando se confirma un pago, re-verificar pendiente
   useEffect(() => {
     const pusher  = new Pusher(import.meta.env.VITE_PUSHER_KEY, { cluster: import.meta.env.VITE_PUSHER_CLUSTER });
     const channel = pusher.subscribe("pagos");
-
-    channel.bind("pago-confirmado", () => {
-      // Re-verificar si el usuario ya no tiene pendiente
-      setUsuarioActual(current => {
-        verificarPendiente(current);
-        return current;
-      });
-    });
-
-    channel.bind("nuevo-pago", () => {
-      setUsuarioActual(current => {
-        verificarPendiente(current);
-        return current;
-      });
-    });
-
+    channel.bind("pago-confirmado", () => { setUsuarioActual(current => { verificarPendiente(current); return current; }); });
+    channel.bind("nuevo-pago",      () => { setUsuarioActual(current => { verificarPendiente(current); return current; }); });
     return () => { channel.unbind_all(); pusher.unsubscribe("pagos"); pusher.disconnect(); };
   }, []);
 
@@ -347,7 +426,6 @@ export function DetailSubasta() {
       const res  = await SubastaService.getSubastaById(id);
       const data = res.data?.data ?? res.data;
       setSubasta(data);
-      // FIX: marcar cerrada independientemente del Pusher
       setCerrada(true);
     } catch (e) { console.error(e); }
   };
@@ -361,11 +439,7 @@ export function DetailSubasta() {
     setMontoError("");
   };
 
-  const handleCambioUsuario = (nuevoId) => {
-    setUsuarioActual(nuevoId);
-    setMonto("");
-    setMontoError("");
-  };
+  const handleCambioUsuario = (nuevoId) => { setUsuarioActual(nuevoId); setMonto(""); setMontoError(""); };
 
   const handlePujar = async () => {
     const montoNum = Number(monto);
@@ -373,52 +447,49 @@ export function DetailSubasta() {
     if (montoNum < montoMinimo) { setMontoError(`El monto mínimo es $${montoMinimo.toLocaleString()}`); return; }
     setEnviando(true);
     try {
-      const res = await PujaService.createPuja({
-        idUsuario:     usuarioActual,
-        idSubasta:     Number(id),
-        montoOfertado: montoNum,
-      });
+      const res = await PujaService.createPuja({ idUsuario: usuarioActual, idSubasta: Number(id), montoOfertado: montoNum });
       if (res.data?.success === false) {
         setMontoError(res.data.message);
-        // Si el error es de pago pendiente, actualizar el flag
-        if (res.data.message?.includes("pago pendiente")) {
-          setTienePendiente(true);
-        }
+        if (res.data.message?.includes("pago pendiente")) setTienePendiente(true);
       } else {
         setMonto("");
         setMontoError("");
+        if (bidInpRef.current) bidInpRef.current.className = "ds-bid-inp";
         toast.success("¡Puja registrada!");
       }
     } catch { toast.error("Error al registrar la puja"); }
     finally { setEnviando(false); }
   };
 
+  // ── Loading ─────────────────────────────────────────────────────────────
   if (loading) return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 rounded-2xl border-2 border-yellow-400/10 rotate-45" />
-          <div className="absolute inset-2 rounded-xl border-2 border-yellow-400/20 animate-spin" />
-          <Gavel className="absolute inset-0 m-auto w-6 h-6 text-yellow-400/60" />
+    <div style={{ minHeight:"100vh", background:"#07060f", display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <style>{GLOBAL_CSS}</style>
+      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:16 }}>
+        <div style={{ position:"relative", width:64, height:64 }}>
+          <div style={{ position:"absolute", inset:0, borderRadius:16, border:"2px solid rgba(250,204,21,.1)", transform:"rotate(45deg)" }} />
+          <div style={{ position:"absolute", inset:8, borderRadius:12, border:"2px solid rgba(250,204,21,.22)", animation:"ds-spinr .9s linear infinite" }} />
+          <Gavel style={{ position:"absolute", inset:0, margin:"auto", width:24, height:24, color:"rgba(250,204,21,.6)" }} />
         </div>
-        <p className="text-white/30 text-xs tracking-[0.3em] uppercase">Cargando subasta</p>
+        <p style={{ fontFamily:"'DM Mono',monospace", fontSize:11, letterSpacing:".3em", textTransform:"uppercase", color:"rgba(255,255,255,.25)", margin:0 }}>Cargando subasta</p>
       </div>
     </div>
   );
 
   if (!subasta) return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-      <div className="text-center space-y-3">
-        <AlertCircle className="w-10 h-10 text-red-400 mx-auto" />
-        <p className="text-white/60 text-sm">No se encontró la subasta</p>
-        <Button onClick={() => navigate(-1)} variant="ghost" className="text-white/30 text-xs">Volver</Button>
+    <div style={{ minHeight:"100vh", background:"#07060f", display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <style>{GLOBAL_CSS}</style>
+      <div style={{ textAlign:"center" }}>
+        <AlertCircle style={{ width:40, height:40, color:"#f87171", margin:"0 auto 12px" }} />
+        <p style={{ color:"rgba(255,255,255,.5)", fontSize:14, margin:"0 0 12px" }}>No se encontró la subasta</p>
+        <Button onClick={() => navigate(-1)} variant="ghost">Volver</Button>
       </div>
     </div>
   );
 
+  // ── Derivados ────────────────────────────────────────────────────────────
   const data        = subasta;
   const glow        = getGlow(data?.carta?.categorias);
-  // FIX: isActive depende de idEstadoSubasta del objeto Y del flag cerrada
   const isActive    = String(data?.idEstadoSubasta) === "1" && !cerrada;
   const pujaLider   = pujas[0] ?? null;
   const esVendedor  = String(data?.idUsuario) === String(usuarioActual);
@@ -426,329 +497,353 @@ export function DetailSubasta() {
     ? Number(pujaLider.montoOfertado) + Number(data?.incrementoMin)
     : Number(data?.precio) + Number(data?.incrementoMin);
   const categorias  = data?.carta?.categorias ?? [];
-
-  // Razón por la que no puede pujar
+  const bloqueado   = esVendedor || tienePendiente;
   const razonesBloqueado = () => {
     if (esVendedor) return "Eres el vendedor de esta subasta";
     if (tienePendiente) return "Tienes un pago pendiente — ve a Pagos para confirmar";
     return null;
   };
-  const bloqueado = esVendedor || tienePendiente;
 
+  // Botones de precio rápido
+  const quickBids = [
+    montoMinimo,
+    montoMinimo + Math.ceil(Number(data?.incrementoMin) * 2),
+    montoMinimo + Math.ceil(Number(data?.incrementoMin) * 5),
+  ];
+
+  // Input class helper
+  const inpClass = () => {
+    if (montoError) return "ds-bid-inp err";
+    if (monto && Number(monto) >= montoMinimo) return "ds-bid-inp ok";
+    return "ds-bid-inp";
+  };
+
+  // ── RENDER ───────────────────────────────────────────────────────────────
   return (
-    <>
-      <style>{`
-        @keyframes slideIn {
-          from { opacity:0; transform:translateY(-10px) scale(0.96); }
-          to   { opacity:1; transform:translateY(0) scale(1); }
-        }
-        @keyframes fadeUp {
-          from { opacity:0; transform:translateY(20px); }
-          to   { opacity:1; transform:translateY(0); }
-        }
-        @keyframes glowPulse {
-          0%,100% { opacity:0.04; }
-          50%     { opacity:0.10; }
-        }
-        .anim-1 { animation: fadeUp 0.45s cubic-bezier(0.34,1.2,0.64,1) both; }
-        .anim-2 { animation: fadeUp 0.45s 0.07s cubic-bezier(0.34,1.2,0.64,1) both; }
-        .anim-3 { animation: fadeUp 0.45s 0.14s cubic-bezier(0.34,1.2,0.64,1) both; }
-        .anim-4 { animation: fadeUp 0.45s 0.21s cubic-bezier(0.34,1.2,0.64,1) both; }
-        .glow-bg { animation: glowPulse 4s ease-in-out infinite; }
-      `}</style>
+    <div className="ds-root" style={{ minHeight:"100vh", background:"#07060f", position:"relative", overflowX:"hidden" }}>
+      <style>{GLOBAL_CSS}</style>
 
+      {/* FONDO GLOW */}
+      <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0 }}>
+        <div style={{ position:"absolute", top:0, left:"25%", width:700, height:500, borderRadius:"50%", filter:"blur(140px)", background:glow.hex, animation:"ds-glowPulse 5s ease-in-out infinite", opacity:.06 }} />
+        <div style={{ position:"absolute", bottom:0, right:"25%", width:400, height:300, borderRadius:"50%", filter:"blur(100px)", background:glow.hex, opacity:.03 }} />
+        <div style={{ position:"absolute", inset:0, opacity:.012, backgroundImage:"linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px)", backgroundSize:"60px 60px" }} />
+      </div>
+
+      {/* ALERTA PUJA SUPERADA */}
       {pujaSuper && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3 px-5 py-4 rounded-2xl border border-red-500/40 bg-[#0d1424]/98 backdrop-blur-xl shadow-2xl"
-          style={{ animation: "slideIn 0.5s cubic-bezier(0.34,1.56,0.64,1)" }}>
-          <div className="w-10 h-10 rounded-2xl bg-red-500/15 border border-red-500/25 flex items-center justify-center flex-shrink-0">
-            <AlertCircle className="w-5 h-5 text-red-400" />
+        <div style={{ position:"fixed", top:20, left:"50%", transform:"translateX(-50%)", zIndex:60, display:"flex", alignItems:"center", gap:14, padding:"16px 22px", borderRadius:20, background:"rgba(9,7,18,.97)", border:".5px solid rgba(248,113,113,.4)", backdropFilter:"blur(24px)", boxShadow:"0 24px 60px rgba(0,0,0,.7),0 0 40px rgba(248,113,113,.1)", animation:"ds-slideIn .5s cubic-bezier(.22,1,.36,1) both", minWidth:300 }}>
+          <div style={{ width:40, height:40, borderRadius:13, background:"rgba(248,113,113,.1)", border:".5px solid rgba(248,113,113,.28)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, animation:"ds-floatY 2s ease-in-out infinite" }}>
+            <AlertCircle size={19} color="#f87171" />
           </div>
           <div>
-            <p className="text-red-300 font-black text-sm">¡Tu puja fue superada!</p>
-            <p className="text-white/40 text-xs mt-0.5">Alguien ofreció más — ¿vuelves a pujar?</p>
+            <p style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:15, fontWeight:700, color:"#fca5a5" }}>¡Tu puja fue superada!</p>
+            <p style={{ margin:"3px 0 0", fontFamily:"'DM Mono',monospace", fontSize:10, color:"rgba(255,255,255,.28)" }}>Alguien ofreció más — ¿vuelves a pujar?</p>
           </div>
-          <button onClick={() => setPujaSuper(false)} className="ml-2 text-white/20 hover:text-white/50 transition-colors text-lg leading-none">×</button>
+          <button onClick={() => setPujaSuper(false)} style={{ marginLeft:6, background:"none", border:"none", color:"rgba(255,255,255,.2)", fontSize:20, cursor:"pointer", lineHeight:1, transition:"all .25s" }}
+            onMouseEnter={e=>e.target.style.color="rgba(255,255,255,.6)"} onMouseLeave={e=>e.target.style.color="rgba(255,255,255,.2)"}>×</button>
         </div>
       )}
 
-      <div className="min-h-screen bg-[#020617] px-4 py-8 relative overflow-hidden">
+      {/* CONTENIDO PRINCIPAL */}
+      <div style={{ position:"relative", zIndex:10, maxWidth:1140, margin:"0 auto", padding:"28px 20px 100px", opacity: mounted ? 1 : 0, transition:"opacity .5s" }}>
 
-        <div className="fixed inset-0 pointer-events-none">
-          <div className="glow-bg absolute top-0 left-1/4 w-[700px] h-[500px] rounded-full blur-[140px]"
-            style={{ background: glow.hex }} />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[300px] rounded-full blur-[100px] opacity-[0.03]"
-            style={{ background: glow.hex }} />
-          <div className="absolute inset-0 opacity-[0.012]"
-            style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.08) 1px,transparent 1px)", backgroundSize: "60px 60px" }} />
+        {/* TOPBAR */}
+        <div className="ds-a1" style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:32 }}>
+          <button onClick={() => navigate(-1)}
+            className="ds-back-btn"
+            style={{ display:"flex", alignItems:"center", gap:7, background:"none", border:".5px solid rgba(201,185,154,.12)", color:"#c9b99a", fontFamily:"'DM Mono',monospace", fontSize:11, letterSpacing:".1em", textTransform:"uppercase", padding:"9px 16px", borderRadius:10, cursor:"pointer", position:"relative", overflow:"hidden", transition:"all .3s" }}>
+            <ArrowLeft size={14} /> Regresar
+          </button>
+          {import.meta.env.DEV && <UserSwitcher usuarioActual={usuarioActual} onChange={handleCambioUsuario} />}
         </div>
 
-        <div className={`relative z-10 max-w-6xl mx-auto space-y-5 transition-opacity duration-500 ${mounted ? "opacity-100" : "opacity-0"}`}>
+        {/* HERO CARD */}
+        <div className="ds-a2" style={{ position:"relative", borderRadius:28, overflow:"hidden", marginBottom:18, background:"linear-gradient(145deg,#161323 0%,#0e0c1c 50%,#0b0916 100%)", border:".5px solid rgba(250,204,21,.22)", animation:"ds-goldRing 6s ease-in-out infinite" }}>
+          <div className="ds-hero-scanline" />
+          <div className="ds-hero-topline" />
+          <div className="ds-orb-a" />
+          <div className="ds-orb-b" />
+          <div className="ds-orb-c" />
 
-          <div className="flex items-center justify-between">
-            <button onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors text-sm group">
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-              Regresar
-            </button>
-            <UserSwitcher usuarioActual={usuarioActual} onChange={handleCambioUsuario} />
-          </div>
-
-          {/* HEADER CARD */}
-          <div className="anim-1 relative overflow-hidden rounded-3xl border bg-gradient-to-b from-[#0d1424] to-[#080d18]"
-            style={{ borderColor: `rgba(${glow.rgb},0.18)` }}>
-            <div className="absolute top-0 left-0 right-0 h-px"
-              style={{ background: `linear-gradient(90deg,transparent,rgba(${glow.rgb},0.9) 40%,rgba(${glow.rgb},0.9) 60%,transparent)` }} />
-
-            <div className="p-6 md:p-8">
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center border flex-shrink-0"
-                    style={{ background: `rgba(${glow.rgb},0.1)`, borderColor: `rgba(${glow.rgb},0.22)` }}>
-                    <Gavel className="w-7 h-7" style={{ color: glow.hex }} />
+          <div style={{ padding:"30px 36px 24px", position:"relative", zIndex:4 }}>
+            <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:16, flexWrap:"wrap" }}>
+              <div>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:6, padding:"4px 12px", borderRadius:20, background:"rgba(74,222,128,.08)", border:".5px solid rgba(74,222,128,.3)", fontFamily:"'DM Mono',monospace", fontSize:9, letterSpacing:".18em", textTransform:"uppercase", color:"#4ade80" }}>
+                    <span style={{ width:6, height:6, borderRadius:"50%", background:"#4ade80", animation:"ds-tick 1.2s ease-in-out infinite", boxShadow:"0 0 8px rgba(74,222,128,.8)", display:"inline-block" }} />
+                    {isActive ? "Subasta en vivo" : "Subasta"}
                   </div>
-                  <div>
-                    <p className="text-white/25 text-[10px] uppercase tracking-[0.25em] font-semibold mb-0.5">Subasta en vivo</p>
-                    <h1 className="text-2xl font-black text-white">
-                      {data.carta?.nombre ?? "—"}
-                      <span className="ml-2 text-base font-normal text-white/20">#{data.idSubasta}</span>
-                    </h1>
-                    {categorias.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {categorias.map(cat => (
-                          <span key={cat.idCategoria}
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                              categoriaStyles[cat.descripcion] ?? "bg-white/5 border-white/10 text-white/40"
-                            }`}>
-                            {cat.descripcion}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <span style={{ fontFamily:"'DM Mono',monospace", fontSize:10, color:"rgba(201,185,154,.25)", letterSpacing:".1em" }}>Lote #{data.idSubasta}</span>
                 </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* FIX: el badge usa isActive que ya incluye ambas condiciones */}
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold ${
-                    isActive ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400" : "bg-red-500/10 border-red-500/25 text-red-400"
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-400 animate-pulse" : "bg-red-400"}`} />
-                    {isActive ? "En curso" : "Finalizada"}
-                  </div>
-                  {data.fechaCierre && <Contador fechaCierre={data.fechaCierre} onExpirado={handleExpirado} />}
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t border-white/[0.05] grid grid-cols-3 divide-x divide-white/[0.05]">
-              {[
-                { label: "Precio base",     value: `$${Number(data.precio).toLocaleString()}`,        color: "text-yellow-400" },
-                { label: "Incremento mín.", value: `$${Number(data.incrementoMin).toLocaleString()}`, color: "text-purple-400" },
-                { label: "Total pujas",     value: pujas.length,                                       color: "text-blue-400"   },
-              ].map((s, i) => (
-                <div key={i} className="px-6 py-4 text-center">
-                  <p className="text-white/25 text-[10px] uppercase tracking-widest font-semibold mb-1">{s.label}</p>
-                  <p className={`text-xl font-black ${s.color}`}>{s.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* BODY */}
-          <div className="grid lg:grid-cols-[1fr_390px] gap-5">
-
-            {/* IZQUIERDA */}
-            <div className="space-y-5">
-              <div className="anim-2 rounded-3xl border border-white/[0.06] bg-[#0a0f1e]/80 p-6 flex gap-6">
-                <div className="flex-shrink-0">
-                  {data.carta?.imagenes?.length > 0 ? (
-                    <div className="relative w-32 h-44 rounded-2xl overflow-hidden border-2 hover:scale-[1.04] transition-all duration-500 shadow-2xl"
-                      style={{ borderColor: `rgba(${glow.rgb},0.4)`, boxShadow: `0 12px 40px rgba(0,0,0,0.7),0 0 24px rgba(${glow.rgb},0.12)` }}>
-                      <img src={`${BASE_URL}/${data.carta.imagenes[0].imagen}`} alt={data.carta.nombre} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-white/5" />
-                    </div>
-                  ) : (
-                    <div className="w-32 h-44 rounded-2xl border-2 border-white/10 bg-[#0a0f1e] flex items-center justify-center text-white/10">
-                      <FilmIcon className="w-10 h-10" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 space-y-3">
-                  <div>
-                    <h2 className="text-white font-black text-xl">{data.carta?.nombre ?? "—"}</h2>
-                    {data.carta?.descripcion && <p className="text-white/35 text-sm mt-1 leading-relaxed">{data.carta.descripcion}</p>}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {data.carta?.condicion?.descripcion && (
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                        <Shield className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
-                        <div>
-                          <p className="text-[9px] text-white/25 uppercase tracking-widest">Condición</p>
-                          <p className="text-white/70 text-xs font-semibold">{data.carta.condicion.descripcion}</p>
-                        </div>
-                      </div>
-                    )}
-                    {data.carta?.fechaRegistro && (
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                        <Calendar className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
-                        <div>
-                          <p className="text-[9px] text-white/25 uppercase tracking-widest">Registrada</p>
-                          <p className="text-white/70 text-xs font-semibold">{data.carta.fechaRegistro?.slice(0,10)}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="anim-3 rounded-3xl border p-6 relative overflow-hidden"
-                style={{ borderColor: `rgba(${glow.rgb},0.2)`, background: `linear-gradient(135deg,rgba(${glow.rgb},0.05) 0%,transparent 60%)` }}>
-                <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl pointer-events-none"
-                  style={{ background: glow.hex, opacity: 0.06 }} />
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/25 mb-4">Puja más alta</p>
-                {pujaLider ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-2xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center">
-                        <Crown className="w-5 h-5 text-yellow-400" />
-                      </div>
-                      <div>
-                        <p className="text-white font-bold text-base leading-none">{pujaLider.usuario?.nombre ?? "—"}</p>
-                        <p className="text-white/25 text-xs mt-1">
-                          {parseFechaCR(pujaLider.fechaPuja)?.toLocaleString("es-CR") ?? pujaLider.fechaPuja}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-yellow-400 font-black text-3xl">${Number(pujaLider.montoOfertado).toLocaleString()}</p>
-                      <p className="text-white/20 text-[10px]">próxima mín: ${montoMinimo.toLocaleString()}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between">
-                    <p className="text-white/25 text-sm">Sin pujas aún</p>
-                    <div className="text-right">
-                      <p className="text-white/40 font-black text-2xl">${Number(data.precio).toLocaleString()}</p>
-                      <p className="text-white/20 text-[10px]">precio base</p>
-                    </div>
+                <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(26px,5vw,48px)", fontWeight:900, lineHeight:.95, color:"#f5ead8", letterSpacing:"-.02em", margin:0 }}>
+                  {data.carta?.nombre ?? "—"}
+                </h1>
+                {categorias.length > 0 && (
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginTop:12 }}>
+                    {categorias.map(cat => (
+                      <span key={cat.idCategoria} className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${categoriaStyles[cat.descripcion] ?? "bg-white/5 border-white/10 text-white/40"}`}>
+                        {cat.descripcion}
+                      </span>
+                    ))}
                   </div>
                 )}
               </div>
-
-              <div className="anim-4 flex items-center gap-3 p-4 rounded-2xl border border-white/[0.05] bg-white/[0.02]">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                  <User className="w-4 h-4 text-blue-400" />
+              <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:9, flexShrink:0 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:7, padding:"8px 18px", borderRadius:40, fontFamily:"'DM Mono',monospace", fontSize:11, fontWeight:500, background: isActive?"rgba(74,222,128,.07)":"rgba(248,113,113,.07)", border: isActive?".5px solid rgba(74,222,128,.3)":".5px solid rgba(248,113,113,.3)", color: isActive?"#4ade80":"#f87171" }}>
+                  <span style={{ width:6, height:6, borderRadius:"50%", background: isActive?"#4ade80":"#f87171", display:"inline-block", animation: isActive?"ds-tick 1.2s ease-in-out infinite":undefined }} />
+                  {isActive ? "En curso" : "Finalizada"}
                 </div>
-                <div>
-                  <p className="text-[10px] text-white/25 uppercase tracking-widest font-semibold">Vendedor</p>
-                  <p className="text-white/70 text-sm font-semibold">{data.creador?.nombre ?? "—"}</p>
-                </div>
+                {data.fechaCierre && <Contador fechaCierre={data.fechaCierre} onExpirado={handleExpirado} />}
               </div>
             </div>
+          </div>
 
-            {/* DERECHA */}
-            <div className="space-y-5">
+          {/* STATS BAR */}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", borderTop:".5px solid rgba(250,204,21,.08)", position:"relative", zIndex:4 }}>
+            {[
+              { label:"Precio base",     value:`$${Number(data.precio).toLocaleString()}`,        color:"#facc15" },
+              { label:"Incremento mín.", value:`$${Number(data.incrementoMin).toLocaleString()}`, color:"#a78bfa" },
+              { label:"Total pujas",     value: pujas.length,                                      color:"#7aaee8" },
+            ].map((s, i) => (
+              <div key={i} className="ds-stat-cell" style={{ padding:"20px 28px", textAlign:"center", borderRight: i<2?".5px solid rgba(250,204,21,.07)":"none", position:"relative", overflow:"hidden", cursor:"default" }}>
+                <p style={{ margin:"0 0 7px", fontFamily:"'DM Mono',monospace", fontSize:9, letterSpacing:".2em", textTransform:"uppercase", color:"rgba(201,185,154,.28)" }}>{s.label}</p>
+                <p style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:24, fontWeight:700, color:s.color, lineHeight:1, transition:"transform .3s" }}>{s.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-              {/* Formulario de puja */}
-              {isActive && !bloqueado && (
-                <div className="rounded-3xl border border-white/[0.08] bg-[#0a0f1e]/80 p-5 space-y-4"
-                  style={{ boxShadow: `0 0 50px rgba(${glow.rgb},0.05)` }}>
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4" style={{ color: glow.hex }} />
-                    <p className="text-white font-bold text-sm">Realizar puja</p>
+        {/* GRID */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 390px", gap:18, alignItems:"start" }} className="lg:grid-cols-[1fr_390px]">
+
+          {/* COLUMNA IZQUIERDA */}
+          <div>
+
+            {/* CARTA */}
+            <div className="ds-a3 ds-card" style={{ borderRadius:22, border:".5px solid rgba(250,204,21,.1)", background:"linear-gradient(150deg,#141122 0%,#0e0c1c 100%)", overflow:"hidden", marginBottom:16 }}>
+              <div style={{ padding:"16px 22px", display:"flex", alignItems:"center", justifyContent:"space-between", borderBottom:".5px solid rgba(250,204,21,.07)", position:"relative", overflow:"hidden" }}>
+                <div style={{ fontFamily:"'DM Mono',monospace", fontSize:9, letterSpacing:".22em", textTransform:"uppercase", color:"rgba(201,185,154,.32)", display:"flex", alignItems:"center", gap:7 }}>
+                  🎴 Carta en subasta
+                </div>
+              </div>
+              <div style={{ padding:22 }}>
+                <div style={{ display:"flex", gap:22 }}>
+                  {/* IMAGEN */}
+                  <div className="ds-img-wrap" style={{ flexShrink:0, width:112, height:158, borderRadius:16, overflow:"hidden", border:`1.5px solid rgba(${glow.rgb},.3)`, boxShadow:`0 16px 48px rgba(0,0,0,.7),0 0 28px rgba(${glow.rgb},.1)`, position:"relative", cursor:"pointer" }}>
+                    {data.carta?.imagenes?.length > 0 ? (
+                      <>
+                        <img src={`${BASE_URL}/${data.carta.imagenes[0].imagen}`} alt={data.carta.nombre} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                        <div style={{ position:"absolute", inset:0, background:"linear-gradient(to bottom,rgba(255,255,255,.06) 0%,transparent 40%,rgba(0,0,0,.5) 100%)", pointerEvents:"none" }} />
+                      </>
+                    ) : (
+                      <div style={{ width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,.02)", color:"rgba(201,185,154,.2)" }}>
+                        <FilmIcon size={36} />
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-1.5">
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 text-sm font-bold">$</span>
-                      <input type="number" value={monto}
-                        onChange={e => handleMontoChange(e.target.value)}
-                        placeholder={montoMinimo.toLocaleString()}
-                        className={`w-full bg-white/[0.04] border rounded-2xl pl-8 pr-4 py-3.5 text-white placeholder-white/15 focus:outline-none text-sm transition-all duration-200 ${
-                          montoError ? "border-red-500/50" : monto && Number(monto) >= montoMinimo ? "border-emerald-500/40" : "border-white/[0.08]"
-                        }`}
-                        style={monto && !montoError ? { borderColor: `rgba(${glow.rgb},0.4)` } : undefined}
-                      />
+
+                  {/* INFO CARTA */}
+                  <div style={{ flex:1, display:"flex", flexDirection:"column", gap:11 }}>
+                    <p style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:21, fontWeight:700, color:"#f5ead8", lineHeight:1.05 }}>{data.carta?.nombre ?? "—"}</p>
+                    {data.carta?.descripcion && <p style={{ margin:0, fontSize:13, color:"rgba(201,185,154,.42)", lineHeight:1.7, fontStyle:"italic" }}>{data.carta.descripcion}</p>}
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:7 }}>
+                      {data.carta?.condicion?.descripcion && (
+                        <div style={{ display:"flex", alignItems:"center", gap:6, padding:"6px 12px", borderRadius:10, background:"rgba(255,255,255,.025)", border:".5px solid rgba(255,255,255,.07)", fontFamily:"'DM Mono',monospace", fontSize:10 }}>
+                          <span style={{ width:5, height:5, borderRadius:"50%", background:"#4ade80", boxShadow:"0 0 6px rgba(74,222,128,.6)", flexShrink:0 }} />
+                          <span style={{ color:"rgba(201,185,154,.45)" }}>Condición</span>
+                          <strong style={{ color:"rgba(201,185,154,.82)" }}>{data.carta.condicion.descripcion}</strong>
+                        </div>
+                      )}
+                      {data.carta?.fechaRegistro && (
+                        <div style={{ display:"flex", alignItems:"center", gap:6, padding:"6px 12px", borderRadius:10, background:"rgba(255,255,255,.025)", border:".5px solid rgba(255,255,255,.07)", fontFamily:"'DM Mono',monospace", fontSize:10 }}>
+                          <span style={{ width:5, height:5, borderRadius:"50%", background:"#60a5fa", boxShadow:"0 0 6px rgba(96,165,250,.6)", flexShrink:0 }} />
+                          <span style={{ color:"rgba(201,185,154,.45)" }}>Registrada</span>
+                          <strong style={{ color:"rgba(201,185,154,.82)" }}>{data.carta.fechaRegistro?.slice(0,10)}</strong>
+                        </div>
+                      )}
                     </div>
-                    {montoError
-                      ? <div className="flex items-center gap-1.5 px-1"><span className="w-1 h-1 rounded-full bg-red-400 flex-shrink-0" /><p className="text-red-400/80 text-[11px]">{montoError}</p></div>
-                      : <p className="text-white/20 text-[11px] px-1">Mínimo: <span className="text-white/40 font-semibold">${montoMinimo.toLocaleString()}</span></p>
-                    }
                   </div>
-                  <button onClick={handlePujar} disabled={enviando || !!montoError || !monto}
-                    className="w-full py-3.5 rounded-2xl font-bold text-sm text-black transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed"
-                    style={{ background: `linear-gradient(135deg,${glow.hex},rgba(${glow.rgb},0.7))` }}>
-                    {enviando
-                      ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-black/20 border-t-black/60 rounded-full animate-spin" />Registrando...</span>
-                      : "Pujar ahora"
-                    }
-                  </button>
                 </div>
-              )}
 
-              {/* Bloqueado por razón */}
-              {isActive && bloqueado && (
-                <div className={`rounded-3xl border p-5 text-center space-y-2 ${
-                  tienePendiente
-                    ? "border-orange-400/20 bg-orange-400/5"
-                    : "border-yellow-400/15 bg-yellow-400/5"
-                }`}>
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mx-auto border ${
-                    tienePendiente
-                      ? "bg-orange-400/10 border-orange-400/20"
-                      : "bg-yellow-400/10 border-yellow-400/20"
-                  }`}>
-                    {tienePendiente
-                      ? <CreditCard className="w-5 h-5 text-orange-400" />
-                      : <Shield className="w-5 h-5 text-yellow-400" />
-                    }
-                  </div>
-                  <p className={`text-sm font-semibold ${tienePendiente ? "text-orange-400/80" : "text-yellow-400/70"}`}>
-                    {tienePendiente ? "Pago pendiente" : "Eres el vendedor"}
+                {/* PUJA LÍDER */}
+                <div className="ds-leader-card" style={{ marginTop:18, padding:"20px 22px", borderRadius:18, background:"linear-gradient(135deg,rgba(250,204,21,.07),rgba(232,115,107,.03))", border:".5px solid rgba(250,204,21,.25)", position:"relative", overflow:"hidden" }}>
+                  <div style={{ position:"absolute", inset:0, borderRadius:18, background:"radial-gradient(ellipse at 80% -10%,rgba(250,204,21,.14) 0%,transparent 60%)", pointerEvents:"none" }} />
+                  <p style={{ margin:"0 0 12px", fontFamily:"'DM Mono',monospace", fontSize:9, letterSpacing:".2em", textTransform:"uppercase", color:"rgba(250,204,21,.42)", display:"flex", alignItems:"center", gap:6 }}>
+                    👑 Puja más alta
                   </p>
-                  <p className="text-white/20 text-xs">{razonesBloqueado()}</p>
+                  {pujaLider ? (
+                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:11 }}>
+                        <div className="ds-crown" style={{ width:40, height:40, borderRadius:14, background:"rgba(250,204,21,.1)", border:".5px solid rgba(250,204,21,.3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:19, cursor:"default" }}>👑</div>
+                        <div>
+                          <p style={{ margin:0, fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:16, color:"#f5ead8" }}>{pujaLider.usuario?.nombre ?? "—"}</p>
+                          <p style={{ margin:"2px 0 0", fontFamily:"'DM Mono',monospace", fontSize:10, color:"rgba(201,185,154,.28)" }}>
+                            {parseFechaCR(pujaLider.fechaPuja)?.toLocaleString("es-CR") ?? pujaLider.fechaPuja}
+                          </p>
+                        </div>
+                      </div>
+                      <div style={{ textAlign:"right" }}>
+                        <p style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:32, fontWeight:900, lineHeight:1, background:"linear-gradient(135deg,#f7d88a,#e8a83c)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>
+                          ${Number(pujaLider.montoOfertado).toLocaleString()}
+                        </p>
+                        <p style={{ margin:"3px 0 0", fontFamily:"'DM Mono',monospace", fontSize:10, color:"rgba(201,185,154,.28)" }}>
+                          próxima mín: ${montoMinimo.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                      <p style={{ margin:0, fontFamily:"'DM Mono',monospace", fontSize:12, color:"rgba(201,185,154,.3)" }}>Sin pujas aún</p>
+                      <div style={{ textAlign:"right" }}>
+                        <p style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:26, fontWeight:700, color:"rgba(201,185,154,.4)" }}>${Number(data.precio).toLocaleString()}</p>
+                        <p style={{ margin:"2px 0 0", fontFamily:"'DM Mono',monospace", fontSize:10, color:"rgba(201,185,154,.25)" }}>precio base</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {!isActive && (
-                <div className="rounded-3xl border border-white/[0.07] bg-white/[0.02] p-6 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-yellow-400/8 border border-yellow-400/15 flex items-center justify-center mx-auto">
-                    <Trophy className="w-6 h-6 text-yellow-400" />
+                {/* VENDEDOR */}
+                <div className="ds-seller-row" style={{ marginTop:14, display:"flex", alignItems:"center", gap:10, padding:"12px 16px", borderRadius:13, background:"rgba(255,255,255,.018)", border:".5px solid rgba(255,255,255,.06)", transition:"all .3s", cursor:"default" }}>
+                  <div className="ds-s-icon" style={{ width:34, height:34, borderRadius:11, background:"rgba(96,165,250,.1)", border:".5px solid rgba(96,165,250,.22)", display:"flex", alignItems:"center", justifyContent:"center", transition:"transform .3s" }}>
+                    <User size={15} color="#60a5fa" />
                   </div>
                   <div>
-                    <p className="text-white/60 font-bold text-sm">Subasta finalizada</p>
-                    {pujaLider
-                      ? <p className="text-white/30 text-xs mt-1.5">Ganador: <span className="text-yellow-400/80 font-semibold">{pujaLider.usuario?.nombre}</span> — <span className="text-white/50">${Number(pujaLider.montoOfertado).toLocaleString()}</span></p>
-                      : <p className="text-white/20 text-xs mt-1">Sin pujas registradas</p>
-                    }
+                    <p style={{ margin:0, fontFamily:"'DM Mono',monospace", fontSize:9, letterSpacing:".15em", color:"rgba(201,185,154,.28)", textTransform:"uppercase" }}>Vendedor</p>
+                    <p style={{ margin:"1px 0 0", fontSize:13, color:"rgba(201,185,154,.72)", fontWeight:600 }}>{data.creador?.nombre ?? "—"}</p>
                   </div>
-                </div>
-              )}
-
-              {/* Historial */}
-              <div className="rounded-3xl border border-white/[0.06] bg-[#0a0f1e]/60 overflow-hidden">
-                <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-3.5 h-3.5 text-white/25" />
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/25">Historial</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-white/20 bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/[0.05]">
-                    {pujas.length} {pujas.length === 1 ? "puja" : "pujas"}
-                  </span>
-                </div>
-                <div className="p-3 space-y-2 max-h-[380px] overflow-y-auto">
-                  {pujas.length === 0
-                    ? <div className="text-center py-10"><p className="text-white/15 text-sm">Sin pujas todavía</p><p className="text-white/10 text-xs mt-1">Sé el primero en pujar</p></div>
-                    : pujas.map((puja, index) => (
-                        <PujaRow key={puja.idPuja ?? index} puja={puja} index={index} isNew={nuevasPujas.has(puja.idPuja)} />
-                      ))
-                  }
                 </div>
               </div>
-
             </div>
+          </div>
+
+          {/* COLUMNA DERECHA */}
+          <div className="ds-a4">
+
+            {/* PANEL PUJA */}
+            {isActive && !bloqueado && (
+              <div className="ds-bid-panel" style={{ padding:24, borderRadius:22, border:".5px solid rgba(250,204,21,.2)", background:"linear-gradient(160deg,#161224 0%,#100e1e 100%)", position:"relative", overflow:"hidden", marginBottom:16 }}>
+                <div className="ds-bp-glow-a" style={{ position:"absolute", width:300, height:220, borderRadius:"50%", filter:"blur(80px)", background:"rgba(250,204,21,.09)", top:-80, right:-80, pointerEvents:"none" }} />
+                <div className="ds-bp-glow-b" style={{ position:"absolute", width:200, height:150, borderRadius:"50%", filter:"blur(60px)", background:"rgba(167,139,250,.06)", bottom:-40, left:-40, pointerEvents:"none" }} />
+                <div className="ds-bp-topline" />
+                <div style={{ display:"flex", alignItems:"center", gap:8, fontFamily:"'DM Mono',monospace", fontSize:10, letterSpacing:".18em", textTransform:"uppercase", color:"rgba(250,204,21,.5)", marginBottom:20, position:"relative", zIndex:1 }}>
+                  <Zap size={13} color="#facc15" /> Realizar puja
+                </div>
+
+                {/* INPUT */}
+                <div style={{ position:"relative", marginBottom:8, zIndex:1 }}>
+                  <span style={{ position:"absolute", left:18, top:"50%", transform:"translateY(-50%)", fontFamily:"'Playfair Display',serif", fontSize:20, color:"rgba(250,204,21,.35)", pointerEvents:"none", transition:"color .3s" }}>$</span>
+                  <input
+                    ref={bidInpRef}
+                    type="number"
+                    value={monto}
+                    onChange={e => handleMontoChange(e.target.value)}
+                    placeholder={montoMinimo.toLocaleString()}
+                    className={inpClass()}
+                    style={{ width:"100%", background:"rgba(255,255,255,.03)", border:".5px solid rgba(255,255,255,.1)", borderRadius:16, padding:"16px 18px 16px 40px", fontFamily:"'Playfair Display',serif", fontSize:22, color:"#f5ead8", MozAppearance:"textfield" }}
+                  />
+                </div>
+                <p style={{ margin:"0 0 12px", fontFamily:"'DM Mono',monospace", fontSize:10, padding:"0 4px", color: montoError ? "rgba(248,113,113,.8)" : "rgba(201,185,154,.38)", minHeight:16, position:"relative", zIndex:1 }}>
+                  {montoError || <>Mínimo: <strong>${montoMinimo.toLocaleString()}</strong></>}
+                </p>
+
+                {/* QUICK BIDS */}
+                <div style={{ display:"flex", gap:8, marginBottom:16, position:"relative", zIndex:1 }}>
+                  {quickBids.map((q, i) => (
+                    <button key={i}
+                      className="ds-qb"
+                      onClick={() => { setMonto(String(q)); handleMontoChange(String(q)); }}
+                      style={{ flex:1, padding:"9px 6px", borderRadius:11, background:"rgba(250,204,21,.06)", border:".5px solid rgba(250,204,21,.18)", color:"rgba(250,204,21,.65)", fontFamily:"'DM Mono',monospace", fontSize:11, cursor:"pointer", textAlign:"center" }}>
+                      ${q.toLocaleString()}
+                    </button>
+                  ))}
+                </div>
+
+                {/* BOTÓN PUJAR */}
+                <button
+                  className="ds-bid-btn"
+                  onClick={handlePujar}
+                  disabled={enviando || !!montoError || !monto}
+                  style={{ width:"100%", padding:16, borderRadius:16, border:"none", cursor: enviando || !!montoError || !monto ? "not-allowed" : "pointer", fontFamily:"'Playfair Display',serif", fontSize:17, fontWeight:700, letterSpacing:".03em", background:"linear-gradient(135deg,#e8a83c 0%,#facc15 45%,#f7d88a 100%)", color:"#07060f", opacity: enviando || !!montoError || !monto ? .3 : 1, zIndex:1 }}>
+                  {enviando
+                    ? <span style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+                        <span style={{ width:18, height:18, border:"2px solid rgba(0,0,0,.2)", borderTopColor:"rgba(0,0,0,.7)", borderRadius:"50%", animation:"ds-spinr .7s linear infinite", display:"inline-block" }} />
+                        Registrando...
+                      </span>
+                    : "Pujar ahora"
+                  }
+                </button>
+              </div>
+            )}
+
+            {/* BLOQUEADO */}
+            {isActive && bloqueado && (
+              <div style={{ padding:"22px", borderRadius:22, textAlign:"center", background: tienePendiente?"rgba(251,146,60,.05)":"rgba(250,204,21,.05)", border: tienePendiente?".5px solid rgba(251,146,60,.2)":".5px solid rgba(250,204,21,.15)", marginBottom:16 }}>
+                <div style={{ width:40, height:40, borderRadius:14, background: tienePendiente?"rgba(251,146,60,.1)":"rgba(250,204,21,.1)", border: tienePendiente?".5px solid rgba(251,146,60,.2)":".5px solid rgba(250,204,21,.2)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 10px" }}>
+                  {tienePendiente ? <CreditCard size={18} color="#fb923c" /> : <Shield size={18} color="#facc15" />}
+                </div>
+                <p style={{ margin:"0 0 5px", fontFamily:"'Playfair Display',serif", fontSize:15, fontWeight:700, color: tienePendiente?"rgba(251,146,60,.8)":"rgba(250,204,21,.7)" }}>
+                  {tienePendiente ? "Pago pendiente" : "Eres el vendedor"}
+                </p>
+                <p style={{ margin:0, fontFamily:"'DM Mono',monospace", fontSize:10, color:"rgba(201,185,154,.3)", lineHeight:1.6 }}>{razonesBloqueado()}</p>
+              </div>
+            )}
+
+            {/* SUBASTA FINALIZADA */}
+            {!isActive && (
+              <div className="ds-winner-card" style={{ padding:"28px 24px", borderRadius:22, textAlign:"center", background: pujaLider ? "linear-gradient(135deg,rgba(250,204,21,.07),rgba(232,115,107,.03))" : "rgba(255,255,255,.018)", border: pujaLider ? ".5px solid rgba(250,204,21,.28)" : ".5px solid rgba(255,255,255,.08)", marginBottom:16, position:"relative", overflow:"hidden" }}>
+                {pujaLider && <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 50% -20%,rgba(250,204,21,.12) 0%,transparent 60%)", pointerEvents:"none" }} />}
+                <div style={{ position:"relative", zIndex:1 }}>
+                  <div style={{ fontSize:32, marginBottom:10, animation:"ds-floatY 3s ease-in-out infinite", display:"inline-block" }}>
+                    {pujaLider ? "🏆" : "🎴"}
+                  </div>
+                  <p style={{ margin:"0 0 8px", fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:700, color: pujaLider ? "#f5ead8" : "rgba(201,185,154,.4)" }}>
+                    Subasta finalizada
+                  </p>
+                  {pujaLider ? (
+                    <>
+                      <p style={{ margin:"0 0 4px", fontFamily:"'DM Mono',monospace", fontSize:10, letterSpacing:".15em", textTransform:"uppercase", color:"rgba(250,204,21,.45)" }}>Ganador</p>
+                      <p style={{ margin:"0 0 6px", fontFamily:"'Playfair Display',serif", fontSize:22, fontWeight:700, color:"#facc15" }}>{pujaLider.usuario?.nombre ?? "—"}</p>
+                      <p style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:28, fontWeight:900, background:"linear-gradient(135deg,#f7d88a,#e8a83c)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>
+                        ${Number(pujaLider.montoOfertado).toLocaleString()}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p style={{ margin:"0 0 4px", fontFamily:"'DM Mono',monospace", fontSize:10, letterSpacing:".15em", textTransform:"uppercase", color:"rgba(201,185,154,.28)" }}>Resultado</p>
+                      <p style={{ margin:0, fontFamily:"'Playfair Display',serif", fontSize:16, color:"rgba(201,185,154,.4)", fontStyle:"italic" }}>Sin ganador — ninguna puja registrada</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* HISTORIAL */}
+            <div className="ds-a5 ds-card" style={{ borderRadius:22, border:".5px solid rgba(250,204,21,.1)", background:"linear-gradient(150deg,#141122 0%,#0e0c1c 100%)", overflow:"hidden" }}>
+              <div style={{ padding:"16px 22px", display:"flex", alignItems:"center", justifyContent:"space-between", borderBottom:".5px solid rgba(250,204,21,.07)" }}>
+                <div style={{ fontFamily:"'DM Mono',monospace", fontSize:9, letterSpacing:".22em", textTransform:"uppercase", color:"rgba(201,185,154,.32)", display:"flex", alignItems:"center", gap:7 }}>
+                  <TrendingUp size={12} /> Historial de pujas
+                </div>
+                <span style={{ fontFamily:"'DM Mono',monospace", fontSize:10, color:"rgba(201,185,154,.28)", background:"rgba(255,255,255,.03)", border:".5px solid rgba(255,255,255,.06)", padding:"4px 11px", borderRadius:20 }}>
+                  {pujas.length} {pujas.length === 1 ? "puja" : "pujas"}
+                </span>
+              </div>
+              <div style={{ maxHeight:380, overflowY:"auto", padding:"14px 16px", display:"flex", flexDirection:"column", gap:7 }}
+                className="[&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-thumb]:bg-yellow-400/20 [&::-webkit-scrollbar-track]:bg-transparent">
+                {pujas.length === 0 ? (
+                  <div style={{ padding:"44px 20px", textAlign:"center" }}>
+                    <div style={{ fontSize:28, opacity:.25, marginBottom:10, animation:"ds-floatY 3s ease-in-out infinite" }}>🎴</div>
+                    <p style={{ margin:0, fontFamily:"'DM Mono',monospace", fontSize:11, color:"rgba(201,185,154,.2)", lineHeight:1.7 }}>Sin pujas todavía<br />Sé el primero en pujar</p>
+                  </div>
+                ) : pujas.map((puja, index) => (
+                  <PujaRow key={puja.idPuja ?? index} puja={puja} index={index} isNew={nuevasPujas.has(puja.idPuja)} />
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
