@@ -40,26 +40,16 @@ class usuario
         }
     }
     public function create()
-{
-    try {
-
+    {
+    $response = new Response();
         $request = new Request();
-        $response = new Response();
+        //Obtener json enviado
         $inputJSON = $request->getJSON();
         $usuario = new UsuarioModel();
-
-        // Ejecutar create
         $result = $usuario->create($inputJSON);
-
-        // Respuesta
+        //Dar respuesta
         $response->toJSON($result);
-
-    } catch (Exception $e) {
-
-        handleException($e);
-
     }
-}
 public function update()
     {
         try {

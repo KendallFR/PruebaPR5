@@ -32,7 +32,7 @@ class UsuarioService {
 
     })
   }
-  loginUser(Usuario) {
+  loginUsuario(Usuario) {
     return axios.post(BASE_URL + '/login', JSON.stringify(Usuario));
   }
 }

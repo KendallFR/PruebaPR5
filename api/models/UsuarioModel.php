@@ -1,4 +1,5 @@
 <?php
+use Firebase\JWT\JWT;
 class UsuarioModel
 {
 	public $enlace;
@@ -72,53 +73,49 @@ class UsuarioModel
 
 	public function login($objeto)
 	{
-		return false;
+		$vSql = "SELECT * from usuario where email='$objeto->email'";
+		//Ejecutar la consulta
+		$vResultado = $this->enlace->ExecuteSQL($vSql);
+		if (is_object($vResultado[0])) {
+			$usuario = $vResultado[0];
+			if (password_verify($objeto->password, $usuario->password)) {
+				$usuario = $this->get($usuario->idUsuario);
+				if (!empty($usuario)) {
+					// Datos para el token JWT
+					$data = [
+						'id' => $usuario->idUsuario,
+						'email' => $usuario->email,
+						'rol' => $usuario->rol,
+						'iat' => time(),  // Hora de emisión
+						'exp' => time() + 3600 // Expiración en 1 hora
+					];
+
+					// Generar el token JWT
+					$jwt_token = JWT::encode($data, config::get('SECRET_KEY'), 'HS256');
+
+					// Enviar el token como respuesta
+					return $jwt_token;
+				}
+			}
+		} else {
+			return false;
+		}
 	}
 
 	public function create($objeto)
     {
-        try {
+        if (isset($objeto->password) && $objeto->password != null) {
+			$crypt = password_hash($objeto->password, PASSWORD_BCRYPT);
+			$objeto->password = $crypt;
+		}
+		//Consulta sql            
+		$vSql = "Insert into usuario (cedula,nombre,email,password,idRol,idEstadoUsuario,fechaRegistro)" .
+			" Values ('$objeto->cedula','$objeto->nombre','$objeto->email','$objeto->password',$objeto->idRol,1,NOW())";
 
-            // Validar que venga el objeto
-            if (!$objeto) {
-                throw new Exception("No se recibieron datos del usuario");
-            }
-
-            // Validar password
-            if (!isset($objeto->password)) {
-                throw new Exception("La contraseña es requerida");
-            }
-
-            // Encriptar contraseña
-            $passwordHash = password_hash($objeto->password, PASSWORD_DEFAULT);
-
-            // Convertir idRol a número por seguridad
-            $idRol = intval($objeto->idRol);
-
-            $sql = "INSERT INTO usuario
-                    (cedula, nombre, email, password, idRol, idEstadoUsuario, fechaRegistro)
-                    VALUES
-                    (   
-                        '$objeto->cedula',
-                        '$objeto->nombre',
-                        '$objeto->email',
-                        '$passwordHash',
-                        $idRol,
-                        1,
-                        NOW()
-                    )";
-
-            // Ejecutar insert
-            $idUsuario = $this->enlace->executeSQL_DML_last($sql);
-
-            // Retornar el usuario creado
-            return $this->get($idUsuario);
-
-        } catch (Exception $e) {
-
-            handleException($e);
-
-        }
+		//Ejecutar la consulta
+		$vResultado = $this->enlace->executeSQL_DML_last($vSql);
+		// Retornar el objeto creado
+		return $this->get($vResultado);
     }
 
     public function update($objeto)
