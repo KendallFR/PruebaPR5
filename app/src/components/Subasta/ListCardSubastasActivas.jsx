@@ -326,7 +326,7 @@ export function ListCardSubastasActivas({ data, onRefresh }) {
                           </Button>
                         </Link>
                       </TooltipTrigger>
-                      <TooltipContent>Ver detalle</TooltipContent>
+                      <TooltipContent>Realizar puja y ver detalles</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>

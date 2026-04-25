@@ -18,7 +18,6 @@ import {
   CreditCard
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Menubar,
   MenubarMenu,
@@ -26,15 +25,12 @@ import {
   MenubarContent,
   MenubarItem,
 } from "@/components/ui/menubar";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 
 export default function Header() {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const userEmail = "Invitado";
 
   const navItems = [
     { title: "Subastas", href: "/subasta/SubastasActivas", icon: <Film className="h-4 w-4" /> },
-    { title: "Filtrar por carta", href: "/movie/filter", icon: <Filter className="h-4 w-4" /> },
   ];
 
  const mantItems = [
@@ -42,7 +38,6 @@ export default function Header() {
   { title: "Subastas Finalizadas", href: "/subasta/SubastasFinalizadas", icon: <Wrench className="h-4 w-4" /> },
   { title: "Cartas",              href: "/carta",                      icon: <ShoppingBasket className="h-4 w-4" /> },
   { title: "Usuarios",            href: "/usuario/table",              icon: <ChartArea className="h-4 w-4" /> },
-  { title: "Pujas",               href: "/puja/table/1",               icon: <ChartArea className="h-4 w-4" /> },
   { title: "Pagos",               href: "/facturacion",                icon: <CreditCard className="h-4 w-4" /> },
 ];
 
@@ -151,35 +146,6 @@ export default function Header() {
 
           </Menubar>
         </div>
-
-        {/* -------- CARRITO + MÓVIL -------- */}
-        <div className="flex items-center gap-4">
-          <Link to="/cart" className="relative hover:opacity-80">
-            <ShoppingCart className="h-6 w-6" />
-            <Badge
-              className="absolute -top-2 -right-3 rounded-full px-2 py-0 text-xs font-semibold"
-              variant="secondary"
-            >
-              3
-            </Badge>
-          </Link>
-
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <button className="md:hidden inline-flex items-center justify-center p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-                {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </SheetTrigger>
-            <SheetContent side="left" className="bg-accent/10 text-white backdrop-blur-lg w-72">
-              <nav className="mt-8 px-4 space-y-6">
-                <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-                  RedCard Market Trading
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </div>
-
       </div>
     </header>
   );
