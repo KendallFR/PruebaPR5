@@ -10,7 +10,7 @@ import { useUser } from "@/hooks/useUser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Save, ArrowLeft } from "lucide-react";
 
@@ -75,7 +75,7 @@ export function CreateUsuario() {
 
   });
 
-  const { control, handleSubmit, setValue, formState:{errors} } = useForm({
+  const { control, handleSubmit, setValue, formState:{errors, isSubmitting} } = useForm({
 
     defaultValues:{
       cedula:"",
@@ -160,13 +160,17 @@ export function CreateUsuario() {
 
   return (
 
-    <Card className="p-6 max-w-5xl mx-auto">
+    <div className="min-h-screen flex items-center justify-center">
+  <Card className="w-full max-w-md shadow-lg border border-white/10 bg-white/10 backdrop-blur-lg text-white">
+    
+    <CardHeader>
+      <CardTitle className="text-center text-2xl font-bold">
+        Crear Cuenta
+      </CardTitle>
+    </CardHeader>
 
-      <h2 className="text-2xl font-bold mb-6">
-        Crear Usuario
-      </h2>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <CardContent>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
         {/* CEDULA */}
         <div>
@@ -174,16 +178,18 @@ export function CreateUsuario() {
           <Controller
             name="cedula"
             control={control}
-            render={({field})=>(
+            render={({ field }) => (
               <Input
                 {...field}
-                placeholder="Ingrese la cédula"
-                className={errors.cedula ? "border-red-500" : ""}
+                placeholder="Tu cédula"
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
               />
             )}
           />
           {errors.cedula && (
-            <p className="text-red-500 text-sm">{errors.cedula.message}</p>
+            <p className="text-red-300 text-sm mt-1">
+              {errors.cedula.message}
+            </p>
           )}
         </div>
 
@@ -193,54 +199,62 @@ export function CreateUsuario() {
           <Controller
             name="nombre"
             control={control}
-            render={({field})=>(
+            render={({ field }) => (
               <Input
                 {...field}
-                placeholder="Ingrese el nombre"
-                className={errors.nombre ? "border-red-500" : ""}
+                placeholder="Tu nombre"
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
               />
             )}
           />
           {errors.nombre && (
-            <p className="text-red-500 text-sm">{errors.nombre.message}</p>
+            <p className="text-red-300 text-sm mt-1">
+              {errors.nombre.message}
+            </p>
           )}
         </div>
 
         {/* EMAIL */}
         <div>
-          <Label>Email</Label>
+          <Label>Correo electrónico</Label>
           <Controller
             name="email"
             control={control}
-            render={({field})=>(
+            render={({ field }) => (
               <Input
                 {...field}
-                placeholder="Ingrese el email"
-                className={errors.email ? "border-red-500" : ""}
+                type="email"
+                placeholder="ejemplo@correo.com"
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
               />
             )}
           />
           {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
+            <p className="text-red-300 text-sm mt-1">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
         {/* PASSWORD */}
         <div>
-          <Label>Password</Label>
+          <Label>Contraseña</Label>
           <Controller
             name="password"
             control={control}
-            render={({field})=>(
+            render={({ field }) => (
               <Input
-                type="password"
                 {...field}
-                className={errors.password ? "border-red-500" : ""}
+                type="password"
+                placeholder="********"
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
               />
             )}
           />
           {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
+            <p className="text-red-300 text-sm mt-1">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
@@ -252,46 +266,49 @@ export function CreateUsuario() {
             <Controller
               name="idRol"
               control={control}
-              render={({field})=>(
+              render={({ field }) => (
                 <CustomSelect
-                  field={field}
-                  data={dataRoles}
-                  label="Rol"
-                  getOptionLabel={(item)=>item.nombre}
-                  getOptionValue={(item)=>item.idRol}
-                  error={errors.idRol?.message}
-                />
+  field={field}
+  data={dataRoles}
+  label="rol"
+  getOptionLabel={(item) => item.nombre}
+  getOptionValue={(item) => item.idRol}
+/>
               )}
             />
 
             {errors.idRol && (
-              <p className="text-red-500 text-sm">{errors.idRol.message}</p>
+              <p className="text-red-300 text-sm mt-1">
+                {errors.idRol.message}
+              </p>
             )}
           </div>
         )}
 
-        {/* BOTONES */}
-        <div className="flex justify-between gap-4">
+        {/* BOTÓN */}
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-secondary hover:bg-secondary/90 text-white font-semibold mt-2"
+        >
+          {isSubmitting ? "Creando..." : "Crear cuenta"}
+        </Button>
 
-          <Button
-            type="button"
-            onClick={()=>navigate(-1)}
-            className="flex items-center gap-2"
+        {/* LINK LOGIN */}
+        <p className="text-sm text-center mt-4">
+          ¿Ya tienes cuenta?{" "}
+          <a
+            href="/usuario/login"
+            className="text-accent underline hover:text-accent/80"
           >
-            <ArrowLeft className="w-4 h-4"/>
-            Regresar
-          </Button>
-
-          <Button type="submit" className="flex items-center gap-2">
-            <Save className="w-4 h-4"/>
-            Guardar
-          </Button>
-
-        </div>
+            Inicia sesión
+          </a>
+        </p>
 
       </form>
-
-    </Card>
+    </CardContent>
+  </Card>
+</div>
 
   );
 }
