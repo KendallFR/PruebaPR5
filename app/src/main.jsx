@@ -22,6 +22,8 @@ import { EditSubasta } from './components/Subasta/EditSubasta'
 import { CustomToaster } from './components/ui/CustomToaster'
 import EditCarta from './components/Carta/EditCarta'
 import { ListFacturacion } from './components/Facturacion/ListFacturacion'
+import { RoleRoute } from './components/Auth/RoleRoute'
+import Login from './components/Usuario/Login'
 
 const rutas = createBrowserRouter([
   {
@@ -29,13 +31,14 @@ const rutas = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "*", element: <PageNotFound /> },
-      { path: "usuario/table",          element: <TableUsuarios /> },
-      { path: "usuario/detail/:id",     element: <DetailUsuario /> },
+      { path: "usuario/table",          element: (<RoleRoute requiredRoles={["Administrador"]}><TableUsuarios /></RoleRoute>)},
+      { path: "usuario/detail/:id",     element: (<RoleRoute requiredRoles={["Administrador"]}><DetailUsuario /></RoleRoute>)},
       { path: "carta",                  element: <ListCartas /> },
       { path: "carta/detail/:id",       element: <DetailCarta /> },
       { path: "subasta/SubastasActivas",    element: <ListSubastasActivas /> },
       { path: "subasta/SubastasFinalizadas", element: <ListSubastasFinalizadas /> },
       { path: "subasta/detail/:id",     element: <DetailSubasta /> },
+      { path: "usuario/login",         element: <Login /> },
       { path: "usuario/create",         element: <CreateUsuario /> },
       { path: "usuario/edit/:id",       element: <UpdateUsuario /> },
       { path: "usuario/delete/:id",     element: <DeleteUsuario /> },

@@ -25,26 +25,29 @@ import {
   MenubarContent,
   MenubarItem,
 } from "@/components/ui/menubar";
+import { useUser } from "@/hooks/useUser";
 
 export default function Header() {
-  const userEmail = "Invitado";
+  const { user, isAuthenticated, clearUser, authorize } = useUser();
+  const userEmail = user?.email || "Invitado";
 
   const navItems = [
-    { title: "Subastas", href: "/subasta/SubastasActivas", icon: <Film className="h-4 w-4" /> },
+    { title: "Subastas", href: "/subasta/SubastasActivas", icon: <Film className="h-4 w-4" />, show:true,},
   ];
 
  const mantItems = [
-  { title: "Subastas Activas",    href: "/subasta/SubastasActivas",    icon: <Wrench className="h-4 w-4" /> },
-  { title: "Subastas Finalizadas", href: "/subasta/SubastasFinalizadas", icon: <Wrench className="h-4 w-4" /> },
-  { title: "Cartas",              href: "/carta",                      icon: <ShoppingBasket className="h-4 w-4" /> },
-  { title: "Usuarios",            href: "/usuario/table",              icon: <ChartArea className="h-4 w-4" /> },
-  { title: "Pagos",               href: "/facturacion",                icon: <CreditCard className="h-4 w-4" /> },
+  { title: "Subastas Activas",    href: "/subasta/SubastasActivas",    icon: <Wrench className="h-4 w-4" />, show:true,},
+  { title: "Subastas Finalizadas", href: "/subasta/SubastasFinalizadas", icon: <Wrench className="h-4 w-4" />, show:true, },
+  { title: "Cartas",              href: "/carta",                      icon: <ShoppingBasket className="h-4 w-4"  />, show:true, },
+  { title: "Usuarios",            href: "/usuario/table",              icon: <ChartArea className="h-4 w-4" />, show: authorize(["Administrador"]), },
+  { title: "Pagos",               href: "/facturacion",                icon: <CreditCard className="h-4 w-4" />, show:true, },
 ];
 
   const userItems = [
-    { title: "Login", href: "/user/login", icon: <LogIn className="h-4 w-4" /> },
-    { title: "Registrarse", href: "/usuario/create", icon: <UserPlus className="h-4 w-4" /> },
-    { title: "Logout", href: "#login", icon: <LogOut className="h-4 w-4" /> },
+    { title: "Login", href: "/usuario/login", icon: <LogIn className="h-4 w-4" />, show: !isAuthenticated,},
+    { title: "Registrarse", href: "/usuario/create", icon: <UserPlus className="h-4 w-4" />, show: !isAuthenticated,},
+    { title: "Registrar Usuario", href: "/usuario/create", icon: <UserPlus className="h-4 w-4" />, show: authorize(["Administrador"]),},
+    { title: "Logout", href: "#login", icon: <LogOut className="h-4 w-4" />, show: isAuthenticated, action: clearUser,},
   ];
 
   return (
@@ -93,16 +96,17 @@ export default function Header() {
                 <ChevronDown className="h-3 w-3" />
               </MenubarTrigger>
               <MenubarContent className="bg-primary/0 backdrop-blur-md border-white/10">
-                {navItems.map((item) => (
-                  <MenubarItem key={item.href} asChild>
+                {navItems
+                  .filter((item) => item.show)
+                  .map((item) => (
                     <Link
+                      key={item.href}
                       to={item.href}
                       className="flex items-center gap-2 py-2 px-3 rounded-md text-sm hover:bg-accent/10 transition"
                     >
                       {item.icon} {item.title}
                     </Link>
-                  </MenubarItem>
-                ))}
+                  ))}
               </MenubarContent>
             </MenubarMenu>
 
@@ -112,16 +116,17 @@ export default function Header() {
                 <ChevronDown className="h-3 w-3" />
               </MenubarTrigger>
               <MenubarContent className="bg-primary/0 backdrop-blur-md border-white/10">
-                {mantItems.map((item) => (
-                  <MenubarItem key={item.href} asChild>
+                {mantItems
+                  .filter((item) => item.show)
+                  .map((item) => (
                     <Link
+                      key={item.href}
                       to={item.href}
                       className="flex items-center gap-2 py-2 px-3 rounded-md text-sm hover:bg-accent/10 transition"
                     >
                       {item.icon} {item.title}
                     </Link>
-                  </MenubarItem>
-                ))}
+                  ))}
               </MenubarContent>
             </MenubarMenu>
 
@@ -131,16 +136,15 @@ export default function Header() {
                 <ChevronDown className="h-3 w-3" />
               </MenubarTrigger>
               <MenubarContent className="bg-primary/0 backdrop-blur-md border-white/10">
-                {userItems.map((item) => (
-                  <MenubarItem key={item.href} asChild>
-                    <Link
+                {userItems.filter(i => i.show).map(item => (
+                    <Link key={item.href}
                       to={item.href}
+                      onClick={() => item.action && item.action()}
                       className="flex items-center gap-2 py-2 px-3 rounded-md text-sm hover:bg-accent/10 transition"
                     >
                       {item.icon} {item.title}
                     </Link>
-                  </MenubarItem>
-                ))}
+                  ))}
               </MenubarContent>
             </MenubarMenu>
 
