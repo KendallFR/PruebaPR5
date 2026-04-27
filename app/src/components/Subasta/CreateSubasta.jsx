@@ -21,6 +21,7 @@ import UsuarioService from "@/services/UsuarioService";
 
 // Select custom
 import { CustomSelect } from "../ui/custom/custom-select";
+import { useUser } from "@/hooks/useUser";
 
 export function CreateSubasta() {
   const navigate = useNavigate();
@@ -30,7 +31,8 @@ export function CreateSubasta() {
   const cartaPreseleccionada = location.state?.carta ?? null;
 
   const [dataCartas, setDataCartas] = useState([]);
-  const [usuario, setUsuario] = useState({ idUsuario: 1, nombre: "" }); // ID por defecto
+  const { user } = useUser();
+  const [usuario, setUsuario] = useState({ idUsuario: user.idUsuario, nombre: "" }); // ID por defecto
   const [error, setError] = useState("");
 
   /* ── Validación Yup ── */
@@ -115,7 +117,7 @@ export function CreateSubasta() {
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
-        const res = await UsuarioService.getUsuarioById(usuario.idUsuario);
+        const res = await UsuarioService.getUsuarioById(user.idUsuario);
         if (res.data?.data) setUsuario(res.data.data);
       } catch (err) {
         console.error("Error al cargar usuario:", err);

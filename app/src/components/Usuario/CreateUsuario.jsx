@@ -134,8 +134,6 @@ export function CreateUsuario() {
         idRol: Number(dataForm.idRol)
       };
 
-      console.log("FORM DATA", usuario);
-
       const response = await UsuarioService.createUsuario(usuario);
 
       if(response.data){
