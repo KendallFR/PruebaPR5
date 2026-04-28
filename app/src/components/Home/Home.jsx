@@ -161,7 +161,7 @@ export function Home() {
           backgroundImage: `url(${ticketImg})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          filter: "brightness(0.2) saturate(0.8)",
+          filter: "brightness(0.5) saturate(0.8)",
         }}
       />
 
