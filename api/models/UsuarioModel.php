@@ -84,6 +84,7 @@ class UsuarioModel
 					// Datos para el token JWT
 					$data = [
 						'idUsuario' => $usuario->idUsuario,
+                        'nombre' => $usuario->nombre,
 						'email' => $usuario->email,
 						'rol' => $usuario->rol,
 						'iat' => time(),  // Hora de emisión

@@ -17,7 +17,7 @@ import { Save, ArrowLeft, Gavel, Sparkles, BadgeCheck, CalendarClock, DollarSign
 // Servicios
 import SubastaService from "../../services/SubastaService";
 import CartaService from "../../services/CartaService";
-import UsuarioService from "@/services/UsuarioService";
+
 
 // Select custom
 import { CustomSelect } from "../ui/custom/custom-select";
@@ -29,10 +29,8 @@ export function CreateSubasta() {
 
   // Carta preseleccionada desde ListCardCartas (navigate con state)
   const cartaPreseleccionada = location.state?.carta ?? null;
-
+const { user } = useUser();
   const [dataCartas, setDataCartas] = useState([]);
-  const { user } = useUser();
-  const [usuario, setUsuario] = useState({ idUsuario: user.idUsuario, nombre: "" }); // ID por defecto
   const [error, setError] = useState("");
 
   /* ── Validación Yup ── */
@@ -113,19 +111,6 @@ export function CreateSubasta() {
     fetchCartas();
   }, []);
 
-  /* ── Cargar datos del usuario por ID ── */
-  useEffect(() => {
-    const fetchUsuario = async () => {
-      try {
-        const res = await UsuarioService.getUsuarioById(user.idUsuario);
-        if (res.data?.data) setUsuario(res.data.data);
-      } catch (err) {
-        console.error("Error al cargar usuario:", err);
-        toast.error("No se pudo cargar la información del usuario");
-      }
-    };
-    fetchUsuario();
-  }, [usuario.idUsuario]);
 
   /* ── Submit ── */
   const onSubmit = async (dataForm) => {
@@ -141,7 +126,7 @@ export function CreateSubasta() {
           : new Date(dataForm.fechaCierre).toISOString(),
       precio: Number(dataForm.precio),
       incrementoMin: Number(dataForm.incrementoMin),
-      idUsuario: usuario.idUsuario, // <-- enviamos el ID correcto
+      idUsuario: user.idUsuario, // <-- enviamos el ID correcto
     };
 
     try {
@@ -264,7 +249,7 @@ export function CreateSubasta() {
                 Usuario
               </Label>
               <Input
-                value={usuario.nombre}
+                value={user.nombre}
                 disabled
                 className="!bg-white/[0.04] border-white/10 !text-white/40 rounded-xl h-11 text-sm cursor-not-allowed"
               />
